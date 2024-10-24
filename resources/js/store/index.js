@@ -47,7 +47,7 @@
             await axios.get('/api/logout').then(async () => {
                 commit('setUser', null);
                 commit('setAuthenticate', false);
-                await router.push('login');
+                await router.push('/login');
             });
         }
     }
