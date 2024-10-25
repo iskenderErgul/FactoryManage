@@ -5,6 +5,7 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ChatGptController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\Users\UsersController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -24,7 +25,10 @@ Route::middleware('auth:sanctum')->group(function () {
         return $request->user();
     });
 
-
+    Route::get('/getAllUsers', [UsersController::class, 'getAllUsers']);
+    Route::put('/users/{id}', [UsersController::class, 'update']);
+    Route::delete('/users/{id}', [UsersController::class, 'destroy']);
+    Route::post('/createUsers', [UsersController::class, 'store']);
 
 
 });
