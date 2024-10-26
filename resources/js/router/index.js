@@ -4,7 +4,6 @@ import HomeView from "@/views/HomeView.vue";
 import Login from "@/pages/Login.vue";
 import store from "@/store/index.js";
 import UserManagement from "@/components/UserManagements/UserManagement.vue";
-import RoleManagement from "@/components/UserManagements/RoleManagement.vue";
 import UserLog from "@/components/UserManagements/UserLog.vue";
 import PacsEntries from "@/components/PacsManagment/PacsEntries.vue";
 import PacsEntriesLog from "@/components/PacsManagment/PacsEntriesLog.vue";
@@ -43,11 +42,6 @@ const routes = [
                 path : '/sys/manage-users',
                 name : 'userManagement',
                 component : UserManagement
-            },
-            {
-                path : '/sys/role-management',
-                name : 'roleManagement',
-                component : RoleManagement
             },
             {
                 path : '/sys/user-log',

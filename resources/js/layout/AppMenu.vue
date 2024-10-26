@@ -15,7 +15,6 @@ const model = ref([
                 icon: 'pi pi-users',
                 items: [
                     { label: 'Kullanıcı Yönetimi', icon: 'pi pi-users', to: '/sys/manage-users' },
-                    { label: 'Rol Yönetimi', icon: 'pi pi-shield', to: '/sys/role-management' },
                     { label: 'Kullanıcı Giriş Kayıtları', icon: 'pi pi-file', to: '/sys/user-log' }
                 ]
             }

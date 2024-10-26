@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AudioTranscriptionController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ChatGptController;
@@ -29,6 +30,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/users/{id}', [UsersController::class, 'update']);
     Route::delete('/users/{id}', [UsersController::class, 'destroy']);
     Route::post('/createUsers', [UsersController::class, 'store']);
+
+
+
+    Route::get('/getAllUserLogs',[UsersController::class, 'getAllUserLogs']);
+
+
+
+    Route::post('/transcribe', [AudioTranscriptionController::class, 'transcribe']);
 
 
 });

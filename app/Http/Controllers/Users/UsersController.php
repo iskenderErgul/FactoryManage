@@ -2,66 +2,48 @@
 
 namespace App\Http\Controllers\Users;
 
+use App\DTOs\Users\StoreUserDTO;
+use App\DTOs\Users\UpdateUserDTO;
 use App\Http\Controllers\Controller;
-use App\Models\User;
+use App\Http\Repositories\UserRepository;
+use App\Http\Requests\Users\StoreUserRequest;
+use App\Http\Requests\Users\UpdateUserRequest;
 use App\Services\ImageUploadService;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
+
+
 
 class UsersController extends Controller
 {
     protected $imageUploadService;
+    protected UserRepository $userRepository;
 
-    public function __construct(ImageUploadService $imageUploadService)
+    public function __construct(ImageUploadService $imageUploadService, UserRepository $userRepository)
     {
         $this->imageUploadService = $imageUploadService;
+        $this->userRepository = $userRepository;
     }
     public function getAllUsers(): JsonResponse
     {
-        return response()->json(User::all());
+        return $this->userRepository->getAllUsers();
     }
-    public function store(Request $request): JsonResponse
+    public function getAllUserLogs(): JsonResponse
     {
-        $photoPath = null;
-        if ($request->hasFile('photo')) {
-            $photoPath = $this->imageUploadService->uploadImage($request->file('photo'), 'users');
-        }
-
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'role' => $request->role,
-            'password' => bcrypt($request->password),
-            'photo' => $photoPath,
-        ]);
-
-        return response()->json($user, 201);
+        return $this->userRepository->getAllUserLogs();
     }
-    public function update(Request $request, $id): JsonResponse
+    public function store(StoreUserRequest $request): JsonResponse
     {
-
-        $user = User::findOrFail($id);
-        if ($request->hasFile('photo')) {
-            $this->imageUploadService->deleteImage($user->photo);
-            $user->photo = $this->imageUploadService->uploadImage($request->file('photo'), 'users');
-        }
-        $user->name = $request->name;
-        $user->email = $request->email;
-        $user->role = $request->role['name'];
-
-        if ($request->password && !Hash::check($request->password, $user->password)) {
-            $user->password = bcrypt($request->password);
-        }
-        $user->save();
-        return response()->json($user);
+        return $this->userRepository->store(StoreUserDTO::buildFromRequest($request));
     }
-
+    public function update(UpdateUserRequest $request, $id): JsonResponse
+    {
+        return $this->userRepository->update(UpdateUserDTO::buildFromRequest($request), $id);
+    }
     public function destroy($id): JsonResponse
     {
-        $user = User::findOrFail($id);
-        $user->delete();
-        return response()->json(null, 204);
-
+        return $this->userRepository->destroy($id);
     }
+
+
+
 }

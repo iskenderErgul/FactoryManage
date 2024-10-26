@@ -4,8 +4,8 @@ import { createApp } from 'vue';
 import './assets/style.scss'
 import PrimeVue from 'primevue/config';
 import HomeView from "@/views/HomeView.vue";
-import axios from "axios";
-axios.defaults.withCredentials=true;
+
+
 import Toast from "primevue/toast";
 
 import router from './router';

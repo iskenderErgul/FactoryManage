@@ -64,13 +64,17 @@ const isOutsideClicked = (event) => {
 const  logout = () => {
     store.dispatch('logout');
 }
+
+// Kullanıcı adını almak için computed özelliği
+const username = computed(() => {
+    return store.state.user.name || "Ergül Plastik"; // Kullanıcı adı yoksa "İSKENDER" gösterilir
+});
 </script>
 
 <template>
     <div class="layout-topbar">
         <router-link to="/sys" class="layout-topbar-logo">
-            <img :src="logoUrl" alt="logo" />
-            <span>İSKENDER</span>
+            <span>{{ username }}</span>
         </router-link>
 
         <button class="p-link layout-menu-button layout-topbar-button" @click="onMenuToggle()">
