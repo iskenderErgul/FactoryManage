@@ -13,10 +13,15 @@ class ProductionLog extends Model
         'production_id',
         'action',
         'changes',
+        'user_id'
     ];
 
     public function production()
     {
         return $this->belongsTo(Production::class);
+    }
+
+    public  function user(){
+        return $this->belongsTo(User::class);
     }
 }

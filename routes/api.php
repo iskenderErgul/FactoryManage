@@ -58,6 +58,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/productions/{id}', [ProductionController::class, 'show']);
     Route::put('/productions/{id}', [ProductionController::class, 'update']);
     Route::delete('/productions/{id}', [ProductionController::class, 'destroy']);
+    Route::get('/getAllProductionLogs',[ProductionController::class, 'getAllProductionLogs']);
 
     Route::get('/getAllWorkers',[WorkerController::class, 'getAllWorkers']);
     Route::get('/getShifts',[WorkerController::class, 'getShifts']);

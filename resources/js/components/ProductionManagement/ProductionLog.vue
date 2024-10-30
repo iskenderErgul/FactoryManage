@@ -35,20 +35,20 @@ import axios from 'axios';
 import { format } from 'date-fns';
 
 const dt = ref();
-const usersLogs = ref([]);
+const productionLogs = ref([]);
 
 onMounted(() => {
-    getUsersLogs();
+    getProductionLogs();
 });
 
-const getUsersLogs = () => {
-    axios.get('/api/getAllUserLogs').then(resp => {
-        usersLogs.value = resp.data.reverse();
+const getProductionLogs = () => {
+    axios.get('/api/getAllProductionLogs').then(resp => {
+        productionLogs.value = resp.data.reverse();
     });
 };
 
 const formattedLogs = computed(() => {
-    return usersLogs.value.map(log => ({
+    return productionLogs.value.map(log => ({
         ...log,
         created_at: log.created_at ? format(new Date(log.created_at), 'dd/MM/yyyy') : '',
         updated_at: log.updated_at ? format(new Date(log.updated_at), 'dd/MM/yyyy') : ''

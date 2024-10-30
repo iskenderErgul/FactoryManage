@@ -92,9 +92,9 @@
         <!-- Üretim Güncelleme Diyaloğu -->
         <Dialog v-model:visible="editProductionDialog" :style="{width: '450px'}" header="Üretim Güncelle" :modal="true" class="p-fluid">
             <div class="field">
-                <label for="product_name">Ürün Adı</label>
-                <InputText id="product_name" v-model.trim="production.product.product_name" required :invalid="submitted && !production.product_name" />
-                <small class="p-error" v-if="submitted && !production.product_name">Ürün adı gereklidir.</small>
+                <label for="product_id">Ürün</label>
+                <Dropdown id="product_id" v-model="production.product_id" :options="products" optionLabel="product_name" optionValue="id" required :invalid="submitted && !production.product_id" />
+                <small class="p-error" v-if="submitted && !production.product_id">Ürün seçimi gerekli.</small>
             </div>
             <div class="field">
                 <label for="quantity">Miktar</label>
@@ -103,16 +103,31 @@
             </div>
             <div class="field">
                 <label for="machine_id">Makine</label>
-                <InputText id="machine_id" v-model="production.machine.machine_name" required :invalid="submitted && !production.machine_name" />
-                <small class="p-error" v-if="submitted && !production.machine_name">Makine adı gereklidir.</small>
+                <Dropdown id="machine_id" v-model="production.machine_id" :options="machines" optionLabel="machine_name" optionValue="id" required :invalid="submitted && !production.machine_id" />
+                <small class="p-error" v-if="submitted && !production.machine_id">Makine seçimi gereklidir.</small>
             </div>
             <div class="field">
-                <label for="user.name">İşçi Adı</label>
-                <InputText id="user.name" v-model="production.user.name" required :invalid="submitted && !production.worker_name" />
-                <small class="p-error" v-if="submitted && !production.worker_name">İşçi adı gereklidir.</small>
+                <label for="shift_id">Üretildiği Vardiya</label>
+                <Dropdown id="shift_id" v-model="production.shift_id" :options="formattedShifts" optionLabel="label" optionValue="id" required :invalid="submitted && !production.shift_id" />
+                <small class="p-error" v-if="submitted && !production.shift_id">Vardiya seçimi gereklidir.</small>
+            </div>
+            <div class="field">
+                <label for="production_date">Üretim Tarihi</label>
+                <Calendar
+                    id="production_date"
+                    v-model="production.production_date"
+                    required
+                    :invalid="submitted && !production.production_date"
+                />
+                <small class="p-error" v-if="submitted && !production.production_date">Tarih seçimi gereklidir.</small>
+            </div>
+            <div class="field">
+                <label for="worker_id">İşçi</label>
+                <Dropdown id="worker_id" v-model="production.worker_id" :options="workers" optionLabel="name" optionValue="id" required :invalid="submitted && !production.worker_id" />
+                <small class="p-error" v-if="submitted && !production.worker_id">İşçi seçimi gereklidir.</small>
             </div>
             <template #footer>
-                <Button label="İptal" icon="pi pi-times" text @click="hideEditDialog" />
+                <Button label="İptal" icon="pi pi-times" text @click="hideDialog" />
                 <Button label="Güncelle" icon="pi pi-check" text @click="updateProduction" />
             </template>
         </Dialog>
@@ -276,7 +291,7 @@ const saveProduction = () => {
 const updateProduction = () => {
     submitted.value = true;
 
-    if (production.value.product_name && production.value.quantity && production.value.machine_name && production.value.worker_name) {
+    if (production.value.product_id && production.value.quantity && production.value.machine_id && production.value.worker_id) {
         axios.put(`/api/productions/${production.value.id}`, production.value)
             .then(() => {
                 toast.value.add({ severity: 'success', summary: 'Başarılı', detail: 'Üretim başarıyla güncellendi', life: 3000 });
