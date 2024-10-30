@@ -12,7 +12,7 @@ class Production extends Model
     protected $fillable = [
         'user_id',
         'machine_id',
-        'product_name',
+        'product_id',
         'quantity',
         'shift_id',
         'production_date',
@@ -32,4 +32,16 @@ class Production extends Model
     {
         return $this->hasMany(ProductionLog::class);
     }
+    public function machine()
+    {
+        return $this->belongsTo(Machine::class);
+    }
+    public function product()
+    {
+        return $this->belongsTo(Product::class);
+    }
+
+
+
+
 }

@@ -4,7 +4,9 @@
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Machines\MachinesController;
 use App\Http\Controllers\Product\ProductController;
+use App\Http\Controllers\Production\ProductionController;
 use App\Http\Controllers\Users\UsersController;
+use App\Http\Controllers\Worker\WorkerController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -47,6 +49,18 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/products/{id}', [ProductController::class, 'update']);
     Route::delete('/products/{id}', [ProductController::class, 'destroy']);
     Route::delete('/products/delete-selected', [ProductController::class, 'destroySelected']);
+
+
+
+    Route::get('/productions', [ProductionController::class, 'index']);
+    Route::post('/productions/worker', [ProductionController::class, 'storeByWorker']);
+    Route::post('/productions/admin', [ProductionController::class, 'storeByAdmin']);
+    Route::get('/productions/{id}', [ProductionController::class, 'show']);
+    Route::put('/productions/{id}', [ProductionController::class, 'update']);
+    Route::delete('/productions/{id}', [ProductionController::class, 'destroy']);
+
+    Route::get('/getAllWorkers',[WorkerController::class, 'getAllWorkers']);
+    Route::get('/getShifts',[WorkerController::class, 'getShifts']);
 
 
 

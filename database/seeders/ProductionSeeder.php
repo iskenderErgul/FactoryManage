@@ -16,7 +16,7 @@ class ProductionSeeder extends Seeder
         Production::create([
             'user_id' => 1,
             'machine_id' => 1,
-            'product_name' => 'Ürün A',
+            'product_id' => '1',
             'quantity' => 100,
             'shift_id' => 1,
             'production_date' => now()->toDateString(),

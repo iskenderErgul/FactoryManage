@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->foreignId('machine_id')->nullable()->constrained('machines')->onDelete('set null');
-            $table->string('product_name');
+            $table->foreignId('product_id')->constrained('products')->onDelete('set null');
             $table->integer('quantity');
             $table->foreignId('shift_id')->constrained('shifts')->onDelete('cascade');
             $table->date('production_date');
