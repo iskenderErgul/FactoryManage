@@ -23,7 +23,6 @@ class ProductionController extends Controller
 
         return response()->json($productions);
     }
-
     public function storeByWorker(Request $request): JsonResponse
     {
 
@@ -152,7 +151,6 @@ class ProductionController extends Controller
 
         return response()->json($production);
     }
-
     public function destroy($id): JsonResponse
     {
 
@@ -189,7 +187,6 @@ class ProductionController extends Controller
         $productionLogs = ProductionLog::with('user')->get();
         return response()->json($productionLogs);
     }
-
     private function logProductionAction($action, Production $production, $additionalInfo = ''): void
     {
         $message = '';
