@@ -88,6 +88,7 @@ class ProductionController extends Controller
     }
     public function update(Request $request, $id): JsonResponse
     {
+
         $formattedProductionDate = Carbon::parse($request->production_date)->format('Y-m-d H:i:s');
         $production = Production::findOrFail($id);
 
@@ -136,7 +137,7 @@ class ProductionController extends Controller
 
         // Üretim kaydını güncelle
         $production->update([
-            'user_id' => $request->user_id,
+            'user_id' => $request->worker_id,
             'machine_id' => $request->machine_id,
             'product_id' => $newProductId,
             'quantity' => $newQuantity,
