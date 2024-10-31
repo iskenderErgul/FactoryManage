@@ -30,7 +30,6 @@ const actions = {
     async login({commit, dispatch, state}, authData) {
 
         await axios.get('/sanctum/csrf-cookie').then((resp) => {
-            console.log('csrf coooki',resp);
             axios.post('/api/login', {...authData})
                 .then(async res => {
                     commit('setAuthenticate', true)
