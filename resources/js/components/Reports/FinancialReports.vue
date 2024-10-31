@@ -40,6 +40,7 @@ const production = reactive({
 // Makineler ve ürünler için veri referansları
 const machines = ref([]);
 const products = ref([]);
+const toast = ref(null);
 
 // Backend'den makineleri ve ürünleri çekme
 const fetchMachines = async () => {
@@ -72,7 +73,6 @@ onMounted(async () => {
 const saveProduction = async () => {
     if (production.machine && production.product && production.quantity) {
         try {
-            // Üretim bilgilerini kaydetmek için API'ye istek gönder
             const response = await axios.post('/api/productions/worker', {
                 user_id : 4,
                 shift_id : 1,

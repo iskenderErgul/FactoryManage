@@ -26,6 +26,7 @@ class ProductionController extends Controller
     public function storeByWorker(Request $request): JsonResponse
     {
 
+
         $production = Production::create([
             'user_id' => $request->user_id,
             'shift_id' => $request->shift_id,
@@ -208,7 +209,7 @@ class ProductionController extends Controller
 
         ProductionLog::create([
             'production_id' => $production->id,
-            'user_id' => Auth::id(),
+            'user_id' => $production->user_id,
             'action' => $action,
             'changes' => $message,
             'created_at' => now(),

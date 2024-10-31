@@ -195,7 +195,7 @@ const submitted = ref(false);
 const fetchProductions = () => {
     axios.get('/api/productions')
         .then(response => {
-            productions.value = response.data.reverse();
+            productions.value = response.data;
         })
         .catch(error => {
             console.error("Üretimler alınırken hata:", error);
@@ -276,7 +276,7 @@ const saveProduction = () => {
     console.log('if dışı')
     if (production.value.product_id && production.value.quantity && production.value.machine_id && production.value.worker_id) {
         console.log('if içi')
-        axios.post('/api/productions/admin', production.value) // Admin olarak kayıt yapıyoruz
+        axios.post('/api/productions/admin', production.value)
             .then(() => {
                 toast.value.add({ severity: 'success', summary: 'Başarılı', detail: 'Üretim başarıyla eklendi', life: 3000 });
                 fetchProductions();

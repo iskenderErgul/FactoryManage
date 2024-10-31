@@ -44,6 +44,7 @@ onMounted(() => {
 const getProductionLogs = () => {
     axios.get('/api/getAllProductionLogs').then(resp => {
         productionLogs.value = resp.data.reverse();
+        console.log(productionLogs)
     });
 };
 
