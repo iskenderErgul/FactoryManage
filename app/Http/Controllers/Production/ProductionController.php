@@ -8,6 +8,7 @@ use App\Models\Production;
 use App\Models\ProductionLog;
 use App\Models\StockMovement;
 
+use App\Models\StockMovementsLog;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -36,13 +37,15 @@ class ProductionController extends Controller
             'production_date' => now(),
         ]);
 
-        StockMovement::create([
+        $stockMovement =StockMovement::create([
             'product_id' => $request->product_id,
             'movement_type' => 'giriş',
             'quantity' => $request->quantity,
             'related_process' => 'Üretim',
             'movement_date' => now(),
         ]);
+
+        $this->logStockMovementAction('create', $stockMovement, 'İşçi tarafından stok hareketi eklendi.');
 
         $product = Product::findOrFail($request->product_id);
         $product->stock_quantity += $request->quantity;
@@ -69,13 +72,16 @@ class ProductionController extends Controller
             'production_date' => $formattedProductionDate,
         ]);
 
-        StockMovement::create([
+        $stockMovement =StockMovement::create([
             'product_id' => $request->product_id,
             'movement_type' => 'giriş',
             'quantity' => $request->quantity,
             'related_process' => 'Üretim',
             'movement_date' => now(),
         ]);
+
+
+        $this->logStockMovementAction('create', $stockMovement, 'Yönetici tarafından stok hareketi eklendi.');
 
         $product = Product::findOrFail($request->product_id);
         $product->stock_quantity += $request->quantity;
@@ -113,13 +119,15 @@ class ProductionController extends Controller
             $newProduct->save();
 
             // Stok hareketi: Eski ürün çıkışı
-            StockMovement::create([
+            $stockMovement =StockMovement::create([
                 'product_id' => $previousProductId,
                 'movement_type' => 'çıkış',
                 'quantity' => $previousQuantity,
                 'related_process' => 'Üretim Güncelleme',
                 'movement_date' => now(),
             ]);
+
+            $this->logStockMovementAction('update', $stockMovement, "Üretim güncelleme sırasında stok hareketi güncellendi.");
 
             $logMessage = "Ürün değişti. Eski Ürün: {$previousProduct->name}, Yeni Ürün: {$newProduct->name}.";
         } else {
@@ -165,12 +173,22 @@ class ProductionController extends Controller
         $product = Product::findOrFail($productId);
 
 
-        StockMovement::create([
+        $stockMovement =StockMovement::create([
             'product_id' => $productId,
             'movement_type' => 'çıkış',
             'quantity' => $quantity,
             'related_process' => 'Üretim Silme',
             'movement_date' => now(),
+        ]);
+
+
+        StockMovementsLog::create([
+            'stock_movement_id' => $stockMovement->id,
+            'user_id' => Auth::id(),
+            'action' => 'delete',
+            'changes' => "Üretim kaydı silindi. Ürün ID: {$productId}, Miktar: {$quantity}.",
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
 
         $product->stock_quantity -= $quantity;
@@ -211,6 +229,34 @@ class ProductionController extends Controller
         ProductionLog::create([
             'production_id' => $production->id,
             'user_id' => $production->user_id,
+            'action' => $action,
+            'changes' => $message,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+    }
+    private function logStockMovementAction($action, StockMovement $stockMovement, $additionalInfo = ''): void
+    {
+        $message = '';
+
+        switch ($action) {
+            case 'create':
+                $message = "Stok hareketi oluşturuldu. Ürün: {$stockMovement->product_id}, Miktar: {$stockMovement->quantity}, Hareket Tipi: {$stockMovement->movement_type}, Tarih: {$stockMovement->movement_date}. $additionalInfo";
+                break;
+            case 'update':
+                $message = "Stok hareketi güncellendi. Ürün: {$stockMovement->product_id}, Yeni Miktar: {$stockMovement->quantity}, Hareket Tipi: {$stockMovement->movement_type}, Tarih: {$stockMovement->movement_date}. $additionalInfo";
+                break;
+            case 'delete':
+                $message = "Stok hareketi silindi. Ürün: {$stockMovement->product_id}, Miktar: {$stockMovement->quantity}, Hareket Tipi: {$stockMovement->movement_type}, Tarih: {$stockMovement->movement_date}. $additionalInfo";
+                break;
+            default:
+                $message = $additionalInfo;
+                break;
+        }
+
+        StockMovementsLog::create([
+            'stock_movement_id' => $stockMovement->id,
+            'user_id' => Auth::id(),
             'action' => $action,
             'changes' => $message,
             'created_at' => now(),

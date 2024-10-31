@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class StockMovementsLog extends Model
 {
@@ -13,10 +14,16 @@ class StockMovementsLog extends Model
         'stock_movement_id',
         'action',
         'changes',
+        'user_id',
+
     ];
 
-    public function stockMovement()
+    public function stockMovement(): BelongsTo
     {
         return $this->belongsTo(StockMovement::class);
+    }
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
     }
 }

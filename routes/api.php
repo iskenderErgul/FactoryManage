@@ -5,6 +5,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Machines\MachinesController;
 use App\Http\Controllers\Product\ProductController;
 use App\Http\Controllers\Production\ProductionController;
+use App\Http\Controllers\Stock\StockController;
 use App\Http\Controllers\Users\UsersController;
 use App\Http\Controllers\Worker\WorkerController;
 use Illuminate\Http\Request;
@@ -60,12 +61,20 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/productions/{id}', [ProductionController::class, 'destroy']);
     Route::get('/getAllProductionLogs',[ProductionController::class, 'getAllProductionLogs']);
 
+
+    Route::get('/getStockMovementsLogs', [StockController::class, 'getStockMovementsLogs']);
+    Route::get('/getStockMovements', [StockController::class, 'getStockMovements']);
+
+
+
+
     Route::get('/getAllWorkers',[WorkerController::class, 'getAllWorkers']);
     Route::get('/getShifts',[WorkerController::class, 'getShifts']);
 
 
 
-//    Route::post('/transcribe', [AudioTranscriptionController::class, 'transcribe']);
+
+
 
 
 });

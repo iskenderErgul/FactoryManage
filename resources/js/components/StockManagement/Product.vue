@@ -1,6 +1,5 @@
 <template>
     <div>
-        <h1>Ürünler</h1>
         <div class="card">
             <Toolbar class="mb-4">
                 <template #start>
