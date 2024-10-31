@@ -2,6 +2,7 @@
 
 
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Customer\CustomerController;
 use App\Http\Controllers\Machines\MachinesController;
 use App\Http\Controllers\Product\ProductController;
 use App\Http\Controllers\Production\ProductionController;
@@ -60,6 +61,16 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/productions/{id}', [ProductionController::class, 'update']);
     Route::delete('/productions/{id}', [ProductionController::class, 'destroy']);
     Route::get('/getAllProductionLogs',[ProductionController::class, 'getAllProductionLogs']);
+
+    Route::get('/customers', [CustomerController::class, 'index']);
+    Route::post('/customers', [CustomerController::class, 'store']);
+    Route::put('/customers/{id}', [CustomerController::class, 'update']);
+    Route::delete('/customers/{id}', [CustomerController::class, 'destroy']);
+    Route::delete('/customers', [CustomerController::class, 'deleteSelected']);
+
+
+
+
 
 
     Route::get('/getStockMovementsLogs', [StockController::class, 'getStockMovementsLogs']);
