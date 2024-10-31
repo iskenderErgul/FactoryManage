@@ -17,4 +17,16 @@ class Product extends Model
         'ProductionCost',
         'StockLevel',
     ];
+
+    public function salesProducts()
+    {
+        return $this->hasMany(SalesProduct::class);
+    }
+
+    public function sales()
+    {
+        return $this->belongsToMany(Sales::class, 'sales_products')
+            ->withPivot('quantity', 'price')
+            ->withTimestamps();
+    }
 }

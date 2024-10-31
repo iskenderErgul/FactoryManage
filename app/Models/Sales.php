@@ -22,9 +22,16 @@ class Sales extends Model
         return $this->belongsTo(Customer::class);
     }
 
-    public function product()
+    public function products()
     {
-        return $this->belongsTo(Product::class);
+        return $this->belongsToMany(Product::class, 'sales_products')
+            ->withPivot('quantity', 'price')
+            ->withTimestamps();
+    }
+
+    public function salesProducts()
+    {
+        return $this->hasMany(SalesProduct::class);
     }
 
     public function logs()

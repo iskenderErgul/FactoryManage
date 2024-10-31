@@ -6,6 +6,8 @@ use App\Http\Controllers\Customer\CustomerController;
 use App\Http\Controllers\Machines\MachinesController;
 use App\Http\Controllers\Product\ProductController;
 use App\Http\Controllers\Production\ProductionController;
+use App\Http\Controllers\Sales\SalesController;
+use App\Http\Controllers\Sales\SalesProductController;
 use App\Http\Controllers\Stock\StockController;
 use App\Http\Controllers\Users\UsersController;
 use App\Http\Controllers\Worker\WorkerController;
@@ -67,6 +69,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/customers/{id}', [CustomerController::class, 'update']);
     Route::delete('/customers/{id}', [CustomerController::class, 'destroy']);
     Route::delete('/customers', [CustomerController::class, 'deleteSelected']);
+
+    Route::get('/sales', [SalesController::class, 'index']);
+    Route::post('/sales', [SalesController::class, 'store']);
+    Route::put('/sales/{id}', [SalesController::class, 'update']);
+    Route::delete('/sales/{id}', [SalesController::class, 'destroy']);
+    Route::delete('/sales', [SalesController::class, 'bulkDelete']);
 
 
 

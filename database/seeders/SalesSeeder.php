@@ -15,9 +15,6 @@ class SalesSeeder extends Seeder
     {
         Sales::create([
             'customer_id' => 1,
-            'product_id' => 1,
-            'quantity' => 5,
-            'price' => 50.00,
             'sale_date' => now()->toDateString(),
         ]);
         // Diğer örnek satışları buraya ekleyebilirsiniz
