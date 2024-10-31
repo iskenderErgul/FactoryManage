@@ -52,7 +52,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
 
-    Route::get('/productions', [ProductionController::class, 'index']);
+    Route::get('/productions', [ProductionController::class, 'getAllProductions']);
     Route::post('/productions/worker', [ProductionController::class, 'storeByWorker']);
     Route::post('/productions/admin', [ProductionController::class, 'storeByAdmin']);
     Route::get('/productions/{id}', [ProductionController::class, 'show']);

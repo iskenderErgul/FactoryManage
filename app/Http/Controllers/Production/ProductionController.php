@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\Auth;
 class ProductionController extends Controller
 {
 
-    public function index(): JsonResponse
+    public function getAllProductions(): JsonResponse
     {
         $productions = Production::with(['machine', 'product', 'user', 'shift'])->get();
 
