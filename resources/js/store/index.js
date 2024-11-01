@@ -35,7 +35,6 @@ const actions = {
                     commit('setAuthenticate', true)
                     commit('setUser', res.data.data)
                     await router.push('/sys')
-                    console.log(state);
                 }).catch((err) => {
                 console.log(err)
             })

@@ -29,4 +29,9 @@ class Product extends Model
             ->withPivot('quantity', 'price')
             ->withTimestamps();
     }
+
+    public function getTotalPriceAttribute()
+    {
+        return $this->pivot->quantity * $this->pivot->price;
+    }
 }

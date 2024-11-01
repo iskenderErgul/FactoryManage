@@ -13,6 +13,8 @@ class SalesController
         return Sales::with('customer','products')->get();
     }
 
+
+
     public function store(Request $request)
     {
         $sale = Sales::create($request->all());

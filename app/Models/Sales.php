@@ -28,6 +28,21 @@ class Sales extends Model
             ->withPivot('quantity', 'price')
             ->withTimestamps();
     }
+    // Accessor for total price
+    public function toArray()
+    {
+        $array = parent::toArray();
+        // Her bir ürün için total_price eklemek için
+        $array['products'] = $this->products->map(function ($product) {
+            // Ürün verilerini array'e çevir
+            $productArray = $product->toArray();
+            // Total price ekle
+            $productArray['total_price'] = $product->total_price; // Accessor çağrısı
+            return $productArray;
+        });
+
+        return $array;
+    }
 
     public function salesProducts()
     {
