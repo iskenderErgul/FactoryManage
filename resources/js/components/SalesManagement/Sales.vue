@@ -236,10 +236,10 @@ const calculateTotalPrice = (rowData) => {
 
 const saveSale = () => {
     submitted.value = true;
-
+        console.log('selected customeer',selectedCustomer);
     if (selectedCustomer && saleProducts.value.length > 0) {
         const saleData = {
-            customer_id: selectedCustomer.id,
+            customer_id: selectedCustomer.value.id,
             sale_date: saleDate.value,
             products: saleProducts.value,
         };
@@ -254,28 +254,36 @@ const saveSale = () => {
 };
 
 const addProductToSale = () => {
-    console.log('Seçilen Ürün:', selectedProduct); // Kontrol için log ekleyin
-    console.log('Seçilen Ürün Değeri:', selectedProduct.value); // Proxy değerini kontrol edin
-
     if (selectedProduct && selectedProduct.value && productQuantity.value > 0 && productPrice.value >= 0) {
-        const product = {
-            ...selectedProduct.value, // Burada _value kullanın
-            quantity: productQuantity.value,
-            price : parseFloat(productPrice.value),
-            total_price: parseFloat(productPrice.value) * productQuantity.value
-        };
-        console.log('product', product);
-        saleProducts.value.push(product);
-        console.log('Satış Ürünleri:', saleProducts.value);
+        const productStock = selectedProduct.value.stock_quantity;
 
-        // Değişkenleri sıfırla
+        if (productQuantity.value > productStock) {
+            toast.value.add({ severity: 'error', summary: 'Hata', detail: 'Yeterli stok yok! Lütfen daha düşük bir miktar seçin.', life: 3000 });
+            return;
+        }
+
+        const existingProductIndex = saleProducts.value.findIndex(product => product.id === selectedProduct.value.id);
+
+        if (existingProductIndex !== -1) {
+            saleProducts.value[existingProductIndex].quantity += productQuantity.value;
+            saleProducts.value[existingProductIndex].total_price = parseFloat(productPrice.value) * saleProducts.value[existingProductIndex].quantity;
+        } else {
+            const product = {
+                ...selectedProduct.value,
+                quantity: productQuantity.value,
+                price: parseFloat(productPrice.value),
+                total_price: parseFloat(productPrice.value) * productQuantity.value
+            };
+            saleProducts.value.push(product);
+        }
         selectedProduct.value = null;
         productQuantity.value = 1;
         productPrice.value = '';
     } else {
-        alert("Lütfen tüm alanları doldurun.");
+        toast.value.add({ severity: 'warn', summary: 'Uyarı', detail: 'Lütfen tüm alanları doldurun.', life: 3000 });
     }
 };
+
 const confirmDeleteSale = (saleToDelete) => {
     sale.value = { ...saleToDelete };
     deleteSaleDialog.value = true;
