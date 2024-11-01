@@ -170,6 +170,12 @@ const saveProduct = () => {
     }
 };
 
+const editProduct = (productToEdit) => {
+    product.value = { ...productToEdit };
+    productDialog.value = true;
+};
+
+
 const confirmDeleteProduct = (productToDelete) => {
     product.value = { ...productToDelete };
     deleteProductDialog.value = true;

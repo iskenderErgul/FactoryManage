@@ -14,8 +14,8 @@ class Product extends Model
         'product_type',
         'product_photo',
         'description',
-        'ProductionCost',
-        'StockLevel',
+        'production_cost',
+        'stock_quantity',
     ];
 
     public function salesProducts()

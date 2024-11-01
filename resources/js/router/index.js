@@ -35,7 +35,8 @@ const routes = [
         children :  [
             {
                 path : '/sys',
-                component :HomeView
+                component :HomeView,
+                name : 'home'
             },
             //UserManagement
             {
@@ -180,7 +181,12 @@ const router = createRouter({
 router.beforeEach(async (to, from, next) => {
     try {
         await store.dispatch('authenticate');
-        if (store.getters.authenticated || to.name === 'login') {
+
+        // Eğer kullanıcı zaten authenticated ise ve login sayfasına gitmeye çalışıyorsa
+        if (store.getters.authenticated && to.name === 'login') {
+            // Ana sayfaya veya başka bir sayfaya yönlendirebilirsiniz
+            next({ name: 'home' }); // 'home' sayfasına yönlendirin
+        } else if (store.getters.authenticated || to.name === 'login') {
             next();
         } else {
             next({ name: 'login' });

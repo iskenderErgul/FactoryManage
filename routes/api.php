@@ -92,7 +92,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
 
-
+    Route::get('/logout', [LoginController::class, 'logout']);
 
 
 
