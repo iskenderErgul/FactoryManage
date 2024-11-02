@@ -74,7 +74,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/sales', [SalesController::class, 'store']);
     Route::put('/sales/{id}', [SalesController::class, 'update']);
     Route::delete('/sales/{id}', [SalesController::class, 'destroy']);
-    Route::delete('/sales', [SalesController::class, 'bulkDelete']);
+
+
 
 
 
@@ -83,10 +84,6 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/getStockMovementsLogs', [StockController::class, 'getStockMovementsLogs']);
     Route::get('/getStockMovements', [StockController::class, 'getStockMovements']);
-
-
-
-
     Route::get('/getAllWorkers',[WorkerController::class, 'getAllWorkers']);
     Route::get('/getShifts',[WorkerController::class, 'getShifts']);
 

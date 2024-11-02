@@ -6,6 +6,7 @@ use App\Models\Product;
 use App\Models\Sales;
 use App\Models\SalesProduct;
 use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -19,13 +20,12 @@ class SalesController
 
 
 
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
         $products = $request->input('products');
 
-        // Transaction başlat
-        DB::beginTransaction();
 
+        DB::beginTransaction();
         try {
 
             $saleDate = Carbon::createFromFormat('d.m.Y', $request->sale_date)->format('Y-m-d');
@@ -72,21 +72,98 @@ class SalesController
 
     public function update(Request $request, $id)
     {
+        //Gelen veriler
+
+        /*
+        array:3 [ // app\Http\Controllers\Sales\SalesController.php:75
+  "customer_id" => 103
+  "sale_date" => "2024-11-01"
+  "products" => array:3 [
+    0 => array:11 [
+      "id" => 4
+      "product_name" => "Baskılı Poşet"
+      "product_type" => "Küçük"
+      "product_photo" => "url_to_photo_4"
+      "description" => "Özel baskılı poşetler, markanız için harika bir seçimdir."
+      "production_cost" => "0.75"
+      "stock_quantity" => 500
+      "created_at" => "2024-10-31T18:10:38.000000Z"
+      "updated_at" => "2024-11-01T19:02:46.000000Z"
+      "pivot" => array:6 [
+        "sales_id" => 3
+        "product_id" => 4
+        "quantity" => 4
+        "price" => "3.00"
+        "created_at" => "2024-10-31T18:25:30.000000Z"
+        "updated_at" => "2024-11-01T19:05:00.000000Z"
+      ]
+      "total_price" => 12
+    ]
+    1 => array:11 [
+      "id" => 6
+      "product_name" => "Şeffaf Poşet"
+      "product_type" => "Küçük"
+      "product_photo" => "url_to_photo_6"
+      "description" => "Ürünlerinizi sergilemek için ideal şeffaf poşetler."
+      "production_cost" => "0.40"
+      "stock_quantity" => 1200
+      "created_at" => "2024-10-31T18:10:38.000000Z"
+      "updated_at" => "2024-11-01T19:02:46.000000Z"
+      "pivot" => array:6 [
+        "sales_id" => 3
+        "product_id" => 6
+        "quantity" => 2
+        "price" => "0.80"
+        "created_at" => "2024-10-31T18:25:30.000000Z"
+        "updated_at" => "2024-11-01T19:05:00.000000Z"
+      ]
+      "total_price" => 1.6
+    ]
+    2 => array:11 [
+      "id" => 1
+      "product_name" => "Renkli Poşet"
+      "product_type" => "Küçük"
+      "product_photo" => "url_to_photo_1"
+      "description" => "Renkli plastik poşetler, alışveriş için idealdir."
+      "production_cost" => "0.50"
+      "stock_quantity" => 1000
+      "created_at" => "2024-10-31T18:10:38.000000Z"
+      "updated_at" => "2024-11-01T19:02:46.000000Z"
+      "pivot" => array:2 [
+        "quantity" => 1
+        "price" => 1
+      ]
+      "total_price" => 1
+    ]
+  ]
+]
+"3" // app\Http\Controllers\Sales\SalesController.php:75
+        */
+
+
+        dd($request->all(),$id);
         $sale = Sales::findOrFail($id);
         $sale->update($request->all());
         return response()->json($sale, 200);
     }
 
-    public function destroy($id)
+    public function destroy($id): JsonResponse
     {
+
         $sale = Sales::findOrFail($id);
+        $saleProducts = DB::table('sales_products')->where('sales_id', $id)->get();
+
+        foreach ($saleProducts as $saleProduct) {
+            DB::table('products')
+                ->where('id', $saleProduct->product_id)
+                ->increment('stock_quantity', $saleProduct->quantity);
+        }
+
+        DB::table('sales_products')->where('sales_id', $id)->delete();
+
         $sale->delete();
         return response()->json(null, 204);
     }
 
-    public function bulkDelete(Request $request)
-    {
-        Sales::whereIn('id', $request->ids)->delete();
-        return response()->json(null, 204);
-    }
+
 }

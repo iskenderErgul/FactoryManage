@@ -10,11 +10,14 @@
                     <Button label="Dışa Aktar" icon="pi pi-upload" severity="help" @click="exportCSV" />
                 </template>
             </Toolbar>
-            <DataTable ref="dt" :value="sales" v-model:selection="selectedSales" dataKey="id"
-                       :paginator="true" :rows="10"
-                       paginatorTemplate="İlk Sayfa Bağlantısı Önceki Sayfa Bağlantısı Sayfa Bağlantıları Sonraki Sayfa Bağlantısı Mevcut Sayfa Raporu Sayfa Başına Satır Aşağı Aşağı"
-                       :rowsPerPageOptions="[5,10,25]"
-                       currentPageReportTemplate="Mevcut {first} ile {last} arasında, toplam {totalRecords} satış">
+            <DataTable
+                :value="sales"
+                v-model:selection="selectedSales"
+                dataKey="id"
+                :paginator="true"
+                :rows="10"
+                :rowsPerPageOptions="[5, 10, 25]"
+                currentPageReportTemplate="Mevcut {first} ile {last} arasında, toplam {totalRecords} satış">
                 <Column selectionMode="multiple" style="width: 2rem" :exportable="false"></Column>
                 <Column field="id" header="Satış ID" sortable style="min-width:8rem"></Column>
                 <Column field="customer.name" header="Müşteri Adı" sortable style="min-width:10rem"></Column>
@@ -22,16 +25,107 @@
                 <Column :exportable="false" style="min-width:8rem">
                     <template #body="slotProps">
                         <Button icon="pi pi-info-circle" outlined rounded class="mr-2" @click="openSaleDetailDialog(slotProps.data)" />
-                        <Button icon="pi pi-pencil" outlined rounded class="mr-2" @click="editSale(slotProps.data)" />
+                        <Button icon="pi pi-pencil" outlined rounded class="mr-2" @click="openUpdateSaleDialog(slotProps.data)" />
                         <Button icon="pi pi-trash" outlined rounded severity="danger" @click="confirmDeleteSale(slotProps.data)" />
                     </template>
                 </Column>
             </DataTable>
+
         </div>
         <Toast ref="toast" />
 
         <!-- Satış Detayları Diyaloğu -->
+        <Dialog v-model:visible="updateSaleDialog" maximizable modal header="Yeni Satış Ekle" :style="{ width: '50rem' }" :breakpoints="{ '1199px': '75vw', '575px': '90vw' }">
+            <div class="p-fluid">
+                <!-- Müşteri Bilgileri -->
+                <h3>Müşteri Bilgileri</h3>
+                <div class="p-field">
+                    <label for="customerSelect">Müşteri Seç:</label>
+                    <Dropdown id="customerSelect" v-model="selectedCustomer" :options="customers" optionLabel="name" placeholder="Müşteri Seçin" />
+                </div>
 
+                <div class="p-field">
+                    <label for="saleDate">Satış Tarihi:</label>
+                    <InputText id="saleDate" v-model="saleDate" />
+                </div>
+
+                <!-- Ürün Ekleme -->
+                <h3>Ürün Ekle</h3>
+                <div class="product-selection">
+                    <div class="p-field">
+                        <label for="productSelect">Ürün Seç:</label>
+                        <Dropdown id="productSelect" v-model="selectedProduct" :options="products" optionLabel="product_name" placeholder="Ürün Seçin" />
+
+                    </div>
+                    <div class="p-field">
+                        <label for="productQuantity">Miktar:</label>
+                        <InputText id="productQuantity" v-model.number="productQuantity" type="number" min="1" />
+                    </div>
+                    <div class="p-field">
+                        <label for="productPrice">Birim Fiyat (TL):</label>
+                        <InputText id="productPrice" v-model.number="productPrice" type="number" min="0" />
+                    </div>
+                    <Button label="Ekle" @click="addUpdatingProductToSale" />
+                </div>
+
+                <!-- Satış Ürünleri Tablosu -->
+                <h3>Satış Ürünleri</h3>
+                <!-- DataTable: Satır düzenleme ve silme işlemleri için düğmeler eklendi -->
+
+                <DataTable :value="saleProducts" :paginator="true" :rows="5">
+                    <Column field="product_name" header="Ürün Adı" sortable></Column>
+                    <Column field="product_type" header="Ürün Türü" sortable></Column>
+                    <Column field="pivot.quantity" header="Miktar" sortable></Column>
+                    <Column field="pivot.price" header="Birim Fiyat (TL)" sortable></Column>
+                    <Column field="total_price" header="Toplam (TL)" sortable></Column>
+
+                    <!-- Düzenle ve Sil Butonları Sütunu -->
+                    <Column :header="''" style="width: 8rem">
+                        <template #body="slotProps">
+                            <Button icon="pi pi-pencil" class="p-button-rounded p-button-info mr-2"
+                                    @click="openEditDialog(slotProps.data)" />
+                            <Button icon="pi pi-trash" class="p-button-rounded p-button-danger"
+                                    @click="removeProductFromSale(slotProps.data)" />
+                        </template>
+                    </Column>
+                </DataTable>
+                <div class="total-summary" style="text-align: right; margin-top: 20px;">
+                    <strong style="font-size: 1.5em; font-weight: bold;">Genel Toplam (TL): {{ calculateTotalPrice(saleProducts) }}</strong>
+                </div>
+
+                <div class="p-field" style="text-align: right; margin-top: 20px;">
+                    <Button label="Kaydet" @click="updateSale" />
+                </div>
+
+                <!-- Düzenleme Dialogu -->
+                <Dialog header="Ürün Düzenle" v-model:visible="isEditDialogVisible" :modal="true" :closable="false">
+
+                    <div class="p-fluid">
+                        <div class="p-field">
+                            <label for="product_name">Ürün Adı</label>
+                            <InputText v-model="editingProduct.product_name" />
+                        </div>
+                        <div class="p-field">
+                            <label for="product_type">Ürün Türü</label>
+                            <InputText v-model="editingProduct.product_type" />
+                        </div>
+                        <div class="p-field">
+                            <label for="quantity">Miktar</label>
+                            <InputNumber v-model="editingProduct.pivot.quantity" mode="decimal" />
+                        </div>
+                        <div class="p-field">
+                            <label for="price">Birim Fiyat (TL)</label>
+                            <InputNumber v-model="editingProduct.pivot.price" mode="currency" currency="TRY" locale="tr-TR" />
+                        </div>
+                    </div>
+
+                    <template #footer>
+                        <Button label="İptal" icon="pi pi-times" class="p-button-text" @click="isEditDialogVisible = false" />
+                        <Button label="Kaydet" icon="pi pi-check" class="p-button-text" @click="saveEdit" />
+                    </template>
+                </Dialog>
+            </div>
+        </Dialog>
         <Dialog v-model:visible="addSaleDialog" maximizable modal header="Yeni Satış Ekle" :style="{ width: '50rem' }" :breakpoints="{ '1199px': '75vw', '575px': '90vw' }">
             <div class="p-fluid">
                 <!-- Müşteri Bilgileri -->
@@ -84,7 +178,6 @@
                 </div>
             </div>
         </Dialog>
-
         <Dialog v-model:visible="deleteSaleDialog" :style="{width: '450px'}" header="Onayla" :modal="true">
             <div class="confirmation-content">
                 <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem" />
@@ -155,6 +248,7 @@ import Toolbar from 'primevue/toolbar';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import InputText from 'primevue/inputtext';
+import InputNumber from "primevue/inputnumber";
 import Dialog from 'primevue/dialog';
 import Toast from 'primevue/toast';
 import Dropdown from 'primevue/dropdown';
@@ -165,12 +259,19 @@ const toast = ref(null);
 const sales = ref([]);
 const saleDialog = ref(false);
 const addSaleDialog = ref(false);
+const updateSaleDialog = ref(false);
 const detailSaleDialog = ref(false);
 const deleteSaleDialog = ref(false);
 const deleteSalesDialog = ref(false);
 const sale = ref({});
 const selectedSales = ref([]);
 const submitted = ref(false);
+const isEditDialogVisible = ref(false);
+const editingProduct = ref({});
+
+
+
+
 
 
 const selectedCustomer = ref(null);
@@ -226,7 +327,86 @@ const openSaleDetailDialog = (data) => {
     selectedSales.value = data;
     detailSaleDialog.value = true;
 }
-// Toplam Fiyat Hesaplama Fonksiyonu
+
+const openUpdateSaleDialog = (data) => {
+    selectedSales.value = data;
+    saleDate.value = data.sale_date;
+    selectedCustomer.value = data.customer;
+    saleProducts.value = data.products.map(product => ({
+        ...product,
+        total_price: product.pivot.price * product.pivot.quantity,
+    }));
+    updateSaleDialog.value = true;
+
+}
+const openEditDialog = (product) => {
+    editingProduct.value = { ...product };
+    editingProduct.value.price = parseFloat(editingProduct.value.price);
+    isEditDialogVisible.value = true;
+
+};
+
+const saveEdit = () => {
+    const index = saleProducts.value.findIndex((p) => p.id === editingProduct.value.id);
+    if (index !== -1) {
+        // Düzenlenen ürünü güncelle
+        saleProducts.value[index] = { ...editingProduct.value };
+
+        // Toplam fiyatı güncelle
+        saleProducts.value[index].total_price = saleProducts.value[index].pivot.price * saleProducts.value[index].pivot.quantity;
+    }
+    isEditDialogVisible.value = false;
+};
+
+const addUpdatingProductToSale = () => {
+    if (selectedProduct.value && productQuantity.value > 0 && productPrice.value >= 0) {
+        const existingProductIndex = saleProducts.value.findIndex(product => product.id === selectedProduct.value.id);
+
+        // Ürün zaten varsa güncelle
+        if (existingProductIndex !== -1) {
+            const currentProduct = saleProducts.value[existingProductIndex];
+            const newQuantity = currentProduct.pivot.quantity + productQuantity.value; // Burayı güncelliyoruz
+            const productStock = selectedProduct.value.stock_quantity;
+
+            // Stok kontrolü
+            if (newQuantity > productStock) {
+                toast.value.add({ severity: 'error', summary: 'Hata', detail: 'Yeterli stok yok! Lütfen daha düşük bir miktar seçin.', life: 3000 });
+                return;
+            }
+
+            // Mevcut ürün güncelleniyor
+            currentProduct.pivot.quantity = newQuantity; // Miktarı güncelliyoruz
+            currentProduct.pivot.price = parseFloat(productPrice.value); // Birim fiyatı güncelliyoruz
+            currentProduct.total_price = currentProduct.pivot.quantity * currentProduct.pivot.price; // Toplam fiyatı güncelliyoruz
+
+        } else {
+            // Ürün yoksa yeni bir ürün ekleniyor
+            const product = {
+                ...selectedProduct.value,
+                pivot: {
+                    quantity: productQuantity.value, // Miktarı burada tanımlıyoruz
+                    price: parseFloat(productPrice.value) // Birim fiyatı burada tanımlıyoruz
+                },
+                total_price: productQuantity.value * parseFloat(productPrice.value) // Toplam fiyatı burada hesaplıyoruz
+            };
+            saleProducts.value.push(product);
+        }
+
+        // Seçili ürün ve diğer alanları sıfırlama
+        selectedProduct.value = null;
+        productQuantity.value = 1;
+        productPrice.value = '';
+    } else {
+        toast.value.add({ severity: 'warn', summary: 'Uyarı', detail: 'Lütfen tüm alanları doldurun.', life: 3000 });
+    }
+};
+
+
+const removeProductFromSale = (product) => {
+    saleProducts.value = saleProducts.value.filter(item => item.id !== product.id); // Ürünü listeden çıkar
+    toast.value.add({ severity: 'info', summary: 'Ürün Silindi', detail: `${product.product_name} başarıyla silindi`, life: 3000 });
+};
+
 const calculateTotalPrice = (rowData) => {
 
     return rowData.reduce((total, product) => {
@@ -250,6 +430,26 @@ const saveSale = () => {
                 fetchSales();
             });
         addSaleDialog.value = false;
+    }
+};
+
+const updateSale = () => {
+    if (selectedCustomer && saleProducts.value.length > 0) {
+        const saleData = {
+            customer_id: selectedCustomer.value.id,
+            sale_date: saleDate.value,
+            products: saleProducts.value,
+        };
+
+        axios.put(`/api/sales/${selectedSales.value.id}`, saleData)
+            .then(() => {
+                toast.value.add({ severity: 'success', summary: 'Başarılı', detail: 'Satış başarıyla güncellendi', life: 3000 });
+                fetchSales();
+            })
+            .catch(error => {
+                toast.value.add({ severity: 'error', summary: 'Hata', detail: 'Güncelleme başarısız.', life: 3000 });
+            });
+        updateSaleDialog.value = false;
     }
 };
 
@@ -315,6 +515,8 @@ const deleteSelectedSales = () => {
     deleteSalesDialog.value = false;
     selectedSales.value = [];
 };
+
+
 
 const exportCSV = () => {
     // CSV dışa aktarma işlemleri
