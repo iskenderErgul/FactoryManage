@@ -7,8 +7,9 @@ use App\Models\Product;
 use App\Models\Production;
 use App\Models\ProductionLog;
 use App\Models\StockMovement;
-
 use App\Models\StockMovementsLog;
+use App\Services\LoggerService;
+use App\Services\StockMovementService;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -17,252 +18,164 @@ use Illuminate\Support\Facades\Auth;
 
 class ProductionController extends Controller
 {
+    protected StockMovementService $stockMovementService;
+    protected LoggerService $loggerService;
 
-    public function getAllProductions(): JsonResponse
+    public function __construct(StockMovementService $stockMovementService, LoggerService $loggerService)
     {
-        $productions = Production::with(['machine', 'product', 'user', 'shift'])->get();
-
-        return response()->json($productions);
+        $this->stockMovementService = $stockMovementService;
+        $this->loggerService = $loggerService;
     }
-    public function storeByWorker(Request $request): JsonResponse
-    {
+        public function getAllProductions(): JsonResponse
+        {
+            $productions = Production::with(['machine', 'product', 'user', 'shift'])->get();
+
+            return response()->json($productions);
+        }
+        public function storeByWorker(Request $request): JsonResponse
+        {
 
 
-        $production = Production::create([
-            'user_id' => $request->user_id,
-            'shift_id' => $request->shift_id,
-            'machine_id' => $request->machine_id,
-            'product_id' => $request->product_id,
-            'quantity' => $request->quantity,
-            'production_date' => now(),
-        ]);
-
-        $stockMovement =StockMovement::create([
-            'product_id' => $request->product_id,
-            'movement_type' => 'giriş',
-            'quantity' => $request->quantity,
-            'related_process' => 'Üretim',
-            'movement_date' => now(),
-        ]);
-
-        $this->logStockMovementAction('create', $stockMovement, 'İşçi tarafından stok hareketi eklendi.');
-
-        $product = Product::findOrFail($request->product_id);
-        $product->stock_quantity += $request->quantity;
-        $product->save();
-
-
-        $this->logProductionAction('create', $production, 'İşçi tarafından üretim kaydı oluşturuldu.');
-
-        return response()->json($production, 201);
-    }
-    public function storeByAdmin(Request $request): JsonResponse
-    {
-
-
-
-        $formattedProductionDate = Carbon::parse($request->production_date)->format('Y-m-d H:i:s');
-
-        $production = Production::create([
-            'user_id' =>$request->worker_id,
-            'machine_id' => $request->machine_id,
-            'product_id' => $request->product_id,
-            'quantity' => $request->quantity,
-            'shift_id' => $request->shift_id,
-            'production_date' => $formattedProductionDate,
-        ]);
-
-        $stockMovement =StockMovement::create([
-            'product_id' => $request->product_id,
-            'movement_type' => 'giriş',
-            'quantity' => $request->quantity,
-            'related_process' => 'Üretim',
-            'movement_date' => now(),
-        ]);
-
-
-        $this->logStockMovementAction('create', $stockMovement, 'Yönetici tarafından stok hareketi eklendi.');
-
-        $product = Product::findOrFail($request->product_id);
-        $product->stock_quantity += $request->quantity;
-        $product->save();
-
-
-        $this->logProductionAction('create', $production, 'Yönetici tarafından üretim kaydı oluşturuldu.');
-
-        return response()->json($production, 201);
-    }
-    public function update(Request $request, $id): JsonResponse
-    {
-
-        $formattedProductionDate = Carbon::parse($request->production_date)->format('Y-m-d H:i:s');
-        $production = Production::findOrFail($id);
-
-        // Mevcut değerleri sakla
-        $previousQuantity = $production->quantity;
-        $previousProductId = $production->product_id;
-        $newQuantity = $request->quantity;
-        $newProductId = $request->product_id;
-
-        $logMessage = '';
-
-        // Ürün değişikliği kontrolü
-        if ($previousProductId !== $newProductId) {
-            // Eski ürünün stok miktarını azalt
-            $previousProduct = Product::findOrFail($previousProductId);
-            $previousProduct->stock_quantity -= $previousQuantity;
-            $previousProduct->save();
-
-            // Yeni ürünün stok miktarını artır
-            $newProduct = Product::findOrFail($newProductId);
-            $newProduct->stock_quantity += $newQuantity;
-            $newProduct->save();
-
-            // Stok hareketi: Eski ürün çıkışı
-            $stockMovement =StockMovement::create([
-                'product_id' => $previousProductId,
-                'movement_type' => 'çıkış',
-                'quantity' => $previousQuantity,
-                'related_process' => 'Üretim Güncelleme',
-                'movement_date' => now(),
+            $production = Production::create([
+                'user_id' => $request->user_id,
+                'shift_id' => $request->shift_id,
+                'machine_id' => $request->machine_id,
+                'product_id' => $request->product_id,
+                'quantity' => $request->quantity,
+                'production_date' => now(),
             ]);
 
-            $this->logStockMovementAction('update', $stockMovement, "Üretim güncelleme sırasında stok hareketi güncellendi.");
+            $this->stockMovementService->createStockMovement(
+                $request->product_id,
+                $request->quantity,
+                'giriş',
+                'Üretim',
+                'create'
+            );
 
-            $logMessage = "Ürün değişti. Eski Ürün: {$previousProduct->name}, Yeni Ürün: {$newProduct->name}.";
-        } else {
-            // Ürün değişmediği takdirde sadece miktar güncellemesi
-            if ($newQuantity !== $previousQuantity) {
-                // Miktar değişikliklerini uygula
-                $newProduct = Product::findOrFail($newProductId);
-                $newProduct->stock_quantity += ($newQuantity - $previousQuantity);
-                $newProduct->save();
+            $this->loggerService->logProductionAction('create', $production, 'İşçi tarafından üretim kaydı oluşturuldu.');
+
+            $product = Product::findOrFail($request->product_id);
+            $product->stock_quantity += $request->quantity;
+            $product->save();
 
 
-                $logMessage .= empty($logMessage) ? "Miktar güncellendi. Eski Miktar: {$previousQuantity}, Yeni Miktar: {$newQuantity}." : " Miktar güncellendi. Eski Miktar: {$previousQuantity}, Yeni Miktar: {$newQuantity}.";
+
+
+            return response()->json($production, 201);
+        }
+        public function storeByAdmin(Request $request): JsonResponse
+        {
+
+            $formattedProductionDate = Carbon::parse($request->production_date)->format('Y-m-d H:i:s');
+
+            $production = Production::create([
+                'user_id' =>$request->worker_id,
+                'machine_id' => $request->machine_id,
+                'product_id' => $request->product_id,
+                'quantity' => $request->quantity,
+                'shift_id' => $request->shift_id,
+                'production_date' => $formattedProductionDate,
+            ]);
+
+            $this->stockMovementService->createStockMovement(
+                $request->product_id,
+                $request->quantity,
+                'giriş',
+                'Üretim',
+                'create'
+            );
+
+
+            $this->loggerService->logProductionAction('create', $production, 'Yönetici tarafından üretim kaydı oluşturuldu.');
+
+            $product = Product::findOrFail($request->product_id);
+            $product->stock_quantity += $request->quantity;
+            $product->save();
+
+
+            return response()->json($production, 201);
+        }
+        public function update(Request $request, $id): JsonResponse
+        {
+
+            $formattedProductionDate = Carbon::parse($request->production_date)->format('Y-m-d H:i:s');
+            $production = Production::findOrFail($id);
+
+            // Mevcut değerleri sakla
+            $previousQuantity = $production->quantity;
+            $previousProductId = $production->product_id;
+            $newQuantity = $request->quantity;
+            $newProductId = $request->product_id;
+
+            $logMessage = '';
+
+            // Ürün değişikliği kontrolü
+            if ($previousProductId !== $newProductId) {
+                // Eski ürünün stok miktarını azalt
+                $this->stockMovementService->reduceStock($previousProductId, $previousQuantity, 'Üretim Güncelleme');
+                // Yeni ürünün stok miktarını artır
+                $this->stockMovementService->increaseStock($newProductId, $newQuantity);
+                $logMessage = "Ürün değişti. Eski Ürün: {$previousProductId}, Yeni Ürün: {$newProductId}.";
+            } else {
+                // Ürün değişmediği takdirde sadece miktar güncellemesi
+                if ($newQuantity !== $previousQuantity) {
+                    $this->stockMovementService->updateStockQuantity($newProductId, $newQuantity, $previousQuantity);
+                    $logMessage = "Miktar güncellendi. Eski Miktar: {$previousQuantity}, Yeni Miktar: {$newQuantity}.";
+                }
             }
+
+            // Üretim kaydını güncelle
+            $production->update([
+                'user_id' => $request->worker_id,
+                'machine_id' => $request->machine_id,
+                'product_id' => $newProductId,
+                'quantity' => $newQuantity,
+                'shift_id' => $request->shift_id,
+                'production_date' => $formattedProductionDate,
+            ]);
+
+            if (empty($logMessage)) {
+                $logMessage = 'Üretim kaydı güncellendi.';
+            }
+            $this->loggerService->logProductionAction('update', $production, $logMessage);
+
+
+            return response()->json($production);
+        }
+        public function destroy($id): JsonResponse
+        {
+
+            $production = Production::findOrFail($id);
+
+            $productId = $production->product_id;
+            $quantity = $production->quantity;
+
+
+            $product = Product::findOrFail($productId);
+
+            // Stok hareketi ekleme
+            $this->stockMovementService->createStockMovement($productId, $quantity, 'çıkış', 'Üretim Silme','delete');
+
+
+            $product->stock_quantity -= $quantity;
+            $product->save();
+
+
+            // Loglama işlemi
+            $this->loggerService->logProductionAction('delete', $production, 'Üretim kaydı silindi.');
+
+            $production->delete();
+
+            return response()->json(null, 204);
+        }
+        public function getAllProductionLogs(): JsonResponse
+        {
+            $productionLogs = ProductionLog::with('user')->get();
+            return response()->json($productionLogs);
         }
 
-        // Üretim kaydını güncelle
-        $production->update([
-            'user_id' => $request->worker_id,
-            'machine_id' => $request->machine_id,
-            'product_id' => $newProductId,
-            'quantity' => $newQuantity,
-            'shift_id' => $request->shift_id,
-            'production_date' => $formattedProductionDate,
-        ]);
 
-        if (empty($logMessage)) {
-            $logMessage = 'Üretim kaydı güncellendi.';
-        }
-        $this->logProductionAction('update', $production, $logMessage);
-
-
-        return response()->json($production);
-    }
-    public function destroy($id): JsonResponse
-    {
-
-        $production = Production::findOrFail($id);
-
-        $productId = $production->product_id;
-        $quantity = $production->quantity;
-
-
-        $product = Product::findOrFail($productId);
-
-
-        $stockMovement =StockMovement::create([
-            'product_id' => $productId,
-            'movement_type' => 'çıkış',
-            'quantity' => $quantity,
-            'related_process' => 'Üretim Silme',
-            'movement_date' => now(),
-        ]);
-
-
-        StockMovementsLog::create([
-            'stock_movement_id' => $stockMovement->id,
-            'user_id' => Auth::id(),
-            'action' => 'delete',
-            'changes' => "Üretim kaydı silindi. Ürün ID: {$productId}, Miktar: {$quantity}.",
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-
-        $product->stock_quantity -= $quantity;
-        $product->save();
-
-        $userId = Auth::id();
-
-        $this->logProductionAction('delete', $production, "Üretim kaydı silindi.");
-
-        $production->delete();
-
-        return response()->json(null, 204);
-    }
-    public function getAllProductionLogs(): JsonResponse
-    {
-        $productionLogs = ProductionLog::with('user')->get();
-        return response()->json($productionLogs);
-    }
-    private function logProductionAction($action, Production $production, $additionalInfo = ''): void
-    {
-        $message = '';
-
-        switch ($action) {
-            case 'create':
-                $message = "Üretim kaydı oluşturuldu. Ürün: {$production->product->name}, Miktar: {$production->quantity}, Makine: {$production->machine->name}, İşçi: " . ($production->user->name ?? 'Belirtilmemiş') . ", Tarih: {$production->production_date}. $additionalInfo";
-                break;
-            case 'update':
-                $message = "Üretim kaydı güncellendi. Ürün: {$production->product->name}, Yeni Miktar: {$production->quantity}, Makine: {$production->machine->name}, İşçi: " . ($production->user->name ?? 'Belirtilmemiş') . ", Tarih: {$production->production_date}. $additionalInfo";
-                break;
-            case 'delete':
-                $message = "Üretim kaydı silindi. Ürün: {$production->product->name}, Miktar: {$production->quantity}, İşçi: " . ($production->user->name ?? 'Belirtilmemiş') . ", Tarih: {$production->production_date}. $additionalInfo";
-                break;
-            default:
-                $message = $additionalInfo;
-                break;
-        }
-
-        ProductionLog::create([
-            'production_id' => $production->id,
-            'user_id' => $production->user_id,
-            'action' => $action,
-            'changes' => $message,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-    }
-    private function logStockMovementAction($action, StockMovement $stockMovement, $additionalInfo = ''): void
-    {
-        $message = '';
-
-        switch ($action) {
-            case 'create':
-                $message = "Stok hareketi oluşturuldu. Ürün: {$stockMovement->product_id}, Miktar: {$stockMovement->quantity}, Hareket Tipi: {$stockMovement->movement_type}, Tarih: {$stockMovement->movement_date}. $additionalInfo";
-                break;
-            case 'update':
-                $message = "Stok hareketi güncellendi. Ürün: {$stockMovement->product_id}, Yeni Miktar: {$stockMovement->quantity}, Hareket Tipi: {$stockMovement->movement_type}, Tarih: {$stockMovement->movement_date}. $additionalInfo";
-                break;
-            case 'delete':
-                $message = "Stok hareketi silindi. Ürün: {$stockMovement->product_id}, Miktar: {$stockMovement->quantity}, Hareket Tipi: {$stockMovement->movement_type}, Tarih: {$stockMovement->movement_date}. $additionalInfo";
-                break;
-            default:
-                $message = $additionalInfo;
-                break;
-        }
-
-        StockMovementsLog::create([
-            'stock_movement_id' => $stockMovement->id,
-            'user_id' => Auth::id(),
-            'action' => $action,
-            'changes' => $message,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-    }
 
 
 }

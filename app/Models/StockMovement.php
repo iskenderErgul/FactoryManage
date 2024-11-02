@@ -19,6 +19,7 @@ class StockMovement extends Model
         'movement_date',
     ];
 
+
     protected $casts = [
         'movement_type' => 'string',
     ];
