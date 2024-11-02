@@ -284,7 +284,7 @@ const saleDate = ref('');
 const fetchSales = () => {
     axios.get('/api/sales')
         .then(response => {
-            sales.value = response.data;
+            sales.value = response.data.reverse();
         })
         .catch(error => {
             console.error("Satışları getirirken hata:", error);

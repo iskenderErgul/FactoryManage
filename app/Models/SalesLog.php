@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class SalesLog extends Model
 {
@@ -13,10 +14,11 @@ class SalesLog extends Model
         'sale_id',
         'action',
         'changes',
+        'user_id'
     ];
 
-    public function sale()
+    public function sale(): BelongsTo
     {
-        return $this->belongsTo(Sale::class);
+        return $this->belongsTo(Sales::class);
     }
 }

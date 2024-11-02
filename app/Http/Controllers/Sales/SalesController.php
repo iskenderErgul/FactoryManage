@@ -61,7 +61,7 @@ class SalesController
                     $productModel->save();
 
                     // Stok hareketi kaydetme
-                    StockMovement::create([
+                    $stockMovement=StockMovement::create([
                         'product_id' => $product['id'],
                         'movement_type' => 'çıkış', // Stok çıkışı
                         'quantity' => $product['quantity'],
@@ -69,7 +69,7 @@ class SalesController
                         'movement_date' => now(),
                     ]);
 
-                    $this->logStockAction('create', $productModel, $product['quantity'], 'Satış işlemi.');
+                    $this->logStockAction('create', $stockMovement, 'Satış işlemi.');
                 }
             }
 
@@ -112,7 +112,7 @@ class SalesController
                 $product->save();
 
                 // Stok hareketi kaydetme
-                StockMovement::create([
+                $stockMovement = StockMovement::create([
                     'product_id' => $productId,
                     'movement_type' => 'giriş', // Eski miktar geri ekleniyor
                     'quantity' => $stockAdjustment,
@@ -127,7 +127,7 @@ class SalesController
                     'updated_at' => now(),
                 ]);
 
-                $this->logStockAction('update', $product, $quantity, 'Satış güncelleme işlemi.');
+                $this->logStockAction('update', $stockMovement, 'Satış güncelleme işlemi.');
 
             } else {
                 // Yeni ürün: stok düşülmesi ve pivot kaydı
@@ -135,7 +135,7 @@ class SalesController
                 $product->save();
 
                 // Stok hareketi kaydetme
-                StockMovement::create([
+                $stockMovement = StockMovement::create([
                     'product_id' => $productId,
                     'movement_type' => 'çıkış', // Yeni ürün ekleniyor
                     'quantity' => $quantity,
@@ -151,7 +151,7 @@ class SalesController
                     'updated_at' => now(),
                 ]);
 
-                $this->logStockAction('create', $product, $quantity, 'Yeni ürün eklendi.');
+                $this->logStockAction('create', $stockMovement, 'Satışa Yeni ürün eklendi.');
             }
         }
 
@@ -168,7 +168,7 @@ class SalesController
             $removedProduct->save();
 
             // Stok hareketi kaydetme
-            StockMovement::create([
+            $stockMovement =StockMovement::create([
                 'product_id' => $removedProductId,
                 'movement_type' => 'giriş', // Eski ürün geri ekleniyor
                 'quantity' => $removedQuantity,
@@ -179,7 +179,7 @@ class SalesController
             // Pivot kaydı sil
             $sale->products()->detach($removedProductId);
 
-            $this->logStockAction('delete', $removedProduct, $removedQuantity, 'Ürün kaldırıldı.');
+            $this->logStockAction('delete', $stockMovement, 'Satıştan Ürün kaldırıldı.');
         }
         $this->logSaleAction('update', $sale, 'Satış güncelleme işlemi.');
 
@@ -198,7 +198,7 @@ class SalesController
 
 
             // Stok hareketi kaydetme
-            StockMovement::create([
+            $stockMovement =StockMovement::create([
                 'product_id' => $saleProduct->product_id,
                 'movement_type' => 'giriş', // Stok geri ekleniyor
                 'quantity' => $saleProduct->quantity,
@@ -210,8 +210,7 @@ class SalesController
             if ($product) {
                 $this->logStockAction(
                     'delete',
-                    $product,
-                    $saleProduct->quantity,
+                    $stockMovement,
                     'Satış silindiğinde stok geri eklendi.'
                 );
             }
@@ -245,7 +244,7 @@ class SalesController
         }
 
         SalesLog::create([
-            'sales_id' => $sale->id,
+            'sale_id' => $sale->id,
             'user_id' => Auth::id(),
             'action' => $action,
             'changes' => $message,
@@ -254,19 +253,19 @@ class SalesController
         ]);
     }
 
-    private function logStockAction($action, Product $product, $quantity, $additionalInfo = ''): void
+    private function logStockAction($action, StockMovement $stockMovement, $additionalInfo = ''): void
     {
         $message = '';
 
         switch ($action) {
             case 'create':
-                $message = "Stok hareketi oluşturuldu. Ürün: {$product->id}, Miktar: {$quantity}. $additionalInfo";
+                $message = "Stok hareketi oluşturuldu. Ürün: {$stockMovement->product_id}, Miktar: {$stockMovement->quantity}. $additionalInfo";
                 break;
             case 'update':
-                $message = "Stok hareketi güncellendi. Ürün: {$product->id}, Yeni Miktar: {$quantity}. $additionalInfo";
+                $message = "Stok hareketi güncellendi. Ürün: {$stockMovement->product_id}, Yeni Miktar: {$stockMovement->quantity}. $additionalInfo";
                 break;
             case 'delete':
-                $message = "Stok hareketi silindi. Ürün: {$product->id}, Miktar: {$quantity}. $additionalInfo";
+                $message = "Stok hareketi silindi. Ürün: {$stockMovement->product_id}, Miktar: {$stockMovement->quantity}. $additionalInfo";
                 break;
             default:
                 $message = $additionalInfo;
@@ -274,15 +273,15 @@ class SalesController
         }
 
         StockMovementsLog::create([
-            'product_id' => $product->id,
+            'stock_movement_id' => $stockMovement->id,
             'user_id' => Auth::id(),
             'action' => $action,
-            'quantity' => $quantity,
-            'description' => $message,
+            'changes' => $message,
             'created_at' => now(),
-            'updated_at' => now(),
         ]);
     }
+
+
 
 
 }
