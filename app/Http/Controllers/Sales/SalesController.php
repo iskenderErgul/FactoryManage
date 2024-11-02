@@ -70,81 +70,75 @@ class SalesController
     }
 
 
-    public function update(Request $request, $id)
+    public function update(Request $request, $id): JsonResponse
     {
-        //Gelen veriler
-
-        /*
-        array:3 [ // app\Http\Controllers\Sales\SalesController.php:75
-  "customer_id" => 103
-  "sale_date" => "2024-11-01"
-  "products" => array:3 [
-    0 => array:11 [
-      "id" => 4
-      "product_name" => "Baskılı Poşet"
-      "product_type" => "Küçük"
-      "product_photo" => "url_to_photo_4"
-      "description" => "Özel baskılı poşetler, markanız için harika bir seçimdir."
-      "production_cost" => "0.75"
-      "stock_quantity" => 500
-      "created_at" => "2024-10-31T18:10:38.000000Z"
-      "updated_at" => "2024-11-01T19:02:46.000000Z"
-      "pivot" => array:6 [
-        "sales_id" => 3
-        "product_id" => 4
-        "quantity" => 4
-        "price" => "3.00"
-        "created_at" => "2024-10-31T18:25:30.000000Z"
-        "updated_at" => "2024-11-01T19:05:00.000000Z"
-      ]
-      "total_price" => 12
-    ]
-    1 => array:11 [
-      "id" => 6
-      "product_name" => "Şeffaf Poşet"
-      "product_type" => "Küçük"
-      "product_photo" => "url_to_photo_6"
-      "description" => "Ürünlerinizi sergilemek için ideal şeffaf poşetler."
-      "production_cost" => "0.40"
-      "stock_quantity" => 1200
-      "created_at" => "2024-10-31T18:10:38.000000Z"
-      "updated_at" => "2024-11-01T19:02:46.000000Z"
-      "pivot" => array:6 [
-        "sales_id" => 3
-        "product_id" => 6
-        "quantity" => 2
-        "price" => "0.80"
-        "created_at" => "2024-10-31T18:25:30.000000Z"
-        "updated_at" => "2024-11-01T19:05:00.000000Z"
-      ]
-      "total_price" => 1.6
-    ]
-    2 => array:11 [
-      "id" => 1
-      "product_name" => "Renkli Poşet"
-      "product_type" => "Küçük"
-      "product_photo" => "url_to_photo_1"
-      "description" => "Renkli plastik poşetler, alışveriş için idealdir."
-      "production_cost" => "0.50"
-      "stock_quantity" => 1000
-      "created_at" => "2024-10-31T18:10:38.000000Z"
-      "updated_at" => "2024-11-01T19:02:46.000000Z"
-      "pivot" => array:2 [
-        "quantity" => 1
-        "price" => 1
-      ]
-      "total_price" => 1
-    ]
-  ]
-]
-"3" // app\Http\Controllers\Sales\SalesController.php:75
-        */
-
-
-        dd($request->all(),$id);
+        $saleData = $request->only(['customer_id', 'sale_date', 'products']);
         $sale = Sales::findOrFail($id);
-        $sale->update($request->all());
-        return response()->json($sale, 200);
+
+        // 1. Customer ve sale_date güncellenmesi
+        $sale->update([
+            'customer_id' => $saleData['customer_id'],
+            'sale_date' => $saleData['sale_date'],
+        ]);
+
+        // 2. Gelen ürünlerin mevcut ürünlerle kıyaslanması
+        $existingProductIds = $sale->products->pluck('id')->toArray();
+
+        foreach ($saleData['products'] as $productData) {
+            $productId = $productData['id'];
+            $quantity = $productData['pivot']['quantity'];
+            $price = $productData['pivot']['price'];
+
+            $product = Product::findOrFail($productId);
+
+            if (in_array($productId, $existingProductIds)) {
+                // Mevcut ürün: stok ve pivot güncellemeleri
+                $previousQuantity = $sale->products()->where('product_id', $productId)->first()->pivot->quantity;
+
+                // Stok ayarlaması
+                $stockAdjustment = $previousQuantity - $quantity;
+                $product->stock_quantity += $stockAdjustment;
+                $product->save();
+
+                // Pivot tablosunda güncelle
+                $sale->products()->updateExistingPivot($productId, [
+                    'quantity' => $quantity,
+                    'price' => $price,
+                    'updated_at' => now(),
+                ]);
+
+            } else {
+                // Yeni ürün: stok düşülmesi ve pivot kaydı
+                $product->stock_quantity -= $quantity;
+                $product->save();
+
+                // Pivot tablosuna yeni kayıt ekle
+                $sale->products()->attach($productId, [
+                    'quantity' => $quantity,
+                    'price' => $price,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
+        }
+
+        // 3. Eski siparişten kaldırılan ürünlerin stok geri eklenmesi
+        $updatedProductIds = array_column($saleData['products'], 'id');
+        $removedProductIds = array_diff($existingProductIds, $updatedProductIds);
+
+        foreach ($removedProductIds as $removedProductId) {
+            $removedProduct = Product::findOrFail($removedProductId);
+            $removedQuantity = $sale->products()->where('product_id', $removedProductId)->first()->pivot->quantity;
+
+            // Stok geri ekle
+            $removedProduct->stock_quantity += $removedQuantity;
+            $removedProduct->save();
+
+            // Pivot kaydı sil
+            $sale->products()->detach($removedProductId);
+        }
+
+        return response()->json($sale->load('products'), 200);
     }
 
     public function destroy($id): JsonResponse
