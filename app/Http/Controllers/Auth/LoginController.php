@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Domains\Users\Repositories\UserRepository;
 use App\DTOs\Users\LoginUserDTO;
 use App\Http\Controllers\Controller;
-use App\Http\Repositories\UserRepository;
 use App\Http\Requests\Login\LoginRequest;
 use Illuminate\Http\JsonResponse;
 

@@ -2,11 +2,10 @@
 
 namespace App\Http\Controllers\Machines;
 
+use App\Domains\Machines\Repositories\MachineRepository;
 use App\Http\Controllers\Controller;
-use App\Http\Repositories\MachineRepository;
 use App\Http\Requests\Machine\StoreMachineRequest;
 use App\Http\Requests\Machine\UpdateMachineRequest;
-use App\Models\Machine;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 

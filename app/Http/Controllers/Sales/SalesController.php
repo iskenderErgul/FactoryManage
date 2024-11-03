@@ -2,10 +2,9 @@
 
 namespace App\Http\Controllers\Sales;
 
+use App\Domains\Sales\Repositories\SalesRepository;
 use App\DTOs\Sales\SalesDTO;
-use App\Http\Repositories\SalesRepository;
 use App\Http\Requests\Sales\SalesRequest;
-use App\Http\Requests\Sales\UpdateSalesRequest;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\JsonResponse;
 
@@ -24,7 +23,6 @@ class SalesController
     }
     public function store(SalesRequest $request): JsonResponse
     {
-        dd($request->all());
         return $this->salesRepository->store(SalesDTO::buildFromRequest($request));
     }
     public function update(SalesRequest $request, $id): JsonResponse

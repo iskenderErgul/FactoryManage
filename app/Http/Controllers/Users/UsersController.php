@@ -3,10 +3,10 @@
 namespace App\Http\Controllers\Users;
 
 use App\Common\Services\ImageUploadService;
+use App\Domains\Users\Repositories\UserRepository;
 use App\DTOs\Users\StoreUserDTO;
 use App\DTOs\Users\UpdateUserDTO;
 use App\Http\Controllers\Controller;
-use App\Http\Repositories\UserRepository;
 use App\Http\Requests\Users\StoreUserRequest;
 use App\Http\Requests\Users\UpdateUserRequest;
 use Illuminate\Http\JsonResponse;

@@ -2,8 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\SalesLog;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Domains\Sales\Models\SalesLog;
 use Illuminate\Database\Seeder;
 
 class SalesLogSeeder extends Seeder

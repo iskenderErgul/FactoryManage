@@ -2,8 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\CustomersLog;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Domains\Customer\Models\CustomersLog;
 use Illuminate\Database\Seeder;
 
 class CustomersLogSeeder extends Seeder

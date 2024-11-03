@@ -2,15 +2,12 @@
 
 namespace App\Http\Controllers\Production;
 
+use App\Domains\Production\Repositories\ProductionRepository;
 use App\DTOs\Production\StoreProductionDTO;
 use App\DTOs\Production\UpdateProductionDTO;
 use App\Http\Controllers\Controller;
-use App\Http\Repositories\ProductionRepository;
-
 use App\Http\Requests\Production\StoreByAdminProductionRequest;
 use App\Http\Requests\Production\UpdateProductionRequest;
-
-use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 

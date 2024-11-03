@@ -2,12 +2,9 @@
 
 namespace App\Http\Controllers\Stock;
 
+use App\Domains\Stock\Repositories\StockRepository;
 use App\Http\Controllers\Controller;
-use App\Http\Repositories\StockRepository;
-use App\Models\StockMovement;
-use App\Models\StockMovementsLog;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 
 class StockController extends Controller
 {

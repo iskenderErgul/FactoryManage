@@ -2,12 +2,12 @@
 
 namespace App\Common\Services;
 
-use App\Models\Production;
-use App\Models\ProductionLog;
-use App\Models\Sales;
-use App\Models\SalesLog;
-use App\Models\StockMovement;
-use App\Models\StockMovementsLog;
+use App\Common\Models\StockMovement;
+use App\Common\Models\StockMovementsLog;
+use App\Domains\Production\Models\Production;
+use App\Domains\Production\Models\ProductionLog;
+use App\Domains\Sales\Models\Sales;
+use App\Domains\Sales\Models\SalesLog;
 use Illuminate\Support\Facades\Auth;
 
 class LoggerService

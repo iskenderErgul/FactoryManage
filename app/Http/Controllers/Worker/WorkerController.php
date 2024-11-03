@@ -2,11 +2,10 @@
 
 namespace App\Http\Controllers\Worker;
 
+use App\Domains\Users\Models\User;
 use App\Http\Controllers\Controller;
 use App\Models\Shift;
-use App\Models\User;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 
 class WorkerController extends Controller
 {

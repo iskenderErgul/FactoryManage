@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers\Customer;
 
+use App\Domains\Customer\Repositories\CustomerRepository;
 use App\Http\Controllers\Controller;
-use App\Http\Repositories\CustomerRepository;
 use App\Http\Requests\Customer\StoreCustomerRequest;
 use App\Http\Requests\Customer\UpdateCustomerRequest;
 use Illuminate\Http\JsonResponse;

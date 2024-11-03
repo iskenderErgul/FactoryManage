@@ -2,8 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\Sales;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Domains\Sales\Models\Sales;
 use Illuminate\Database\Seeder;
 
 class SalesSeeder extends Seeder

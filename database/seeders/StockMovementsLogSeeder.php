@@ -2,8 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\StockMovementsLog;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Common\Models\StockMovementsLog;
 use Illuminate\Database\Seeder;
 
 class StockMovementsLogSeeder extends Seeder

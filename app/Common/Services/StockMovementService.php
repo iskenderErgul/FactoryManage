@@ -2,8 +2,8 @@
 
 namespace App\Common\Services;
 
-use App\Models\Product;
-use App\Models\StockMovement;
+use App\Common\Models\StockMovement;
+use App\Domains\Product\Models\Product;
 
 class StockMovementService
 {

@@ -2,8 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\UsersLog;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Domains\Users\Models\UsersLog;
 use Illuminate\Database\Seeder;
 
 class UsersLogSeeder extends Seeder
