@@ -195,7 +195,7 @@ const submitted = ref(false);
 const fetchProductions = () => {
     axios.get('/api/productions')
         .then(response => {
-            productions.value = response.data.reverse();
+            productions.value = response.data;
         })
         .catch(error => {
             console.error("Üretimler alınırken hata:", error);
