@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\Production;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Production\DestroyProductionRequest;
+use App\Http\Requests\Production\StoreByAdminProductionRequest;
+use App\Http\Requests\Production\UpdateProductionRequest;
 use App\Models\Product;
 use App\Models\Production;
 use App\Models\ProductionLog;
@@ -29,6 +32,11 @@ class ProductionController extends Controller
 
             return response()->json($productions);
         }
+        public function getAllProductionLogs(): JsonResponse
+    {
+        $productionLogs = ProductionLog::with('user')->get();
+        return response()->json($productionLogs);
+    }
         public function storeByWorker(Request $request): JsonResponse
         {
 
@@ -61,8 +69,9 @@ class ProductionController extends Controller
 
             return response()->json($production, 201);
         }
-        public function storeByAdmin(Request $request): JsonResponse
+        public function storeByAdmin(StoreByAdminProductionRequest $request): JsonResponse
         {
+
 
             $formattedProductionDate = Carbon::parse($request->production_date)->format('Y-m-d H:i:s');
 
@@ -93,7 +102,7 @@ class ProductionController extends Controller
 
             return response()->json($production, 201);
         }
-        public function update(Request $request, $id): JsonResponse
+        public function update(UpdateProductionRequest $request, $id): JsonResponse
         {
 
             $formattedProductionDate = Carbon::parse($request->production_date)->format('Y-m-d H:i:s');
@@ -140,7 +149,7 @@ class ProductionController extends Controller
 
             return response()->json($production);
         }
-        public function destroy($id): JsonResponse
+        public function destroy(DestroyProductionRequest  $request ,$id): JsonResponse
         {
 
             $production = Production::findOrFail($id);
@@ -166,13 +175,5 @@ class ProductionController extends Controller
 
             return response()->json(null, 204);
         }
-        public function getAllProductionLogs(): JsonResponse
-        {
-            $productionLogs = ProductionLog::with('user')->get();
-            return response()->json($productionLogs);
-        }
-
-
-
 
 }
