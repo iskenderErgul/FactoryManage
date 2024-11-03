@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Production;
 
+use App\DTOs\Production\StoreProductionDTO;
+use App\DTOs\Production\UpdateProductionDTO;
 use App\Http\Controllers\Controller;
 use App\Http\Repositories\ProductionRepository;
 
@@ -37,11 +39,11 @@ class ProductionController extends Controller
         }
         public function storeByAdmin(StoreByAdminProductionRequest $request): JsonResponse
         {
-            return $this->productionRepository->storeByAdmin($request);
+            return $this->productionRepository->storeByAdmin(StoreProductionDTO::buildFromRequest($request));
         }
         public function update(UpdateProductionRequest $request, $id): JsonResponse
         {
-            return $this->productionRepository->update($request, $id);
+            return $this->productionRepository->update(UpdateProductionDTO::buildFromRequest($request), $id);
         }
         public function destroy($id): JsonResponse
         {

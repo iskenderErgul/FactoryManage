@@ -2,6 +2,8 @@
 
 namespace App\Http\Repositories;
 
+use App\DTOs\Production\StoreProductionDTO;
+use App\DTOs\Production\UpdateProductionDTO;
 use App\Http\Requests\Production\DestroyProductionRequest;
 use App\Http\Requests\Production\StoreByAdminProductionRequest;
 use App\Http\Requests\Production\UpdateProductionRequest;
@@ -68,23 +70,23 @@ class ProductionRepository implements ProductionRepositoryInterface
 
         return response()->json($production, 201);
     }
-    public function storeByAdmin(StoreByAdminProductionRequest $request): JsonResponse
+    public function storeByAdmin(StoreProductionDTO $request): JsonResponse
     {
 
 
-        $formattedProductionDate = Carbon::parse($request->production_date)->format('Y-m-d H:i:s');
+        $formattedProductionDate = Carbon::parse($request->productionDate)->format('Y-m-d H:i:s');
 
         $production = Production::create([
-            'user_id' =>$request->worker_id,
-            'machine_id' => $request->machine_id,
-            'product_id' => $request->product_id,
+            'user_id' =>$request->workerId,
+            'machine_id' => $request->machineId,
+            'product_id' => $request->productId,
             'quantity' => $request->quantity,
-            'shift_id' => $request->shift_id,
+            'shift_id' => $request->shiftId,
             'production_date' => $formattedProductionDate,
         ]);
 
         $this->stockMovementService->createStockMovement(
-            $request->product_id,
+            $request->productId,
             $request->quantity,
             'giriş',
             'Üretim',
@@ -94,14 +96,14 @@ class ProductionRepository implements ProductionRepositoryInterface
 
         $this->loggerService->logProductionAction('create', $production, 'Yönetici tarafından üretim kaydı oluşturuldu.');
 
-        $product = Product::findOrFail($request->product_id);
+        $product = Product::findOrFail($request->productId);
         $product->stock_quantity += $request->quantity;
         $product->save();
 
 
         return response()->json($production, 201);
     }
-    public function update(UpdateProductionRequest $request, $id): JsonResponse
+    public function update(UpdateProductionDTO $request, $id): JsonResponse
     {
 
         $formattedProductionDate = Carbon::parse($request->production_date)->format('Y-m-d H:i:s');
