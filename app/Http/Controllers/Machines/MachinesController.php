@@ -3,56 +3,45 @@
 namespace App\Http\Controllers\Machines;
 
 use App\Http\Controllers\Controller;
+use App\Http\Repositories\MachineRepository;
+use App\Http\Requests\Machine\StoreMachineRequest;
+use App\Http\Requests\Machine\UpdateMachineRequest;
 use App\Models\Machine;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class MachinesController extends Controller
 {
+    protected MachineRepository $machineRepository;
 
 
+    public function __construct(MachineRepository $machineRepository)
+    {
+        $this->machineRepository = $machineRepository;
+    }
     public function index(): JsonResponse
     {
-        return response()->json(Machine::all());
+        return $this->machineRepository->index();
     }
-    public function store(Request $request): JsonResponse
+    public function store(StoreMachineRequest $request): JsonResponse
     {
-
-
-        $machine = Machine::create([
-            'machine_name' => $request->get('name'),
-        ]);
-
-        return response()->json($machine, 201);
+        return $this->machineRepository->store($request);
     }
     public function show($id): JsonResponse
     {
-        $machine = Machine::findOrFail($id);
-
-        return response()->json($machine);
+        return $this->machineRepository->show($id);
     }
-    public function update(Request $request, $id): JsonResponse
+    public function update(UpdateMachineRequest $request, $id): JsonResponse
     {
-        $machine = Machine::findOrFail($id);
-        $machine->update([
-            'machine_name' => $request->name,
-        ]);
-
-        return response()->json($machine);
+        return $this->machineRepository->update($request, $id);
     }
     public function destroy($id): JsonResponse
     {
-        $machine = Machine::findOrFail($id);
-        $machine->delete();
-
-        return response()->json(null, 204);
+        return $this->machineRepository->destroy($id);
     }
     public function destroySelected(Request $request): JsonResponse
     {
-        $request->validate(['ids' => 'required|array']);
-        Machine::whereIn('id', $request->ids)->delete();
-
-        return response()->json(null, 204);
+        return $this->machineRepository->destroySelected($request);
     }
 
 }
