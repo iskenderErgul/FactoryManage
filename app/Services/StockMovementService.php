@@ -49,6 +49,14 @@ class StockMovementService
 
     public function updateStockQuantity($productId, $newQuantity, $previousQuantity): void
     {
-        $this->increaseStock($productId, $newQuantity - $previousQuantity);
+        $difference = $newQuantity - $previousQuantity;
+
+        if ($difference > 0) {
+            // Eğer yeni miktar eskisinden fazlaysa, stoktan çıkış yapılması gerekiyor
+            $this->reduceStock($productId, $difference, 'Satış güncelleme');
+        } elseif ($difference < 0) {
+            // Eğer yeni miktar eskisinden azsa, stok girişi yapılması gerekiyor
+            $this->increaseStock($productId, abs($difference));
+        }
     }
 }

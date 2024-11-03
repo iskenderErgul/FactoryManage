@@ -4,6 +4,8 @@ namespace App\Services;
 
 use App\Models\Production;
 use App\Models\ProductionLog;
+use App\Models\Sales;
+use App\Models\SalesLog;
 use App\Models\StockMovement;
 use App\Models\StockMovementsLog;
 use Illuminate\Support\Facades\Auth;
@@ -62,6 +64,46 @@ class LoggerService
                 return $additionalInfo;
         }
     }
+
+
+    /**
+     * Satış işlemleri için log kaydı oluşturur.
+     *
+     * @param string $action 'create', 'update', 'delete' gibi işlem türünü belirtir.
+     * @param Sales $sale İşlem yapılan satış nesnesi.
+     * @param string $message Log mesajı.
+     * @return void
+     */
+    public function logSaleAction(string $action, Sales $sale, string $message, $additionalInfo = ''): void
+    {
+        // Değişiklik mesajını oluşturma
+        $message = $this->getSaleLogMessage($action, $sale, $additionalInfo);
+        // Satış işlemi için log kaydını oluşturuyoruz.
+        SalesLog::create([
+            'sale_id' => $sale->id,
+            'user_id' => Auth::id(), // İşlemi yapan kullanıcının ID'si
+            'action' => $action,
+            'changes' => $message ,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+    }
+
+    private function getSaleLogMessage($action, Sales $sale, $additionalInfo): string
+    {
+        // İşlem türüne göre log mesajını ayarlıyoruz
+        switch ($action) {
+            case 'create':
+                return "Satış kaydı oluşturuldu. Müşteri ID: {$sale->customer_id}, Satış Tarihi: {$sale->sale_date}. $additionalInfo";
+            case 'update':
+                return "Satış kaydı güncellendi. Müşteri ID: {$sale->customer_id}, Yeni Satış Tarihi: {$sale->sale_date}. $additionalInfo";
+            case 'delete':
+                return "Satış kaydı silindi. Müşteri ID: {$sale->customer_id}, Satış Tarihi: {$sale->sale_date}. $additionalInfo";
+            default:
+                return $additionalInfo;
+        }
+    }
+
 
 
 }
