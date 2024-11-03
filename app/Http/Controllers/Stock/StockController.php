@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Stock;
 
 use App\Http\Controllers\Controller;
+use App\Http\Repositories\StockRepository;
 use App\Models\StockMovement;
 use App\Models\StockMovementsLog;
 use Illuminate\Http\JsonResponse;
@@ -10,15 +11,20 @@ use Illuminate\Http\Request;
 
 class StockController extends Controller
 {
+    protected StockRepository $stockRepository;
+
+
+    public function __construct(StockRepository $stockRepository)
+    {
+        $this->stockRepository = $stockRepository;
+    }
     public function getStockMovementsLogs(): JsonResponse
     {
-        $logs = StockMovementsLog::with('user')->get();
-        return response()->json($logs);
+        return $this->stockRepository->getStockMovementsLogs();
     }
 
     public function getStockMovements(): JsonResponse
     {
-        $movements = StockMovement::all();
-        return response()->json($movements);
+        return $this->stockRepository->getStockMovements();
     }
 }
