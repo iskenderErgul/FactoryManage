@@ -81,7 +81,6 @@ class SalesController
             return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
     }
-
     public function update(Request $request, $id): JsonResponse
     {
         $saleData = $request->only(['customer_id', 'sale_date', 'products']);
@@ -141,7 +140,6 @@ class SalesController
         $this->loggerService->logSaleAction('update', $sale, 'Satış güncelleme işlemi.');
         return response()->json($sale->load('products'), 200);
     }
-
     public function destroy($id): JsonResponse
     {
         $sale = Sales::findOrFail($id);

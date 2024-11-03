@@ -12,7 +12,14 @@ use Illuminate\Support\Facades\Auth;
 
 class LoggerService
 {
-    public function logProductionAction($action, Production $production, $additionalInfo = ''): void
+    /**
+     * Üretim işlemi log kaydı oluşturur.
+     *
+     * @param string $action İşlem türü ("create", "update", "delete").
+     * @param Production $production Üretim kaydı ile ilgili tüm bilgileri içerir.
+     * @param string $additionalInfo Opsiyonel olarak ekstra bilgi eklemek için kullanılan parametre.
+     */
+    public function logProductionAction(string $action, Production $production, string $additionalInfo = ''): void
     {
         $message = $this->getProductionLogMessage($action, $production, $additionalInfo);
         ProductionLog::create([
@@ -25,7 +32,15 @@ class LoggerService
         ]);
     }
 
-    private function getProductionLogMessage($action, Production $production, $additionalInfo): string
+    /**
+     * Üretim log mesajı oluşturur.
+     *
+     * @param string $action İşlem türü ("create", "update", "delete").
+     * @param Production $production Üretim kaydı ile ilgili tüm bilgileri içerir.
+     * @param string $additionalInfo Opsiyonel olarak ekstra bilgi eklemek için kullanılan parametre.
+     * @return string Oluşturulan log mesajı.
+     */
+    private function getProductionLogMessage(string $action, Production $production, string $additionalInfo): string
     {
         switch ($action) {
             case 'create':
@@ -39,7 +54,14 @@ class LoggerService
         }
     }
 
-    public function logStockMovementAction($action, StockMovement $stockMovement, $additionalInfo = ''): void
+    /**
+     * Stok hareketi log kaydı oluşturur.
+     *
+     * @param string $action İşlem türü ("create", "update", "delete").
+     * @param StockMovement $stockMovement Stok hareketi kaydı ile ilgili tüm bilgileri içerir.
+     * @param string $additionalInfo Opsiyonel olarak ekstra bilgi eklemek için kullanılan parametre.
+     */
+    public function logStockMovementAction(string $action, StockMovement $stockMovement, string $additionalInfo = ''): void
     {
         $message = $this->getStockMovementLogMessage($action, $stockMovement, $additionalInfo);
         StockMovementsLog::create([
@@ -51,7 +73,15 @@ class LoggerService
         ]);
     }
 
-    private function getStockMovementLogMessage($action, StockMovement $stockMovement, $additionalInfo): string
+    /**
+     * Stok hareketi log mesajı oluşturur.
+     *
+     * @param string $action İşlem türü ("create", "update", "delete").
+     * @param StockMovement $stockMovement Stok hareketi kaydı ile ilgili tüm bilgileri içerir.
+     * @param string $additionalInfo Opsiyonel olarak ekstra bilgi eklemek için kullanılan parametre.
+     * @return string Oluşturulan log mesajı.
+     */
+    private function getStockMovementLogMessage(string $action, StockMovement $stockMovement, string $additionalInfo): string
     {
         switch ($action) {
             case 'create':
@@ -65,33 +95,37 @@ class LoggerService
         }
     }
 
-
     /**
-     * Satış işlemleri için log kaydı oluşturur.
+     * Satış işlemi log kaydı oluşturur.
      *
-     * @param string $action 'create', 'update', 'delete' gibi işlem türünü belirtir.
-     * @param Sales $sale İşlem yapılan satış nesnesi.
-     * @param string $message Log mesajı.
-     * @return void
+     * @param string $action İşlem türü ("create", "update", "delete").
+     * @param Sales $sale Satış kaydı ile ilgili tüm bilgileri içerir.
+     * @param string $message Log kaydı için oluşturulan mesaj.
+     * @param string $additionalInfo Opsiyonel olarak ekstra bilgi eklemek için kullanılan parametre.
      */
-    public function logSaleAction(string $action, Sales $sale, string $message, $additionalInfo = ''): void
+    public function logSaleAction(string $action, Sales $sale, string $message, string $additionalInfo = ''): void
     {
-        // Değişiklik mesajını oluşturma
         $message = $this->getSaleLogMessage($action, $sale, $additionalInfo);
-        // Satış işlemi için log kaydını oluşturuyoruz.
         SalesLog::create([
             'sale_id' => $sale->id,
-            'user_id' => Auth::id(), // İşlemi yapan kullanıcının ID'si
+            'user_id' => Auth::id(),
             'action' => $action,
-            'changes' => $message ,
+            'changes' => $message,
             'created_at' => now(),
             'updated_at' => now(),
         ]);
     }
 
-    private function getSaleLogMessage($action, Sales $sale, $additionalInfo): string
+    /**
+     * Satış log mesajı oluşturur.
+     *
+     * @param string $action İşlem türü ("create", "update", "delete").
+     * @param Sales $sale Satış kaydı ile ilgili tüm bilgileri içerir.
+     * @param string $additionalInfo Opsiyonel olarak ekstra bilgi eklemek için kullanılan parametre.
+     * @return string Oluşturulan log mesajı.
+     */
+    private function getSaleLogMessage(string $action, Sales $sale, string $additionalInfo): string
     {
-        // İşlem türüne göre log mesajını ayarlıyoruz
         switch ($action) {
             case 'create':
                 return "Satış kaydı oluşturuldu. Müşteri ID: {$sale->customer_id}, Satış Tarihi: {$sale->sale_date}. $additionalInfo";
@@ -103,6 +137,7 @@ class LoggerService
                 return $additionalInfo;
         }
     }
+
 
 
 
