@@ -2,6 +2,7 @@
 
 namespace App\Interfaces;
 
+use App\DTOs\Production\StoreProductionDTO;
 use App\Http\Requests\Product\StoreProductRequest;
 use App\Http\Requests\Product\UpdateProductRequest;
 use Illuminate\Database\Eloquent\Collection;
@@ -20,10 +21,10 @@ interface ProductRepositoryInterface
     /**
      * Yeni bir ürünü kaydet.
      *
-     * @param StoreProductRequest $request
+     * @param StoreProductionDTO $request
      * @return JsonResponse
      */
-    public function store(StoreProductRequest $request): JsonResponse;
+    public function store(StoreProductionDTO $request): JsonResponse;
 
     /**
      * Belirtilen ID'ye sahip ürünü göster.
