@@ -2,14 +2,13 @@
 
 namespace App\Http\Repositories;
 
-use App\Http\Requests\Sales\StoreSalesRequest;
-use App\Http\Requests\Sales\UpdateSalesRequest;
+use App\Common\Services\LoggerService;
+use App\Common\Services\StockMovementService;
+use App\DTOs\Sales\SalesDTO;
 use App\Interfaces\SalesRepositoryInterface;
 use App\Models\Product;
 use App\Models\Sales;
 use App\Models\SalesProduct;
-use App\Services\LoggerService;
-use App\Services\StockMovementService;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\JsonResponse;
@@ -30,7 +29,7 @@ class SalesRepository implements SalesRepositoryInterface
     {
         return Sales::with('customer','products')->get();
     }
-    public function store(StoreSalesRequest $request): JsonResponse
+    public function store(SalesDTO $request): JsonResponse
     {
 
         $products = $request->input('products');
@@ -81,7 +80,7 @@ class SalesRepository implements SalesRepositoryInterface
             return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
     }
-    public function update(UpdateSalesRequest $request, $id): JsonResponse
+    public function update(SalesDTO $request, $id): JsonResponse
     {
 
         $saleData = $request->only(['customer_id', 'sale_date', 'products']);

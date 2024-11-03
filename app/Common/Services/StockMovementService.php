@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace App\Common\Services;
 
 use App\Models\Product;
 use App\Models\StockMovement;

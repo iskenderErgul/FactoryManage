@@ -4,11 +4,11 @@ namespace App\Http\Requests\Sales;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class StoreSalesRequest extends FormRequest
+class SalesRequest extends FormRequest
 {
     public function authorize()
     {
-        return true; // Bu isteğin kim tarafından yapılabileceğine dair bir kısıtlama yok
+        return true;
     }
 
     public function rules(): array

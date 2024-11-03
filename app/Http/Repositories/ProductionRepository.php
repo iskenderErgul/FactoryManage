@@ -2,17 +2,14 @@
 
 namespace App\Http\Repositories;
 
+use App\Common\Services\LoggerService;
+use App\Common\Services\StockMovementService;
 use App\DTOs\Production\StoreProductionDTO;
 use App\DTOs\Production\UpdateProductionDTO;
-use App\Http\Requests\Production\DestroyProductionRequest;
-use App\Http\Requests\Production\StoreByAdminProductionRequest;
-use App\Http\Requests\Production\UpdateProductionRequest;
 use App\Interfaces\ProductionRepositoryInterface;
 use App\Models\Product;
 use App\Models\Production;
 use App\Models\ProductionLog;
-use App\Services\LoggerService;
-use App\Services\StockMovementService;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;

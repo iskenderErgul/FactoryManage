@@ -14,14 +14,4 @@ class UpdateSalesRequest extends FormRequest
             'products' => 'required|array',
         ];
     }
-
-    public function messages(): array
-    {
-        return [
-            'customer_id.required' => 'Müşteri ID\'sini belirtmek zorunludur.',
-            'sale_date.required' => 'Satış tarihi belirtilmelidir.',
-            'products.required' => 'Ürünler listesi zorunludur.',
-
-        ];
-    }
 }

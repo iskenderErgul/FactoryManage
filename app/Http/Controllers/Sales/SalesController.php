@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers\Sales;
 
+use App\DTOs\Sales\SalesDTO;
 use App\Http\Repositories\SalesRepository;
-use App\Http\Requests\Sales\StoreSalesRequest;
+use App\Http\Requests\Sales\SalesRequest;
 use App\Http\Requests\Sales\UpdateSalesRequest;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\JsonResponse;
@@ -21,13 +22,14 @@ class SalesController
     {
         return $this->salesRepository->index();
     }
-    public function store(StoreSalesRequest $request): JsonResponse
+    public function store(SalesRequest $request): JsonResponse
     {
-        return $this->salesRepository->store($request);
+        dd($request->all());
+        return $this->salesRepository->store(SalesDTO::buildFromRequest($request));
     }
-    public function update(UpdateSalesRequest $request, $id): JsonResponse
+    public function update(SalesRequest $request, $id): JsonResponse
     {
-        return $this->salesRepository->update($request, $id);
+        return $this->salesRepository->update(SalesDTO::buildFromRequest($request), $id);
     }
     public function destroy($id): JsonResponse
     {

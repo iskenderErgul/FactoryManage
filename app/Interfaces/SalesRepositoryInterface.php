@@ -2,7 +2,8 @@
 
 namespace App\Interfaces;
 
-use App\Http\Requests\Sales\StoreSalesRequest;
+use App\DTOs\Sales\SalesDTO;
+use App\Http\Requests\Sales\SalesRequest;
 use App\Http\Requests\Sales\UpdateSalesRequest;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\JsonResponse;
@@ -19,19 +20,19 @@ interface SalesRepositoryInterface
     /**
      * Yeni bir satış kaydı oluşturur.
      *
-     * @param StoreSalesRequest $request
+     * @param SalesDTO $request
      * @return JsonResponse
      */
-    public function store(StoreSalesRequest $request): JsonResponse;
+    public function store(SalesDTO $request): JsonResponse;
 
     /**
      * Var olan bir satış kaydını günceller.
      *
-     * @param UpdateSalesRequest $request
+     * @param SalesDTO $request
      * @param int $id
      * @return JsonResponse
      */
-    public function update(UpdateSalesRequest $request, int $id): JsonResponse;
+    public function update(SalesDTO $request, int $id): JsonResponse;
 
     /**
      * Belirtilen bir satış kaydını siler.

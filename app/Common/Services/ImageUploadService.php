@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Services;
+namespace App\Common\Services;
 
 
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 
 class ImageUploadService
 {

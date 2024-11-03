@@ -2,15 +2,14 @@
 
 namespace App\Http\Controllers\Users;
 
+use App\Common\Services\ImageUploadService;
 use App\DTOs\Users\StoreUserDTO;
 use App\DTOs\Users\UpdateUserDTO;
 use App\Http\Controllers\Controller;
 use App\Http\Repositories\UserRepository;
 use App\Http\Requests\Users\StoreUserRequest;
 use App\Http\Requests\Users\UpdateUserRequest;
-use App\Services\ImageUploadService;
 use Illuminate\Http\JsonResponse;
-
 
 
 class UsersController extends Controller
