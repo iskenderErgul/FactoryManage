@@ -3,44 +3,38 @@
 namespace App\Http\Controllers\Customer;
 
 use App\Http\Controllers\Controller;
-use App\Models\Customer;
-use Illuminate\Database\Eloquent\Collection;
+use App\Http\Repositories\CustomerRepository;
+use App\Http\Requests\Customer\StoreCustomerRequest;
+use App\Http\Requests\Customer\UpdateCustomerRequest;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class CustomerController extends Controller
 {
+    protected CustomerRepository $customerRepository;
 
+    public function __construct(CustomerRepository $customerRepository)
+    {
+     $this->customerRepository = $customerRepository;
+    }
     public function index(): JsonResponse
     {
-        $customer = Customer::all();
-        return response()->json($customer);
+        return $this->customerRepository->index();
     }
-    public function store(Request $request): JsonResponse
+    public function store(StoreCustomerRequest $request): JsonResponse
     {
-        $customer = Customer::create($request->all());
-
-        return response()->json($customer);
+        return $this->customerRepository->store($request);
     }
-    public function update(Request $request, $id): JsonResponse
+    public function update(UpdateCustomerRequest $request, $id): JsonResponse
     {
-        $customer = Customer::findOrFail($id);
-
-        $customer->update($request->all());
-
-        return response()->json($customer);
+        return $this->customerRepository->update($request, $id);
     }
     public function destroy($id): JsonResponse
     {
-        $customer = Customer::findOrFail($id);
-        $customer->delete();
-
-        return response()->json(null);
+      return $this->customerRepository->destroy($id);
     }
     public function deleteSelected(Request $request): JsonResponse
     {
-        Customer::destroy($request->ids);
-
-        return response()->json(null);
+        return $this->customerRepository->deleteSelected($request);
     }
 }
