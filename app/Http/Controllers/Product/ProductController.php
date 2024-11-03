@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\Product;
 
 use App\Http\Controllers\Controller;
+use App\Http\Repositories\ProductRepository;
+use App\Http\Requests\Product\StoreProductRequest;
+use App\Http\Requests\Product\UpdateProductRequest;
 use App\Models\Product;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\JsonResponse;
@@ -10,62 +13,36 @@ use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
+
+    protected ProductRepository $productRepository;
+
+
+    public function __construct(ProductRepository $productRepository)
+    {
+        $this->productRepository = $productRepository;
+    }
     public function index(): Collection
     {
-        return Product::all();
+        return $this->productRepository->index();
     }
-
-    // Yeni ürün oluştur
-    public function store(Request $request): JsonResponse
+    public function store(StoreProductRequest $request): JsonResponse
     {
-
-        $product = Product::create($request->all());
-        return response()->json($product, 201);
+        return $this->productRepository->store($request);
     }
-
-    // Belirli bir ürünü göster
     public function show($id): JsonResponse
     {
-        $product = Product::findOrFail($id);
-        return response()->json($product);
+        return $this->productRepository->show($id);
     }
-
-    // Ürünü güncelle
-    public function update(Request $request, $id): JsonResponse
+    public function update(UpdateProductRequest $request, $id): JsonResponse
     {
-
-       $product= Product::where('id', $id)->update(
-           [
-               'product_name' => $request->product_name,
-               'product_type' => $request->product_type,
-               'production_cost' => $request->production_cost,
-               'stock_quantity' => $request->stock_quantity,
-               'description' => $request->description,
-           ]
-       );
-
-
-
-
-        return response()->json($product);
+        return $this->productRepository->update($request, $id);
     }
-
-
     public function destroy($id): JsonResponse
     {
-        $product = Product::findOrFail($id);
-        $product->delete();
-
-        return response()->json(null, 204);
+        return $this->productRepository->destroy($id);
     }
-
-    // Seçili ürünleri sil
-    public function destroySelected(Request $request)
+    public function destroySelected(Request $request): JsonResponse
     {
-        $ids = $request->input('ids');
-
-        Product::destroy($ids);
-
-        return response()->json(null, 204);
+        return $this->productRepository->destroySelected($request);
     }
 }
