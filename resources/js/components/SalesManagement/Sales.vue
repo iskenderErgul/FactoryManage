@@ -145,16 +145,16 @@
                 <div class="product-selection">
                     <div class="p-field">
                         <label for="productSelect">Ürün Seç:</label>
-                        <Dropdown id="productSelect" v-model="selectedProduct" :options="products" optionLabel="product_name" placeholder="Ürün Seçin" />
+                        <Dropdown id="productSelect" v-model="selectedProduct" :options="products" optionLabel="product_name" placeholder="Ürün Seçin"/>
 
                     </div>
                     <div class="p-field">
                         <label for="productQuantity">Miktar:</label>
-                        <InputText id="productQuantity" v-model.number="productQuantity" type="number" min="1" />
+                        <InputText id="productQuantity" v-model.number="productQuantity" type="number" min="1"  required/>
                     </div>
                     <div class="p-field">
                         <label for="productPrice">Birim Fiyat (TL):</label>
-                        <InputText id="productPrice" v-model.number="productPrice" type="number" min="0" />
+                        <InputText id="productPrice" v-model.number="productPrice" type="number" min="0" required/>
                     </div>
                     <Button label="Ekle" @click="addProductToSale" />
                 </div>
@@ -317,6 +317,13 @@ onMounted(() => {
 
 const openNew = () => {
     sale.value = {};
+    selectedCustomer.value = null;
+    saleDate.value = '';
+    saleProducts.value = [];
+    productQuantity.value = 1;
+    productPrice.value = '';
+
+
     submitted.value = false;
     saleDialog.value = true;
     addSaleDialog.value = true;
@@ -445,6 +452,14 @@ const updateSale = () => {
             .then(() => {
                 toast.value.add({ severity: 'success', summary: 'Başarılı', detail: 'Satış başarıyla güncellendi', life: 3000 });
                 fetchSales();
+
+
+                sale.value = {};
+                selectedCustomer.value = null;
+                saleDate.value = '';
+                saleProducts.value = [];
+                productQuantity.value = 1;
+                productPrice.value = '';
             })
             .catch(error => {
                 toast.value.add({ severity: 'error', summary: 'Hata', detail: 'Güncelleme başarısız.', life: 3000 });
@@ -454,7 +469,7 @@ const updateSale = () => {
 };
 
 const addProductToSale = () => {
-    if (selectedProduct && selectedProduct.value && productQuantity.value > 0 && productPrice.value >= 0) {
+    if (selectedProduct && selectedProduct.value && productQuantity.value > 0 && productPrice.value > 0) {
         const productStock = selectedProduct.value.stock_quantity;
 
         if (productQuantity.value > productStock) {
