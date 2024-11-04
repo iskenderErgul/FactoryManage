@@ -74,7 +74,7 @@ class SalesRepository implements SalesRepositoryInterface
 
             DB::commit();
             // **Güncelleme**: Satış log kaydını servis sınıfıyla yapıyoruz
-            $this->loggerService->logSaleAction('create', $sale, 'Satış başarıyla oluşturuldu.','Sarış Kaydı Oluşturuldu');
+            $this->loggerService->logSaleAction('create', $sale, 'Satış başarıyla oluşturuldu.','Yeni Satış Kaydı Oluşturuldu');
             return response()->json(['success' => true, 'sale_id' => $sale->id]);
         } catch (\Exception $e) {
             DB::rollBack();
@@ -143,7 +143,7 @@ class SalesRepository implements SalesRepositoryInterface
             $sale->products()->detach($removedProductId);
         }
 
-        $this->loggerService->logSaleAction('update', $sale, 'Satış güncelleme işlemi.');
+        $this->loggerService->logSaleAction('update', $sale, 'Satış güncelleme işlemi.','Satış kaydı Güncelleme İşlemi');
         return response()->json($sale->load('products'), 200);
     }
     public function destroy($id): JsonResponse
@@ -157,7 +157,7 @@ class SalesRepository implements SalesRepositoryInterface
 
         DB::table('sales_products')->where('sales_id', $id)->delete();
 
-        $this->loggerService->logSaleAction('delete', $sale, 'Satış başarıyla silindi.');
+        $this->loggerService->logSaleAction('delete', $sale, 'Satış başarıyla silindi.','Satış Kaydı Silme İşlemi');
 
         $sale->delete();
         return response()->json(null, 204);
