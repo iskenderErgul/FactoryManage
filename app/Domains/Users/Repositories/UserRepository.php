@@ -16,6 +16,13 @@ use Illuminate\Support\Facades\Session;
 class UserRepository implements UserInterface
 {
 
+    /**
+     * Kullanıcı giriş işlemini gerçekleştirir.
+     *
+     * @param LoginUserDTO $userDTO
+     * @return JsonResponse
+     */
+
     public function login(LoginUserDTO $userDTO): JsonResponse
     {
         $userControl = [
@@ -31,19 +38,43 @@ class UserRepository implements UserInterface
         }
     }
 
+    /**
+     * Kullanıcı çıkış işlemini gerçekleştirir.
+     *
+     * @return JsonResponse
+     */
     public function logout(): JsonResponse
     {
         Session::flush();
         return response()->json('Çıkış İşlemi Başarılı');
     }
+
+    /**
+     * Tüm kullanıcıları alır.
+     *
+     * @return JsonResponse
+     */
     public function getAllUsers(): JsonResponse
     {
         return response()->json(User::all());
     }
+
+    /**
+     * Tüm kullanıcı loglarını alır.
+     *
+     * @return JsonResponse
+     */
     public function getAllUserLogs(): JsonResponse
     {
         return response()->json(UsersLog::with('user')->get());
     }
+
+    /**
+     * Yeni bir kullanıcı kaydeder.
+     *
+     * @param StoreUserDTO $request
+     * @return JsonResponse
+     */
     public function store(StoreUserDTO $request): JsonResponse
     {
         $this->authorizeAdmin();
@@ -64,6 +95,14 @@ class UserRepository implements UserInterface
 
         return response()->json($user, 201);
     }
+
+    /**
+     * Kullanıcı bilgilerini günceller.
+     *
+     * @param UpdateUserDTO $request
+     * @param int $id
+     * @return JsonResponse
+     */
     public function update(UpdateUserDTO $request, $id): JsonResponse
     {
         $this->authorizeAdmin();
@@ -85,6 +124,13 @@ class UserRepository implements UserInterface
 
         return response()->json($user);
     }
+
+    /**
+     * Kullanıcıyı siler.
+     *
+     * @param int $id
+     * @return JsonResponse
+     */
     public function destroy($id): JsonResponse
     {
         $this->authorizeAdmin(); // Admin yetkisi kontrolü
@@ -95,12 +141,27 @@ class UserRepository implements UserInterface
 
         return response()->json(null, 204);
     }
+
+    /**
+     * Sadece adminlerin işlem yapmasını sağlar.
+     *
+     * @return void
+     */
     private function authorizeAdmin(): void
     {
         if (Auth::user()->role !== 'admin') {
             abort(403, 'Sadece Adminler İşlem Yapabilir');
         }
     }
+
+    /**
+     * Kullanıcı işlemlerini loglar.
+     *
+     * @param string $action
+     * @param User $user
+     * @param $admin
+     * @return void
+     */
     private function logUserAction($action, User $user, $admin): void
     {
         UsersLog::create([

@@ -24,17 +24,36 @@ class ProductionRepository implements ProductionRepositoryInterface
         $this->stockMovementService = $stockMovementService;
         $this->loggerService = $loggerService;
     }
+
+    /**
+     * Tüm üretim kayıtlarını alır.
+     *
+     * @return JsonResponse
+     */
     public function getAllProductions(): JsonResponse
     {
         $productions = Production::with(['machine', 'product', 'user', 'shift'])->get();
 
         return response()->json($productions);
     }
+
+    /**
+     * Tüm üretim loglarını alır.
+     *
+     * @return JsonResponse
+     */
     public function getAllProductionLogs(): JsonResponse
     {
         $productionLogs = ProductionLog::with('user')->get();
         return response()->json($productionLogs);
     }
+
+    /**
+     * İşçi tarafından yeni bir üretim kaydı oluşturur.
+     *
+     * @param Request $request  Üretim kaydı oluşturmak için gerekli bilgiler
+     * @return JsonResponse
+     */
     public function storeByWorker(Request $request): JsonResponse
     {
 
@@ -67,6 +86,13 @@ class ProductionRepository implements ProductionRepositoryInterface
 
         return response()->json($production, 201);
     }
+
+    /**
+     * Yönetici tarafından yeni bir üretim kaydı oluşturur.
+     *
+     * @param StoreProductionDTO $request  Üretim kaydı oluşturmak için gerekli bilgiler
+     * @return JsonResponse
+     */
     public function storeByAdmin(StoreProductionDTO $request): JsonResponse
     {
 
@@ -100,6 +126,14 @@ class ProductionRepository implements ProductionRepositoryInterface
 
         return response()->json($production, 201);
     }
+
+    /**
+     * Belirtilen ID'ye sahip üretim kaydını günceller.
+     *
+     * @param UpdateProductionDTO $request  Güncellenecek üretim bilgilerini içeren istek
+     * @param int $id  Güncellenecek üretim kaydı ID'si
+     * @return JsonResponse
+     */
     public function update(UpdateProductionDTO $request, $id): JsonResponse
     {
 
@@ -147,6 +181,13 @@ class ProductionRepository implements ProductionRepositoryInterface
 
         return response()->json($production);
     }
+
+    /**
+     * Belirtilen ID'ye sahip üretim kaydını siler.
+     *
+     * @param int $id  Silinecek üretim kaydı ID'si
+     * @return JsonResponse
+     */
     public function destroy($id): JsonResponse
     {
 

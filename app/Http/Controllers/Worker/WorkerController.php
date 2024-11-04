@@ -9,6 +9,11 @@ use Illuminate\Http\JsonResponse;
 
 class WorkerController extends Controller
 {
+    /**
+     * Tüm işçileri döner.
+     *
+     * @return JsonResponse
+     */
     public function getAllWorkers(): JsonResponse
     {
         $workers = User::where('role', 'worker')->get();
@@ -16,6 +21,11 @@ class WorkerController extends Controller
         return response()->json($workers);
     }
 
+    /**
+     * Tüm vardiyaları döner.
+     *
+     * @return JsonResponse
+     */
     public function getShifts(): JsonResponse
     {
         $shifts = Shift::all();

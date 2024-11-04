@@ -21,27 +21,65 @@ class ProductionController extends Controller
         {
             $this->productionRepository = $productionRepository;
         }
-
+        /**
+         * Tüm üretimleri döner.
+         *
+         * @return JsonResponse
+         */
         public function getAllProductions(): JsonResponse
         {
             return $this->productionRepository->getAllProductions();
         }
+        /**
+         * Tüm üretim loglarını döner.
+         *
+         * @return JsonResponse
+         */
         public function getAllProductionLogs(): JsonResponse
         {
             return $this->productionRepository->getAllProductionLogs();
         }
+
+        /**
+         * İşçi tarafından yeni bir üretim kaydeder.
+         *
+         * @param Request $request
+         * @return JsonResponse
+         */
         public function storeByWorker(Request $request): JsonResponse
         {
             return $this->productionRepository->storeByWorker($request);
         }
+
+        /**
+         * Admin tarafından yeni bir üretim kaydeder.
+         *
+         * @param StoreByAdminProductionRequest $request
+         * @return JsonResponse
+         */
         public function storeByAdmin(StoreByAdminProductionRequest $request): JsonResponse
         {
             return $this->productionRepository->storeByAdmin(StoreProductionDTO::buildFromRequest($request));
         }
+
+        /**
+         * Belirtilen üretimi günceller.
+         *
+         * @param UpdateProductionRequest $request
+         * @param int $id
+         * @return JsonResponse
+         */
         public function update(UpdateProductionRequest $request, $id): JsonResponse
         {
             return $this->productionRepository->update(UpdateProductionDTO::buildFromRequest($request), $id);
         }
+
+        /**
+         * Belirtilen üretimi siler.
+         *
+         * @param int $id
+         * @return JsonResponse
+         */
         public function destroy($id): JsonResponse
         {
             return $this->productionRepository->destroy($id);

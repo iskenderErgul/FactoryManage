@@ -26,10 +26,23 @@ class SalesRepository implements SalesRepositoryInterface
         $this->stockMovementService = $stockMovementService;
         $this->loggerService = $loggerService;
     }
+
+    /**
+     * Tüm satış kayıtlarını alır.
+     *
+     * @return Collection|array
+     */
     public function index(): Collection|array
     {
         return Sales::with('customer','products')->get();
     }
+
+    /**
+     * Yeni bir satış kaydı oluşturur.
+     *
+     * @param SalesDTO $request  Satış kaydı oluşturmak için gerekli bilgiler
+     * @return JsonResponse
+     */
     public function store(SalesDTO $request): JsonResponse
     {
 
@@ -81,6 +94,14 @@ class SalesRepository implements SalesRepositoryInterface
             return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
     }
+
+    /**
+     * Belirtilen ID'ye sahip satış kaydını günceller.
+     *
+     * @param SalesDTO $request  Güncellenecek satış bilgilerini içeren istek
+     * @param int $id  Güncellenecek satış kaydı ID'si
+     * @return JsonResponse
+     */
     public function update(SalesDTO $request, $id): JsonResponse
     {
 
@@ -146,6 +167,13 @@ class SalesRepository implements SalesRepositoryInterface
         $this->loggerService->logSaleAction('update', $sale, 'Satış güncelleme işlemi.','Satış kaydı Güncelleme İşlemi');
         return response()->json($sale->load('products'), 200);
     }
+
+    /**
+     * Belirtilen ID'ye sahip satış kaydını siler.
+     *
+     * @param int $id  Silinecek satış kaydı ID'si
+     * @return JsonResponse
+     */
     public function destroy($id): JsonResponse
     {
         $sale = Sales::findOrFail($id);
@@ -162,6 +190,12 @@ class SalesRepository implements SalesRepositoryInterface
         $sale->delete();
         return response()->json(null, 204);
     }
+
+    /**
+     * Tüm satış loglarını alır.
+     *
+     * @return JsonResponse
+     */
     public function getAllSalesLogs(): JsonResponse
     {
         $salesLogs = SalesLog::with('user','sale')->get();

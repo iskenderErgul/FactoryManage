@@ -17,22 +17,56 @@ class SalesController
     {
         $this->salesRepository = $salesRepository;
     }
+
+    /**
+     * Tüm satışları döner.
+     *
+     * @return Collection|array
+     */
     public function index(): Collection|array
     {
         return $this->salesRepository->index();
     }
+
+    /**
+     * Yeni bir satış kaydeder.
+     *
+     * @param SalesRequest $request
+     * @return JsonResponse
+     */
     public function store(SalesRequest $request): JsonResponse
     {
         return $this->salesRepository->store(SalesDTO::buildFromRequest($request));
     }
+
+    /**
+     * Belirtilen satış kaydını günceller.
+     *
+     * @param SalesRequest $request
+     * @param int $id
+     * @return JsonResponse
+     */
     public function update(SalesRequest $request, $id): JsonResponse
     {
         return $this->salesRepository->update(SalesDTO::buildFromRequest($request), $id);
     }
+
+    /**
+     * Belirtilen satış kaydını siler.
+     *
+     * @param int $id
+     * @return JsonResponse
+     */
     public function destroy($id): JsonResponse
     {
         return $this->salesRepository->destroy($id);
     }
+
+    /**
+     * Tüm satış loglarını döner.
+     *
+     * @return JsonResponse
+     */
     public function getAllSalesLogs(): JsonResponse
     {
         return $this->salesRepository->getAllSalesLogs();

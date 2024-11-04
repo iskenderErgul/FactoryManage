@@ -15,11 +15,22 @@ class StockController extends Controller
     {
         $this->stockRepository = $stockRepository;
     }
+
+    /**
+     * Tüm stok hareket loglarını döner.
+     *
+     * @return JsonResponse
+     */
     public function getStockMovementsLogs(): JsonResponse
     {
         return $this->stockRepository->getStockMovementsLogs();
     }
 
+    /**
+     * Tüm stok hareketlerini döner.
+     *
+     * @return JsonResponse
+     */
     public function getStockMovements(): JsonResponse
     {
         return $this->stockRepository->getStockMovements();

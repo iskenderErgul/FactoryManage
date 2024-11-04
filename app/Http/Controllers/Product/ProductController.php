@@ -20,26 +20,68 @@ class ProductController extends Controller
     {
         $this->productRepository = $productRepository;
     }
+
+    /**
+     * Tüm ürünleri döner.
+     *
+     * @return Collection
+     */
     public function index(): Collection
     {
         return $this->productRepository->index();
     }
+
+    /**
+     * Yeni bir ürün kaydeder.
+     *
+     * @param StoreProductRequest $request
+     * @return JsonResponse
+     */
     public function store(StoreProductRequest $request): JsonResponse
     {
         return $this->productRepository->store($request);
     }
+
+    /**
+     * Belirtilen ürünün detaylarını döner.
+     *
+     * @param int $id
+     * @return JsonResponse
+     */
     public function show($id): JsonResponse
     {
         return $this->productRepository->show($id);
     }
+
+    /**
+     * Belirtilen ürünü günceller.
+     *
+     * @param UpdateProductRequest $request
+     * @param int $id
+     * @return JsonResponse
+     */
     public function update(UpdateProductRequest $request, $id): JsonResponse
     {
         return $this->productRepository->update($request, $id);
     }
+
+    /**
+     * Belirtilen ürünü siler.
+     *
+     * @param int $id
+     * @return JsonResponse
+     */
     public function destroy($id): JsonResponse
     {
         return $this->productRepository->destroy($id);
     }
+
+    /**
+     * Seçilen ürünleri siler.
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
     public function destroySelected(Request $request): JsonResponse
     {
         return $this->productRepository->destroySelected($request);

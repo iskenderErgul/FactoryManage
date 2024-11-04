@@ -15,16 +15,33 @@ class PacsEntryController extends Controller
     {
         $this->pacsEntryRepository = $pacsEntryRepository;
     }
+
+    /**
+     * Tüm PACS girişlerini döner.
+     *
+     * @return JsonResponse
+     */
     public function getAllPacsEntries(): JsonResponse
     {
         return $this->pacsEntryRepository->getAllPacsEntries();
     }
 
+    /**
+     * Tüm PACS giriş loglarını döner.
+     *
+     * @return JsonResponse
+     */
     public function getAllPacsEntriesLogs(): JsonResponse
     {
         return $this->pacsEntryRepository->getAllPacsEntriesLogs();
     }
 
+    /**
+     * Yeni bir PACS girişi oluşturur.
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
     public function createPacsEntry(Request $request): JsonResponse
     {
      return $this->pacsEntryRepository->createPacsEntry($request);
