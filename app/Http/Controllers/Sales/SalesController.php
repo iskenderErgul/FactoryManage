@@ -33,6 +33,11 @@ class SalesController
     {
         return $this->salesRepository->destroy($id);
     }
+    public function getAllSalesLogs(): JsonResponse
+    {
+        return $this->salesRepository->getAllSalesLogs();
+    }
+
 
 
 

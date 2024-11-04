@@ -7,6 +7,7 @@ use App\Common\Services\StockMovementService;
 use App\Domains\Product\Models\Product;
 use App\Domains\Sales\Interfaces\SalesRepositoryInterface;
 use App\Domains\Sales\Models\Sales;
+use App\Domains\Sales\Models\SalesLog;
 use App\Domains\Sales\Models\SalesProduct;
 use App\DTOs\Sales\SalesDTO;
 use Carbon\Carbon;
@@ -161,5 +162,12 @@ class SalesRepository implements SalesRepositoryInterface
         $sale->delete();
         return response()->json(null, 204);
     }
+    public function getAllSalesLogs(): JsonResponse
+    {
+        $salesLogs = SalesLog::with('user','sale')->get();
+
+        return response()->json($salesLogs);
+    }
+
 
 }

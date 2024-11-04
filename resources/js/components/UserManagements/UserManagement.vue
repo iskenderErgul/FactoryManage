@@ -16,7 +16,9 @@
             <DataTable ref="dt" :value="users" v-model:selection="selectedUsers" dataKey="id"
                        :paginator="true" :rows="10" :filters="filters"
                        paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown" :rowsPerPageOptions="[5,10,25]"
-                       currentPageReportTemplate="Showing {first} to {last} of {totalRecords} users">
+                       currentPageReportTemplate="Mevcut {first} ile {last} arasında {totalRecords} kullanıcı">
+
+
                 <template #header>
                     <div class="p-inputgroup">
                               <span class="p-inputgroup-addon">

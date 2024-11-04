@@ -39,4 +39,9 @@ interface SalesRepositoryInterface
      * @return JsonResponse
      */
     public function destroy(int $id): JsonResponse;
+    /**
+     * Satış Loglarını Getirir,
+     */
+
+    public function getAllSalesLogs(): JsonResponse;
 }

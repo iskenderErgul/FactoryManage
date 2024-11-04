@@ -74,6 +74,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/sales', [SalesController::class, 'store']);
     Route::put('/sales/{id}', [SalesController::class, 'update']);
     Route::delete('/sales/{id}', [SalesController::class, 'destroy']);
+    Route::get('/getAllSalesLogs', [SalesController::class, 'getAllSalesLogs']);
 
 
 

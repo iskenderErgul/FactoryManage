@@ -8,7 +8,8 @@
             :rows="5"
             :rowsPerPageOptions="[5, 10, 20, 50]"
             paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
-            currentPageReportTemplate="{first} to {last} of {totalRecords}"
+            currentPageReportTemplate="{first} ile {last} arasında {totalRecords}"
+
         >
             <template #header>
                 <div class="text-end pb-4">
