@@ -237,6 +237,7 @@
                 </div>
             </div>
         </Dialog>
+
     </div>
 </template>
 
@@ -268,12 +269,6 @@ const selectedSales = ref([]);
 const submitted = ref(false);
 const isEditDialogVisible = ref(false);
 const editingProduct = ref({});
-
-
-
-
-
-
 const selectedCustomer = ref(null);
 const selectedProduct = ref(null);
 const productQuantity = ref(1);
@@ -407,7 +402,6 @@ const addUpdatingProductToSale = () => {
         toast.value.add({ severity: 'warn', summary: 'Uyarı', detail: 'Lütfen tüm alanları doldurun.', life: 3000 });
     }
 };
-
 
 const removeProductFromSale = (product) => {
     saleProducts.value = saleProducts.value.filter(item => item.id !== product.id); // Ürünü listeden çıkar

@@ -2,8 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\Cost;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Domains\Costs\Models\Cost;
 use Illuminate\Database\Seeder;
 
 class CostSeeder extends Seeder

@@ -2,6 +2,7 @@
 
 
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Costs\CostsController;
 use App\Http\Controllers\Customer\CustomerController;
 use App\Http\Controllers\Machines\MachinesController;
 use App\Http\Controllers\PacsEntry\PacsEntryController;
@@ -81,17 +82,20 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/getAllPacsEntries', [PacsEntryController::class, 'getAllPacsEntries']);
     Route::get('/getAllPacsEntriesLogs', [PacsEntryController::class, 'getAllPacsEntriesLogs']);
     Route::post('/createPacsEntry', [PacsEntryController::class, 'createPacsEntry']);
-
-
-
-
-
+    Route::get('/getAllWorkers',[WorkerController::class, 'getAllWorkers']);
+    Route::get('/getShifts',[WorkerController::class, 'getShifts']);
 
 
     Route::get('/getStockMovementsLogs', [StockController::class, 'getStockMovementsLogs']);
     Route::get('/getStockMovements', [StockController::class, 'getStockMovements']);
-    Route::get('/getAllWorkers',[WorkerController::class, 'getAllWorkers']);
-    Route::get('/getShifts',[WorkerController::class, 'getShifts']);
+
+    Route::get('/costs', [CostsController::class, 'index']);
+    Route::post('/costs', [CostsController::class, 'store']);
+    Route::get('/costs/{id}', [CostsController::class, 'show']);
+    Route::put('/costs/{id}', [CostsController::class, 'update']);
+    Route::delete('/costs/{id}', [CostsController::class, 'destroy']);
+    Route::delete('/costs/delete-selected', [CostsController::class, 'destroySelected']);
+
 
 
 
