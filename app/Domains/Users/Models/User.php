@@ -2,8 +2,8 @@
 
 namespace App\Domains\Users\Models;
 
+use App\Domains\PacsEntry\Models\PacsEntry;
 use App\Domains\Production\Models\Production;
-use App\Models\PacsEntry;
 use App\Models\Shift;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;

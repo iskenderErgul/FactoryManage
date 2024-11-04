@@ -4,6 +4,7 @@
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Customer\CustomerController;
 use App\Http\Controllers\Machines\MachinesController;
+use App\Http\Controllers\PacsEntry\PacsEntryController;
 use App\Http\Controllers\Product\ProductController;
 use App\Http\Controllers\Production\ProductionController;
 use App\Http\Controllers\Sales\SalesController;
@@ -76,6 +77,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/sales/{id}', [SalesController::class, 'destroy']);
     Route::get('/getAllSalesLogs', [SalesController::class, 'getAllSalesLogs']);
 
+
+    Route::get('/getAllPacsEntries', [PacsEntryController::class, 'getAllPacsEntries']);
+    Route::get('/getAllPacsEntriesLogs', [PacsEntryController::class, 'getAllPacsEntriesLogs']);
+    Route::post('/createPacsEntry', [PacsEntryController::class, 'createPacsEntry']);
 
 
 

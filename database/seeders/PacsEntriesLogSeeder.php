@@ -2,8 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\PacsEntriesLog;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Domains\PacsEntry\Models\PacsEntriesLog;
 use Illuminate\Database\Seeder;
 
 class PacsEntriesLogSeeder extends Seeder

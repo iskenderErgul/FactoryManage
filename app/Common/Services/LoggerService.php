@@ -4,6 +4,7 @@ namespace App\Common\Services;
 
 use App\Common\Models\StockMovement;
 use App\Common\Models\StockMovementsLog;
+use App\Domains\PacsEntry\Models\PacsEntriesLog;
 use App\Domains\Production\Models\Production;
 use App\Domains\Production\Models\ProductionLog;
 use App\Domains\Sales\Models\Sales;
@@ -139,6 +140,24 @@ class LoggerService
     }
 
 
+    /**
+     * PACS giriş kaydı için log oluşturur.
+     *
+     * @param int $pacsEntryId PACS girişi için ID.
+     * @param string $entryType Giriş türü (checkin veya checkout).
+     * @return void
+     */
+    public function createPacsEntryLog(int $pacsEntryId, string $entryType): void
+    {
+        PacsEntriesLog::create([
+            'pacs_entry_id' => $pacsEntryId,
+            'user_id' => auth()->id(),
+            'action' => 'create',
+            'changes' => "ID: {$pacsEntryId}, Tür: {$entryType}",
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+    }
 
 
 }

@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\PacsEntry;
+use App\Domains\PacsEntry\Models\PacsEntry;
 use Illuminate\Database\Seeder;
 
 class PacsEntrySeeder extends Seeder
