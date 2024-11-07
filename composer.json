@@ -12,6 +12,7 @@
         "laravel/sanctum": "^3.3",
         "laravel/tinker": "^2.8",
         "laravel/ui": "^4.3",
+        "maatwebsite/excel": "^3.1",
         "openai-php/laravel": "^0.8.1"
     },
     "require-dev": {
