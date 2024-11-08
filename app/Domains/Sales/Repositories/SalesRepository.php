@@ -51,11 +51,11 @@ class SalesRepository implements SalesRepositoryInterface
         DB::beginTransaction();
         try {
             // Satış tarihi formatını düzenliyoruz
-            $saleDate = Carbon::createFromFormat('d.m.Y', $request->sale_date)->format('Y-m-d');
+
             // Yeni satış kaydı oluşturuyoruz
             $sale = Sales::create([
                 'customer_id' => $request->customer_id,
-                'sale_date' => $saleDate,
+                'sale_date' => $request->sale_date,
             ]);
 
             foreach ($products as $product) {

@@ -46,7 +46,13 @@
 
                 <div class="p-field">
                     <label for="saleDate">Satış Tarihi:</label>
-                    <InputText id="saleDate" v-model="saleDate" />
+<!--                    <InputText id="saleDate" v-model="saleDate" />-->
+                    <Calendar
+                        id="saleDate"
+                        v-model="saleDate"
+                        required
+                        :invalid="submitted && !saleDate"
+                    />
                 </div>
 
                 <!-- Ürün Ekleme -->
@@ -137,7 +143,13 @@
 
                 <div class="p-field">
                     <label for="saleDate">Satış Tarihi:</label>
-                    <InputText id="saleDate" v-model="saleDate" />
+
+                    <Calendar
+                        id="saleDate"
+                        v-model="saleDate"
+                        required
+                        :invalid="submitted && !saleDate"
+                    />
                 </div>
 
                 <!-- Ürün Ekleme -->
@@ -253,6 +265,7 @@ import InputNumber from "primevue/inputnumber";
 import Dialog from 'primevue/dialog';
 import Toast from 'primevue/toast';
 import Dropdown from 'primevue/dropdown';
+import Calendar from "primevue/calendar";
 
 const customers = ref([]);
 const products = ref([]);

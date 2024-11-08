@@ -3,6 +3,7 @@
 namespace App\DTOs\Sales;
 
 use App\Http\Requests\Sales\SalesRequest;
+use Carbon\Carbon;
 
 class SalesDTO
 {
@@ -12,10 +13,12 @@ class SalesDTO
 
     public static function buildFromRequest(SalesRequest $request): self
     {
+
         $storeSalesDTO = new self();
         $storeSalesDTO->customer_id = $request->customer_id;
-        $storeSalesDTO->sale_date = $request->sale_date;
+        $storeSalesDTO->sale_date =  Carbon::parse($request->sale_date)->setTimezone('Europe/Istanbul')->format('Y-m-d');
         $storeSalesDTO->products = $request->products;
         return $storeSalesDTO;
+
     }
 }
