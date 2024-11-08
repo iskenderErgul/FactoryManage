@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace App\Common\Services;
 
 use Maatwebsite\Excel\Concerns\FromArray;
 use Maatwebsite\Excel\Concerns\WithHeadings;

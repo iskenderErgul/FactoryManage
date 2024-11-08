@@ -2,134 +2,97 @@
 
 namespace App\Http\Controllers\Exports;
 
-use App\Common\Models\StockMovement;
-use App\Common\Models\StockMovementsLog;
-use App\Domains\Costs\Models\Cost;
-use App\Domains\PacsEntry\Models\PacsEntriesLog;
-use App\Domains\PacsEntry\Models\PacsEntry;
-use App\Domains\Production\Models\Production;
-use App\Domains\Production\Models\ProductionLog;
-use App\Domains\Sales\Models\Sales;
-use App\Domains\Sales\Models\SalesLog;
-use App\Domains\Sales\Models\SalesProduct;
+use App\Domains\Export\Repositories\ExportRepository;
 use App\Http\Controllers\Controller;
-use App\Services\ExportService;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class ExportController extends Controller
 {
+    protected ExportRepository $exportRepository;
+
+
+    public function __construct(ExportRepository $exportRepository)
+    {
+        $this->exportRepository = $exportRepository;
+    }
+
     public function costsExport(): BinaryFileResponse
     {
-
-        $columns = ['id', 'cost_type', 'amount', 'cost_date','created_at','updated_at']; // İstediğiniz kolonları buraya ekleyin
-        $data = Cost::select($columns)->get();
-
-
-        $exportService = new ExportService($data, $columns);
-
-        return $exportService->export('costs.xlsx');
+        return $this->exportRepository->costsExport();
     }
 
+    /**
+     * Production verileri için export işlemi.
+     *
+     * @return BinaryFileResponse
+     */
     public function productionExport(): BinaryFileResponse
     {
+        return $this->exportRepository->productionExport();
 
-        $columns = ['id', 'user_id', 'machine_id', 'product_id','quantity','shift_id','production_date','created_at','updated_at']; // İstediğiniz kolonları buraya ekleyin
-        $data = Production::select($columns)->get();
-
-
-        $exportService = new ExportService($data, $columns);
-
-        return $exportService->export('production.xlsx');
     }
 
-
-    //SaleExport ve SalesProductExport tabloları daha sonra bir strategy yazılarak içeriği düzenlenecek.
+    /**
+     * Sales verileri için export işlemi.
+     *
+     * @return BinaryFileResponse
+     */
     public function salesExport(): BinaryFileResponse
     {
-
-        $columns = ['id', 'customer_id', 'sale_date','created_at','updated_at'];
-        $data = Sales::select($columns)->get();
-
-        $exportService = new ExportService($data, $columns);
-
-        return $exportService->export('sales.xlsx');
+       return $this->exportRepository->salesExport();
     }
+
+    /**
+     * SalesProduct verileri için export işlemi.
+     *
+     * @return BinaryFileResponse
+     */
     public function salesProductExport(): BinaryFileResponse
     {
-
-        $columns = ['id', 'sales_id', 'product_id','quantity','price','created_at','updated_at'];
-        $data = SalesProduct::select($columns)->get();
-
-        $exportService = new ExportService($data, $columns);
-
-        return $exportService->export('sales.xlsx');
+        return $this->exportRepository->salesProductExport();
     }
+
+    /**
+     * Pacs verileri için export işlemi.
+     *
+     * @return BinaryFileResponse
+     */
     public function pacsExport(): BinaryFileResponse
     {
-
-        $columns = ['id', 'user_id', 'entry_type','created_at','updated_at'];
-        $data = PacsEntry::select($columns)->get();
-
-        $exportService = new ExportService($data, $columns);
-
-        return $exportService->export('pacs.xlsx');
+       return $this->exportRepository->pacsExport();
     }
 
+    /**
+     * Stock Movement verileri için export işlemi.
+     *
+     * @return BinaryFileResponse
+     */
     public function stockMovementExport(): BinaryFileResponse
     {
-        $columns = ['id', 'product_id', 'movement_type','quantity','related_process','movement_date','created_at','updated_at'];
-        $data = StockMovement::select($columns)->get();
-
-        $exportService = new ExportService($data, $columns);
-
-        return $exportService->export('stock-movement.xlsx');
+        return $this->exportRepository->stockMovementExport();
     }
 
-    //Logların Exportları
 
-   public function pacsLogExport(): BinaryFileResponse
-   {
-       $columns = ['id', 'pacs_entry_id', 'user_id','action','changes','created_at','updated_at'];
-       $data = PacsEntriesLog::select($columns)->get();
 
-       $exportService = new ExportService($data, $columns);
 
-       return $exportService->export('pacs-log.xlsx');
-   }
+    public function pacsLogExport(): BinaryFileResponse
+    {
+        return $this->exportRepository->pacsLogExport();
+    }
 
     public function productionLogExport(): BinaryFileResponse
     {
-        $columns = ['id', 'production_id', 'user_id','action','changes','created_at','updated_at'];
-        $data = ProductionLog::select($columns)->get();
-
-        $exportService = new ExportService($data, $columns);
-
-        return $exportService->export('production-log.xlsx');
+        return $this->exportRepository->productionLogExport();
     }
 
     public function salesLogExport(): BinaryFileResponse
     {
-        $columns = ['id', 'sale_id', 'user_id','action','changes','created_at','updated_at'];
-        $data = SalesLog::select($columns)->get();
-
-        $exportService = new ExportService($data, $columns);
-
-        return $exportService->export('sales-log.xlsx');
+        return $this->exportRepository->salesLogExport();
     }
 
     public function stockMovementLogExport(): BinaryFileResponse
     {
-        $columns = ['id', 'stock_movement_id', 'user_id','action','changes','created_at','updated_at'];
-        $data = StockMovementsLog::select($columns)->get();
-
-        $exportService = new ExportService($data, $columns);
-
-        return $exportService->export('sales-log.xlsx');
+        return $this->exportRepository->stockMovementLogExport();
     }
-
-
-
-
-
 
 }
