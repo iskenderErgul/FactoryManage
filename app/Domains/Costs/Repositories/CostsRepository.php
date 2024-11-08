@@ -34,7 +34,7 @@ class CostsRepository implements CostsRepositoryInterface
         $cost = Cost::create([
             'cost_type' => $request->cost_type,
             'amount' => $request->amount,
-            'cost_date' => Carbon::parse($request->cost_date)->format('Y-m-d'),
+            'cost_date' => Carbon::parse($request->cost_date)->setTimezone('Europe/Istanbul')->format('Y-m-d'),
         ]);
         return response()->json($cost, 201);
     }
@@ -66,8 +66,15 @@ class CostsRepository implements CostsRepositoryInterface
     public function update(CostRequest $request, $id): JsonResponse
     {
 
-        $cost = Cost::find($id);
-        $cost->update($request->all());
+        $cost=Cost::where('id', $id)->update([
+            'cost_type' => $request->cost_type,
+            'amount' => $request->amount,
+            'cost_date' => Carbon::parse($request->cost_date)->setTimezone('Europe/Istanbul')->format('Y-m-d'),
+            'created_at' => Carbon::now()->format('Y-m-d H:i:s'),
+            'updated_at' => Carbon::now()->format('Y-m-d H:i:s')
+        ]);
+//        $cost = Cost::find($id);
+//        $cost->update($request->all());
         return response()->json($cost);
     }
 

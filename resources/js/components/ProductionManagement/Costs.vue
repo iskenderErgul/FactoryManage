@@ -24,7 +24,11 @@
                 <Column selectionMode="multiple" style="width: 2rem" :exportable="false"></Column>
                 <Column field="id" header="Maliyet ID" sortable style="min-width:8rem"></Column>
                 <Column field="cost_type" header="Maliyet Türü" sortable style="min-width:10rem"></Column>
-                <Column field="amount" header="Tutar (TL)" sortable style="min-width:8rem"></Column>
+                <Column field="amount" header="Tutar (TL)" sortable style="min-width:8rem">
+                    <template #body="{ data }">
+                        {{ formatAmount(data.amount) }}
+                    </template>
+                </Column>
                 <Column field="cost_date" header="Maliyet Tarihi" sortable style="min-width:10rem"></Column>
                 <Column :exportable="false" style="min-width:8rem">
                     <template #body="slotProps">
@@ -50,14 +54,22 @@
             </div>
             <div class="field">
                 <label for="costDate">Maliyet Tarihi</label>
-                <InputText id="costDate" v-model="cost.cost_date" required :invalid="submitted && !cost.cost_date" />
+                <Calendar
+                    id="cost_date"
+                    v-model="cost.cost_date"
+                    required
+                    :invalid="submitted && !cost.cost_date"
+                />
                 <small class="p-error" v-if="submitted && !cost.cost_date">Maliyet tarihi zorunludur.</small>
+
             </div>
             <template #footer>
                 <Button label="İptal" icon="pi pi-times" text @click="hideDialog" />
                 <Button label="Kaydet" icon="pi pi-check" text @click="saveCost" />
             </template>
         </Dialog>
+
+
         <Dialog v-model:visible="deleteCostDialog" :style="{width: '450px'}" header="Onayla" :modal="true">
             <div class="confirmation-content">
                 <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem" />
@@ -92,6 +104,7 @@ import Column from 'primevue/column';
 import InputText from 'primevue/inputtext';
 import Dialog from 'primevue/dialog';
 import Toast from 'primevue/toast';
+import Calendar from "primevue/calendar";
 
 const toast = ref(null);
 const costs = ref([]);
@@ -205,6 +218,10 @@ const exportCSV = () => {
                 console.error('Export failed:', error);
             });
 };
+
+const formatAmount = (amount) => {
+    return amount % 1 === 0 ? amount.toString().split('.')[0] : amount.toFixed(2);
+}
 </script>
 
 <style scoped>
