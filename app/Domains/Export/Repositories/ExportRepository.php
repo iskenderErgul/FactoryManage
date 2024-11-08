@@ -99,24 +99,48 @@ class ExportRepository implements ExportRepositoryInterface
         return $this->exportData(StockMovement::class, $columns, 'stock-movement.xlsx');
     }
 
-    // Logların export fonksiyonları
+
+    /**
+     * Pacs Log verileri için export işlemi.
+     *
+     * @return BinaryFileResponse
+     */
     public function pacsLogExport(): BinaryFileResponse
     {
         $columns = ['id', 'pacs_entry_id', 'user_id', 'action', 'changes', 'created_at', 'updated_at'];
         return $this->exportData(PacsEntriesLog::class, $columns, 'pacs-log.xlsx');
     }
 
+
+
+    /**
+     * Production Log verileri için export işlemi.
+     *
+     * @return BinaryFileResponse
+     */
     public function productionLogExport(): BinaryFileResponse
     {
         $columns = ['id', 'production_id', 'user_id', 'action', 'changes', 'created_at', 'updated_at'];
         return $this->exportData(ProductionLog::class, $columns, 'production-log.xlsx');
     }
 
+    /**
+     * Sales Log verileri için export işlemi.
+     *
+     * @return BinaryFileResponse
+     */
+
     public function salesLogExport(): BinaryFileResponse
     {
         $columns = ['id', 'sale_id', 'user_id', 'action', 'changes', 'created_at', 'updated_at'];
         return $this->exportData(SalesLog::class, $columns, 'sales-log.xlsx');
     }
+
+    /**
+     * Stock Movement Log verileri için export işlemi.
+     *
+     * @return BinaryFileResponse
+     */
 
     public function stockMovementLogExport(): BinaryFileResponse
     {

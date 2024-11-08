@@ -73,23 +73,43 @@ class ExportController extends Controller
     }
 
 
-
+    /**
+     * Pacs Log verileri için export işlemi.
+     *
+     * @return BinaryFileResponse
+     */
 
     public function pacsLogExport(): BinaryFileResponse
     {
         return $this->exportRepository->pacsLogExport();
     }
 
+    /**
+     * Production Log verileri için export işlemi.
+     *
+     * @return BinaryFileResponse
+     */
     public function productionLogExport(): BinaryFileResponse
     {
         return $this->exportRepository->productionLogExport();
     }
 
+    /**
+     * Sales Log verileri için export işlemi.
+     *
+     * @return BinaryFileResponse
+     */
     public function salesLogExport(): BinaryFileResponse
     {
         return $this->exportRepository->salesLogExport();
     }
 
+
+    /**
+     * Stock Movement Log verileri için export işlemi.
+     *
+     * @return BinaryFileResponse
+     */
     public function stockMovementLogExport(): BinaryFileResponse
     {
         return $this->exportRepository->stockMovementLogExport();
