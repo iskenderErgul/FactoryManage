@@ -7,11 +7,15 @@ use Illuminate\Database\Eloquent\Model;
 
 class Cost extends Model
 {
+    protected $table = 'costs';
     use HasFactory;
 
     protected $fillable = [
         'cost_type',
         'amount',
         'cost_date',
+        'id',
+        'created_at',
+        'updated_at',
     ];
 }

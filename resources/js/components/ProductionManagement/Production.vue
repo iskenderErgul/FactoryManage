@@ -7,7 +7,7 @@
                     <Button label="Sil" icon="pi pi-trash" severity="danger" @click="confirmDeleteSelected" :disabled="!selectedProductions || !selectedProductions.length" />
                 </template>
                 <template #end>
-                    <Button label="Dışa Aktar" icon="pi pi-upload" severity="help" @click=" " />
+                    <Button label="Dışa Aktar" icon="pi pi-upload" severity="help" @click="exportCSV" />
                 </template>
             </Toolbar>
             <DataTable ref="dt" :value="productions" v-model:selection="selectedProductions" dataKey="id"
@@ -325,6 +325,21 @@ const deleteProduction = () => {
 // Seçilen üretimleri silme onayı
 const confirmDeleteSelected = () => {
     deleteProductionsDialog.value = true;
+};
+
+const exportCSV = () => {
+    axios.get('/api/production-export', { responseType: 'blob' })
+        .then(response => {
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', 'production.xlsx');
+            document.body.appendChild(link);
+            link.click();
+        })
+        .catch(error => {
+            console.error('Export failed:', error);
+        });
 };
 
 // Seçilen üretimleri sil

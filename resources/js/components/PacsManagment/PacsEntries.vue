@@ -23,8 +23,8 @@
             currentPageReportTemplate="{first} ile {last} arasında {totalRecords}"
         >
             <template #header>
-                <div class="text-end pb-4">
-                    <Button icon="pi pi-external-link" label="Export" @click="exportCSV($event)" />
+                <div class="text-end pb-2">
+                    <Button icon="pi pi-external-link" label="Dışa Aktar" @click="exportCSV" />
                 </div>
             </template>
             <Column field="id" header="Entry ID" style="width: 5%" />
@@ -69,7 +69,19 @@ const formattedEntries = computed(() => {
     }));
 });
 const exportCSV = () => {
-    dt.value.exportCSV();
+    axios.get('/api/pacs-export', { responseType: 'blob' })
+        .then(response => {
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', 'pacs.xlsx');
+            document.body.appendChild(link);
+            link.click();
+        })
+        .catch(error => {
+            console.error('Export failed:', error);
+        });
+
 };
 
 

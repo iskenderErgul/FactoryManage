@@ -4,6 +4,7 @@
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Costs\CostsController;
 use App\Http\Controllers\Customer\CustomerController;
+use App\Http\Controllers\Exports\ExportController;
 use App\Http\Controllers\Machines\MachinesController;
 use App\Http\Controllers\PacsEntry\PacsEntryController;
 use App\Http\Controllers\Product\ProductController;
@@ -89,12 +90,30 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/getStockMovementsLogs', [StockController::class, 'getStockMovementsLogs']);
     Route::get('/getStockMovements', [StockController::class, 'getStockMovements']);
 
+
+
     Route::get('/costs', [CostsController::class, 'index']);
     Route::post('/costs', [CostsController::class, 'store']);
     Route::get('/costs/{id}', [CostsController::class, 'show']);
     Route::put('/costs/{id}', [CostsController::class, 'update']);
     Route::delete('/costs/{id}', [CostsController::class, 'destroy']);
     Route::delete('/costs/delete-selected', [CostsController::class, 'destroySelected']);
+
+
+
+    Route::get('/costs-export',[ExportController::class,'costsExport']);
+    Route::get('/production-export',[ExportController::class,'productionExport']);
+    Route::get('/sales-export',[ExportController::class,'salesExport']);
+    Route::get('/sales-product-export',[ExportController::class,'salesProductExport']);
+    Route::get('/pacs-export',[ExportController::class,'pacsExport']);
+    Route::get('/stock-movement-export',[ExportController::class,'stockMovementExport']);
+
+
+    //LogExport
+    Route::get('/production-log-export',[ExportController::class,'productionLogExport']);
+    Route::get('/sales-log-export',[ExportController::class,'salesLogExport']);
+    Route::get('/pacs-log-export',[ExportController::class,'pacsLogExport']);
+    Route::get('/stock-movement-log-export',[ExportController::class,'stockMovementLogExport']);
 
 
 

@@ -12,7 +12,7 @@
         >
             <template #header>
                 <div class="text-end pb-4">
-                    <Button icon="pi pi-external-link" label="Export" @click="exportCSV($event)" />
+                    <Button icon="pi pi-external-link" label="Export" @click="exportCSV" />
                 </div>
             </template>
             <Column field="id" header="Hareket Id" style="width: 10%" />
@@ -57,7 +57,21 @@ const formattedMovements = computed(() => {
     }));
 });
 
-const exportCSV = () => {
-    dt.value.exportCSV();
+
+    const exportCSV = () => {
+        axios.get('/api/stock-movement-export', { responseType: 'blob' })
+            .then(response => {
+                const url = window.URL.createObjectURL(new Blob([response.data]));
+                const link = document.createElement('a');
+                link.href = url;
+                link.setAttribute('download', 'stock-movement.xlsx');
+                document.body.appendChild(link);
+                link.click();
+            })
+            .catch(error => {
+                console.error('Export failed:', error);
+            });
+
+
 };
 </script>
