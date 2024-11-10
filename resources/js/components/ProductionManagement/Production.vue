@@ -31,7 +31,7 @@
                 <Column field="machine.machine_name" header="Üretildiği Makina" sortable style="min-width:16rem"></Column>
                 <Column header="Üretildiği Vardiya" sortable style="min-width:12rem">
                     <template #body="slotProps">
-                        {{ slotProps.data.shift.start_time }} - {{ slotProps.data.shift.end_time }}
+                        {{ slotProps.data.shift.template.start_time }} - {{ slotProps.data.shift.template.end_time }}
                     </template>
                 </Column>
                 <Column field="production_date" header="Üretim Tarihi" sortable style="min-width:16rem"></Column>

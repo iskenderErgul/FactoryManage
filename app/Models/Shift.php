@@ -25,7 +25,6 @@ class Shift extends Model
         return $this->belongsTo(ShiftTemplate::class, 'template_id');
     }
 
-    // Shift has many ShiftAssignments
     public function assignments(): HasMany
     {
         return $this->hasMany(ShiftAssignment::class);

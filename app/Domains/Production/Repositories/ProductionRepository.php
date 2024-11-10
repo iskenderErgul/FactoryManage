@@ -32,7 +32,7 @@ class ProductionRepository implements ProductionRepositoryInterface
      */
     public function getAllProductions(): JsonResponse
     {
-        $productions = Production::with(['machine', 'product', 'user', 'shift'])->get();
+        $productions = Production::with(['machine', 'product', 'user', 'shift.template'])->get();
 
         return response()->json($productions);
     }
