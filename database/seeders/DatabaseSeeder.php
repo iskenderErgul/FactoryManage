@@ -14,7 +14,6 @@ class DatabaseSeeder extends Seeder
         $this->call([
             UserSeeder::class,
             PacsEntrySeeder::class,
-            WeeklyScheduleSeeder::class,
             MachineSeeder::class,
             ShiftTemplateSeeder::class,
             ShiftSeeder::class,
@@ -29,9 +28,8 @@ class DatabaseSeeder extends Seeder
             SupplierSeeder::class,
             PacsEntriesLogSeeder::class,
             UsersLogSeeder::class,
-            ShiftTemplatesLogSeeder::class,
-            ShiftsLogSeeder::class,
-            WeeklyScheduleLogSeeder::class,
+           ShiftAssignmentSeeder::class,
+
         ]);
     }
 }

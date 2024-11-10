@@ -6,8 +6,8 @@
 
 
     <div class="flex justify-center">
-        <h1>WeeklySchedule</h1>
-        <h1>Haftalık Çalışma Planı burada görüntülenecek</h1>
+        <h1>Shift Assignments</h1>
+        <h1>İşçilerin vardiya atamaları yapılacak.</h1>
     </div>
 </template>
 

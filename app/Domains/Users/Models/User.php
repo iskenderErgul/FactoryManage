@@ -5,6 +5,7 @@ namespace App\Domains\Users\Models;
 use App\Domains\PacsEntry\Models\PacsEntry;
 use App\Domains\Production\Models\Production;
 use App\Models\Shift;
+use App\Models\ShiftAssignment;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -45,6 +46,11 @@ class User extends Authenticatable
     public function logs(): HasMany
     {
         return $this->hasMany(UsersLog::class);
+    }
+
+    public function assignments(): HasMany
+    {
+        return $this->hasMany(ShiftAssignment::class);
     }
 
 

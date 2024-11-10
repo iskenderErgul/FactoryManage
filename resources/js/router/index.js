@@ -8,9 +8,7 @@ import UserLog from "@/components/UserManagements/UserLog.vue";
 import PacsEntries from "@/components/PacsManagment/PacsEntries.vue";
 import PacsEntriesLog from "@/components/PacsManagment/PacsEntriesLog.vue";
 import ShiftTemplates from "@/components/ShiftManagement/ShiftTemplates.vue";
-import WeeklySchedule from "@/components/ShiftManagement/WeeklySchedule.vue";
 import Shifts from "@/components/ShiftManagement/Shifts.vue";
-import ShftsLog from "@/components/ShiftManagement/ShftsLog.vue";
 import Production from "@/components/ProductionManagement/Production.vue";
 import ProductionLog from "@/components/ProductionManagement/ProductionLog.vue";
 import Machines from "@/components/ProductionManagement/Machines.vue";
@@ -25,6 +23,7 @@ import ProductionReports from "@/components/Reports/ProductionReports.vue";
 import SalesReports from "@/components/Reports/SalesReports.vue";
 import StockReports from "@/components/Reports/StockReports.vue";
 import FinancialReports from "@/components/Reports/FinancialReports.vue";
+import ShiftAssignments from "@/components/ShiftManagement/ShiftAssignments.vue";
 
 
 const routes = [
@@ -69,20 +68,16 @@ const routes = [
                 component : ShiftTemplates
             },
             {
-                path : '/sys/weekly-schedule',
-                name : 'weeklySchedule',
-                component : WeeklySchedule
+                path : '/sys/shift-assignments',
+                name : 'shiftAssignments',
+                component : ShiftAssignments
             },
             {
                 path : '/sys/shifts',
                 name : 'shifts',
                 component : Shifts
             },
-            {
-                path : '/sys/shifts-log',
-                name : 'shiftsLog',
-                component : ShftsLog
-            },
+
 
 // Production Management
             {

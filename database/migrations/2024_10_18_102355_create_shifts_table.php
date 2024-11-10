@@ -14,11 +14,7 @@ return new class extends Migration
         Schema::create('shifts', function (Blueprint $table) {
             $table->id();
             $table->foreignId('template_id')->constrained('shift_templates')->onDelete('cascade');
-            $table->time('start_time');
-            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
-            $table->foreignId('schedule_id')->constrained('weekly_schedules')->onDelete('cascade');
             $table->date('date');
-            $table->time('end_time');
             $table->timestamps();
         });
     }

@@ -41,9 +41,9 @@ const model = ref([
                 icon: 'pi pi-calendar-times',
                 items: [
                     { label: 'Vardiya Şablonları', icon: 'pi pi-calendar-times', to: '/sys/shift-templates' },
-                    { label: 'Haftalık Çalışma Planı', icon: 'pi pi-calendar-plus', to: '/sys/weekly-schedule' },
+                    { label: 'Vardiya Kaydı Atamaları', icon: 'pi pi-calendar-plus', to: '/sys/shift-assignments' },
                     { label: 'Vardiya Kayıtları', icon: 'pi pi-clock', to: '/sys/shifts' },
-                    { label: 'Vardiya Logları', icon: 'pi pi-history', to: '/sys/shifts-log' }
+
                 ]
             }
         ]

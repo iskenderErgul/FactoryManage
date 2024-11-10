@@ -11,11 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('weekly_schedules', function (Blueprint $table) {
+        Schema::create('shift_assignments', function (Blueprint $table) {
             $table->id();
-            $table->string('week');
-            $table->dateTime('start_date');
-            $table->dateTime('end_date');
+            $table->foreignId('shift_id')->constrained('shifts')->onDelete('cascade');
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->timestamps();
         });
     }
@@ -25,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('weekly_schedule');
+        Schema::dropIfExists('shift_assignments');
     }
 };
