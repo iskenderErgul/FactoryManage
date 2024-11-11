@@ -2,9 +2,8 @@
 
 namespace Database\Seeders;
 
-use App\Models\Shift;
+use App\Domains\Shift\Models\Shift;
 use Carbon\Carbon;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class ShiftSeeder extends Seeder

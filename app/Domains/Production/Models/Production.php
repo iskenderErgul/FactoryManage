@@ -4,8 +4,8 @@ namespace App\Domains\Production\Models;
 
 use App\Domains\Machines\Models\Machine;
 use App\Domains\Product\Models\Product;
+use App\Domains\Shift\Models\Shift;
 use App\Domains\Users\Models\User;
-use App\Models\Shift;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;

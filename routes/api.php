@@ -11,6 +11,7 @@ use App\Http\Controllers\Product\ProductController;
 use App\Http\Controllers\Production\ProductionController;
 use App\Http\Controllers\Sales\SalesController;
 use App\Http\Controllers\Sales\SalesProductController;
+use App\Http\Controllers\Shift\ShiftController;
 use App\Http\Controllers\Stock\StockController;
 use App\Http\Controllers\Users\UsersController;
 use App\Http\Controllers\Worker\WorkerController;
@@ -107,21 +108,23 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/sales-product-export',[ExportController::class,'salesProductExport']);
     Route::get('/pacs-export',[ExportController::class,'pacsExport']);
     Route::get('/stock-movement-export',[ExportController::class,'stockMovementExport']);
-
-
     //LogExport
     Route::get('/production-log-export',[ExportController::class,'productionLogExport']);
     Route::get('/sales-log-export',[ExportController::class,'salesLogExport']);
     Route::get('/pacs-log-export',[ExportController::class,'pacsLogExport']);
     Route::get('/stock-movement-log-export',[ExportController::class,'stockMovementLogExport']);
 
+    Route::get('/shift/shift-templates',[ShiftController::class, 'getShiftTemplates']);
+    Route::post('/shift/shift-templates',[ShiftController::class, 'addShiftTemplates']);
+    Route::put('/shift/shift-templates/{id}',[ShiftController::class, 'updateShiftTemplates']);
+    Route::delete('/shift/shift-templates/{id}',[ShiftController::class, 'destroyShiftTemplates']);
+
+
+
 
 
 
     Route::get('/logout', [LoginController::class, 'logout']);
-
-
-
 });
 
 

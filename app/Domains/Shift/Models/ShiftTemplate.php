@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models;
+namespace App\Domains\Shift\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -17,9 +17,9 @@ class ShiftTemplate extends Model
         'duration',
     ];
 
-    public function shifts(): HasMany
+    public function shifts()
     {
-        return $this->hasMany(Shift::class);
+        return $this->hasMany(Shift::class, 'template_id');
     }
 
 }

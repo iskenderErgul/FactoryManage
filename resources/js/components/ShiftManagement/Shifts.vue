@@ -6,8 +6,9 @@
 
 
     <div class="flex justify-center">
-        <h1>Shifts</h1>
-        <h1>Oluşturulmuş olan vardiya kayırları burada listelenecek </h1>
+        <h1>Vardiyalar</h1>
+        <h1>KİŞİLERİN HANGİ VARDİYADA OLDUGU TABLO ŞEKLİNDE GÖSTER
+        </h1>
     </div>
 </template>
 

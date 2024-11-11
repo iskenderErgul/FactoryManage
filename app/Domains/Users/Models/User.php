@@ -4,8 +4,8 @@ namespace App\Domains\Users\Models;
 
 use App\Domains\PacsEntry\Models\PacsEntry;
 use App\Domains\Production\Models\Production;
-use App\Models\Shift;
-use App\Models\ShiftAssignment;
+use App\Domains\Shift\Models\Shift;
+use App\Domains\Shift\Models\ShiftAssignment;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;

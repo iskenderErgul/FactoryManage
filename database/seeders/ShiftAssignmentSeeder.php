@@ -2,8 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\ShiftAssignment;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Domains\Shift\Models\ShiftAssignment;
 use Illuminate\Database\Seeder;
 
 class ShiftAssignmentSeeder extends Seeder
