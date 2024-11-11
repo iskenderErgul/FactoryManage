@@ -6,24 +6,35 @@ use App\Domains\Shift\Interfaces\ShiftRepositoryInterface;
 use App\Domains\Shift\Models\Shift;
 use App\Domains\Shift\Models\ShiftAssignment;
 use App\Domains\Shift\Models\ShiftTemplate;
+use App\Http\Requests\ShiftAssignments\AddShiftAssignmentRequest;
+use App\Http\Requests\ShiftAssignments\UpdateShiftAssignmentRequest;
+use App\Http\Requests\ShiftTemplate\AddShiftTemplateRequest;
+use App\Http\Requests\ShiftTemplate\UpdateShiftTemplateRequest;
 use Carbon\Carbon;
-use Illuminate\Http\Request;
+
 use Illuminate\Http\JsonResponse;
 
 class ShiftRepository implements ShiftRepositoryInterface
 {
+    /**
+     * Oluşturulmuş olan Vardiya şanlonlarını getirir.
+     */
     public function getShiftTemplates(): JsonResponse
     {
        $shiftTemplates = ShiftTemplate::with('shifts')->get();
 
        return response()->json($shiftTemplates);
     }
-    public function addShiftTemplates(Request $request): JsonResponse
+
+    /**
+     * Yeni bir vardiya şablonu ekler.
+     */
+    public function addShiftTemplates(AddShiftTemplateRequest $request): JsonResponse
     {
         $startTime = Carbon::createFromFormat('H:i:s', $request->start_time);
         $endTime = Carbon::createFromFormat('H:i:s', $request->end_time);
 
-        $duration = $startTime->diffInMinutes($endTime);
+
 
         if ($endTime->lt($startTime)) {
             $endTime->addDay();
@@ -43,7 +54,11 @@ class ShiftRepository implements ShiftRepositoryInterface
         ]);
         return response()->json($shiftTemplate);
     }
-    public function updateShiftTemplates(Request $request,$id): JsonResponse
+
+    /**
+     * Oluşturulmuş olan bir vardiya şablonunu günceller.
+     */
+    public function updateShiftTemplates(UpdateShiftTemplateRequest $request,$id): JsonResponse
     {
         $shiftTemplate = ShiftTemplate::find($id);
 
@@ -65,6 +80,10 @@ class ShiftRepository implements ShiftRepositoryInterface
         ]);
         return response()->json($shiftTemplate);
     }
+
+    /**
+     *Oluşturulmuş bir vardiya şablonunu siler
+     */
     public function destroyShiftTemplates($id): JsonResponse
     {
 
@@ -79,7 +98,11 @@ class ShiftRepository implements ShiftRepositoryInterface
         return response()->json(['message' => 'Şablon ve ilgili vardiyalar başarıyla silindi.']);
     }
 
-    public function addShiftAssignments(Request $request): JsonResponse
+    /**
+     * Bir çalışanı belirlenen bir vardiyaya atama işlemini yapar.
+     */
+
+    public function addShiftAssignments(AddShiftAssignmentRequest $request): JsonResponse
     {
 
         $workerId = $request->user_id;
@@ -145,7 +168,10 @@ class ShiftRepository implements ShiftRepositoryInterface
 
     }
 
-    public function updateShiftAssignments(Request $request, $id): JsonResponse
+    /**
+     * Atanmış bir vardiyı güncelleme işlemini yapar.
+     */
+    public function updateShiftAssignments(UpdateShiftAssignmentRequest $request, $id): JsonResponse
     {
         // Gelen request verilerini al
         $workerId = $request->user_id;
@@ -227,6 +253,9 @@ class ShiftRepository implements ShiftRepositoryInterface
         return response()->json(['message' => 'Vardiya ataması zaten mevcut, herhangi bir değişiklik yapılmadı.']);
     }
 
+    /**
+     * Atama yapılmiş bir vardiyayaı siler.
+     */
     public function destroyShiftAssignments($id): JsonResponse
     {
         $workerShiftAssignment = ShiftAssignment::findOrFail($id);
@@ -236,6 +265,10 @@ class ShiftRepository implements ShiftRepositoryInterface
             'message' => 'Atanmış Vardiya başarıyla silindi.',
         ]);
     }
+
+    /**
+     * Tüm atanmış vardiyaları getirir.
+     */
 
     public function getShiftAssignments(): JsonResponse
     {

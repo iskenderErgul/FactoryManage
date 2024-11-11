@@ -4,8 +4,10 @@ namespace App\Http\Controllers\Shift;
 
 use App\Domains\Shift\Repositories\ShiftRepository;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\ShiftTemplate\AddShiftTemplateRequest;
+use App\Http\Requests\ShiftTemplate\UpdateShiftTemplateRequest;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
+
 
 class ShiftController extends Controller
 {
@@ -20,12 +22,13 @@ class ShiftController extends Controller
     {
         return $this->shiftRepository->getShiftTemplates();
     }
-    public function addShiftTemplates(Request $request): JsonResponse
+    public function addShiftTemplates(AddShiftTemplateRequest $request): JsonResponse
     {
         return $this->shiftRepository->addShiftTemplates($request);
     }
-    public function updateShiftTemplates(Request $request,$id): JsonResponse
+    public function updateShiftTemplates(UpdateShiftTemplateRequest $request,$id): JsonResponse
     {
+
         return $this->shiftRepository->updateShiftTemplates($request,$id);
     }
     public function destroyShiftTemplates($id): JsonResponse
