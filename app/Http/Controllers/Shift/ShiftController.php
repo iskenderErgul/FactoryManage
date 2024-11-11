@@ -32,4 +32,5 @@ class ShiftController extends Controller
     {
         return $this->shiftRepository->destroyShiftTemplates($id);
     }
+
 }

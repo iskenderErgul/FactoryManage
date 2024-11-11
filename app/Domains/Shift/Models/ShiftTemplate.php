@@ -22,4 +22,5 @@ class ShiftTemplate extends Model
         return $this->hasMany(Shift::class, 'template_id');
     }
 
+
 }

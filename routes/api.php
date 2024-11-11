@@ -12,6 +12,7 @@ use App\Http\Controllers\Production\ProductionController;
 use App\Http\Controllers\Sales\SalesController;
 use App\Http\Controllers\Sales\SalesProductController;
 use App\Http\Controllers\Shift\ShiftController;
+use App\Http\Controllers\ShiftAssignment\ShiftAssignmentController;
 use App\Http\Controllers\Stock\StockController;
 use App\Http\Controllers\Users\UsersController;
 use App\Http\Controllers\Worker\WorkerController;
@@ -35,6 +36,7 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     Route::get('/getAllUsers', [UsersController::class, 'getAllUsers']);
+    Route::get('/get-all-workers', [UsersController::class, 'getAllWorkers']);
     Route::put('/users/{id}', [UsersController::class, 'update']);
     Route::delete('/users/{id}', [UsersController::class, 'destroy']);
     Route::post('/createUsers', [UsersController::class, 'store']);
@@ -118,6 +120,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/shift/shift-templates',[ShiftController::class, 'addShiftTemplates']);
     Route::put('/shift/shift-templates/{id}',[ShiftController::class, 'updateShiftTemplates']);
     Route::delete('/shift/shift-templates/{id}',[ShiftController::class, 'destroyShiftTemplates']);
+
+    Route::get('/shift/shift-assignments',[ShiftAssignmentController::class, 'getShiftAssignments']);
+    Route::post('/shift/shift-assignments',[ShiftAssignmentController::class, 'addShiftAssignments']);
+    Route::delete('/shift/shift-assignments/{id}',[ShiftAssignmentController::class, 'destroyShiftAssignments']);
+    Route::put('/shift/shift-assignments/{id}',[ShiftAssignmentController::class, 'updateShiftAssignments']);
 
 
 

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Users;
 
 use App\Common\Services\ImageUploadService;
+use App\Domains\Users\Models\User;
 use App\Domains\Users\Repositories\UserRepository;
 use App\DTOs\Users\StoreUserDTO;
 use App\DTOs\Users\UpdateUserDTO;
@@ -76,6 +77,13 @@ class UsersController extends Controller
     public function destroy($id): JsonResponse
     {
         return $this->userRepository->destroy($id);
+    }
+
+
+    public function getAllWorkers(): JsonResponse
+    {
+        $workers = User::where('role', 'worker')->get();
+        return response()->json($workers);
     }
 
 
