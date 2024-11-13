@@ -276,12 +276,5 @@ class ShiftRepository implements ShiftRepositoryInterface
         return response()->json($shiftAssignments);
     }
 
-    public function getAllShifts(): JsonResponse
-    {
-        $shifts =Shift::with('user','template','shiftAssignments.user')->get();
-        return response()->json($shifts);
-
-    }
-
 
 }

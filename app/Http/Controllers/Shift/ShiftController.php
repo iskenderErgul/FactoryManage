@@ -36,8 +36,4 @@ class ShiftController extends Controller
         return $this->shiftRepository->destroyShiftTemplates($id);
     }
 
-    public function getAllShifts(): JsonResponse
-    {
-        return $this->shiftRepository->getAllShifts();
-    }
 }

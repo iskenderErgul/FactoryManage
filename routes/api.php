@@ -120,7 +120,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/shift/shift-templates',[ShiftController::class, 'addShiftTemplates']);
     Route::put('/shift/shift-templates/{id}',[ShiftController::class, 'updateShiftTemplates']);
     Route::delete('/shift/shift-templates/{id}',[ShiftController::class, 'destroyShiftTemplates']);
-    Route::get('/shift/shifts',[ShiftController::class,'getAllShifts']);
 
     Route::get('/shift/shift-assignments',[ShiftAssignmentController::class, 'getShiftAssignments']);
     Route::post('/shift/shift-assignments',[ShiftAssignmentController::class, 'addShiftAssignments']);
