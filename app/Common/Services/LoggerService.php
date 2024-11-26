@@ -4,7 +4,9 @@ namespace App\Common\Services;
 
 use App\Common\Models\StockMovement;
 use App\Common\Models\StockMovementsLog;
+use App\Domains\Machines\Models\Machine;
 use App\Domains\PacsEntry\Models\PacsEntriesLog;
+use App\Domains\Product\Models\Product;
 use App\Domains\Production\Models\Production;
 use App\Domains\Production\Models\ProductionLog;
 use App\Domains\Sales\Models\Sales;
@@ -43,9 +45,14 @@ class LoggerService
      */
     private function getProductionLogMessage(string $action, Production $production, string $additionalInfo): string
     {
+
+        // Makine adını alın
+        $machineName = $this->getMachineNameById($production->machine_id);
+        $productName = $this->getProductNameById($production->product_id);
+
         switch ($action) {
             case 'create':
-                return "Üretim kaydı oluşturuldu. Ürün: {$production->product->name}, Miktar: {$production->quantity}, Makine: {$production->machine->name}, İşçi: " . ($production->user->name ?? 'Belirtilmemiş') . ", Tarih: {$production->production_date}. $additionalInfo";
+                return "Üretim kaydı oluşturuldu. Ürün: {$productName}, Miktar: {$production->quantity}, Makine: {$machineName}, İşçi: " . ($production->user->name ?? 'Belirtilmemiş') . ", Tarih: {$production->production_date}. $additionalInfo";
             case 'update':
                 return "Üretim kaydı güncellendi. Ürün: {$production->product->name}, Yeni Miktar: {$production->quantity}, Makine: {$production->machine->name}, İşçi: " . ($production->user->name ?? 'Belirtilmemiş') . ", Tarih: {$production->production_date}. $additionalInfo";
             case 'delete':
@@ -53,6 +60,18 @@ class LoggerService
             default:
                 return $additionalInfo;
         }
+    }
+
+
+    public function getMachineNameById( $machineId)
+    {
+        $machine = Machine::find($machineId);
+        return $machine ? $machine->machine_name : 'Bilinmeyen Makine';
+    }
+    public function getProductNameById( $productId)
+    {
+        $product = Product::find($productId);
+        return $product ? $product->product_name : 'Bilinmeyen Ürün';
     }
 
     /**

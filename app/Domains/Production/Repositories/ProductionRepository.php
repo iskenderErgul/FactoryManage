@@ -58,6 +58,7 @@ class ProductionRepository implements ProductionRepositoryInterface
     {
 
 
+
         $production = Production::create([
             'user_id' => $request->user_id,
             'shift_id' => $request->shift_id,
