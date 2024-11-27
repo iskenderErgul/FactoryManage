@@ -1,6 +1,4 @@
-
 <template>
-
     <div class="text-center">
         <input v-model="userId" placeholder="ID girin" class="p-inputtext mb-2" />
         <div>
@@ -9,8 +7,6 @@
         </div>
     </div>
     <Toast ref="toast" />
-
-
     <div>
         <DataTable
             :value="formattedEntries"
@@ -45,29 +41,30 @@ import Toast from 'primevue/toast';
 import axios from 'axios';
 import { format } from 'date-fns';
 
-
 const toast = ref(null);
 const dt = ref();
 const pacsEntries = ref([]);
 const userId = ref('');
 
-
-
 onMounted(() => {
     getPacsEntries();
 });
+
 const getPacsEntries = () => {
     axios.get('/api/getAllPacsEntries').then(resp => {
         pacsEntries.value = resp.data.reverse();
     });
 };
+
 const formattedEntries = computed(() => {
     return pacsEntries.value.map(entry => ({
         ...entry,
+        entry_type: entry.entry_type === 'checkin' ? 'Giriş' : entry.entry_type === 'checkout' ? 'Çıkış' : entry.entry_type,
         created_at: entry.created_at ? format(new Date(entry.created_at), 'dd/MM/yyyy HH:mm:ss') : '',
         updated_at: entry.updated_at ? format(new Date(entry.updated_at), 'dd/MM/yyyy HH:mm:ss') : ''
     }));
 });
+
 const exportCSV = () => {
     axios.get('/api/pacs-export', { responseType: 'blob' })
         .then(response => {
@@ -81,25 +78,23 @@ const exportCSV = () => {
         .catch(error => {
             console.error('Export failed:', error);
         });
-
 };
-
 
 const createEntry = async (entryType) => {
     if (!userId.value) {
-        toast.value.add({ severity: 'errors', summary: 'Başarısız', detail: 'Lütfen Bir Id giriniz', life: 3000 });
+        toast.value.add({ severity: 'error', summary: 'Başarısız', detail: 'Lütfen Bir Id giriniz', life: 3000 });
         return;
     }
 
     try {
         const response = await axios.post('/api/createPacsEntry', {
-            user_id : userId.value,
+            user_id: userId.value,
             entry_type: entryType,
         });
         getPacsEntries();
         toast.value.add({ severity: 'success', summary: 'Başarılı', detail: `Başarıyla ${entryType === 'checkin' ? 'giriş' : 'çıkış'} işlemi gerçekleştirildi!`, life: 3000 });
     } catch (error) {
-        toast.value.add({ severity: 'error', summary: 'Başarısız', detail:error.data, life: 3000 });
+        toast.value.add({ severity: 'error', summary: 'Başarısız', detail: error.data, life: 3000 });
     }
 };
 </script>
