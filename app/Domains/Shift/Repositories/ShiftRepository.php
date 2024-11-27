@@ -2,17 +2,16 @@
 
 namespace App\Domains\Shift\Repositories;
 
+use App\Domains\Shift\Helpers\TimeHelper;
 use App\Domains\Shift\Interfaces\ShiftRepositoryInterface;
 use App\Domains\Shift\Models\Shift;
 use App\Domains\Shift\Models\ShiftAssignment;
 use App\Domains\Shift\Models\ShiftTemplate;
-use App\Helpers\TimeHelper;
 use App\Http\Requests\ShiftAssignments\AddShiftAssignmentRequest;
 use App\Http\Requests\ShiftAssignments\UpdateShiftAssignmentRequest;
 use App\Http\Requests\ShiftTemplate\AddShiftTemplateRequest;
 use App\Http\Requests\ShiftTemplate\UpdateShiftTemplateRequest;
 use Carbon\Carbon;
-
 use Illuminate\Http\JsonResponse;
 
 class ShiftRepository implements ShiftRepositoryInterface
@@ -75,7 +74,7 @@ class ShiftRepository implements ShiftRepositoryInterface
     {
 
         $shiftTemplate = $this->getShiftTemplate($id);
-
+        $shiftTemplate->shiftAssignments()->delete();
         $shiftTemplate->shifts()->delete();
         $shiftTemplate->delete();
 
@@ -125,7 +124,7 @@ class ShiftRepository implements ShiftRepositoryInterface
         $workerId = $request->user_id;
         $shiftTemplateId = $request->shift_id;
 
-        $shiftAssignment = ShiftAssignment::find($id);
+        $shiftAssignment = ShiftAssignment::findOrFail($id);
         if (!$shiftAssignment) {
             return response()->json(['message' => 'Vardiya ataması bulunamadı.'], 404);
         }

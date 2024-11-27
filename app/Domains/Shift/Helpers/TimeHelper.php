@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Helpers;
+namespace App\Domains\Shift\Helpers;
 
 use Carbon\Carbon;
 
