@@ -1,11 +1,18 @@
 <script setup>
-import { ref } from 'vue';
+import { ref,computed } from 'vue';
 import AppMenuItem from './AppMenuItem.vue';
+import { useStore } from 'vuex';
+const store = useStore();
+
+const userRole = computed(() => store.state.user.role);
 
 const model = ref([
+
     {
         label: 'Home',
-        items: [{ label: 'Ana Sayfa', icon: 'pi pi-fw pi-home', to: '/sys' }]
+        items: [
+            { label: 'Ana Sayfa', icon: 'pi pi-fw pi-home', to: '/sys' }
+        ]
     },
     {
 
@@ -106,22 +113,57 @@ const model = ref([
             }
         ]
     },
-    {
 
+
+    {
         items: [
             {
                 label: 'Üretim Ekle',
                 icon: 'pi pi-chart-line',
-                items: [
-                    { label: 'Üretim Ekle', icon: 'pi pi-chart-line', to: '/sys/worker/production' },
-                    { label: 'Vardiyalar', icon: 'pi pi-calendar-plus', to: '/sys/worker/shifts' },
-
-                ]
+                to: '/sys/worker/production'
             }
         ]
     },
+    {
+        items: [
+            {
+                label: 'Vardiyalar',
+                icon: 'pi pi-calendar-plus',
+                to: '/sys/worker/shifts'
+            }
+        ]
+    }
 
 ]);
+
+// Kullanıcının rolüne göre model üzerinde filtreleme yapıyoruz
+if (userRole.value !== 'admin') {
+    // Admin olmayan kullanıcılar için 'Kullanıcı Yönetimi' sekmesini kaldırıyoruz
+    model.value = model.value.filter(menu => {
+        if (menu.items) {
+            menu.items = menu.items.filter(subMenu =>
+                subMenu.label !== 'Kullanıcı Yönetimi' &&
+                subMenu.label !== 'PACS Yönetimi' &&
+                subMenu.label !== 'Vardiya Yönetimi' &&
+                subMenu.label !== 'Üretim Yönetimi' &&
+                subMenu.label !== 'Stok Yönetimi' &&
+                subMenu.label !== 'Satış Yönetimi' &&
+                subMenu.label !== 'Raporlar'
+            );
+        }
+        return menu.items.length > 0 || !menu.items; // Eğer menüde eleman varsa göster
+    });
+}
+
+if (userRole.value !== 'worker') {
+    // Worker olmayan kullanıcılar için 'Üretim Ekle' sekmesini kaldırıyoruz
+    model.value = model.value.filter(menu => {
+        if (menu.items) {
+            menu.items = menu.items.filter(subMenu => subMenu.label !== 'Üretim Ekle' && subMenu.label !== 'Vardiyalar');
+        }
+        return menu.items.length > 0 || !menu.items; // Eğer menüde eleman varsa göster
+    });
+}
 </script>
 
 <template>
