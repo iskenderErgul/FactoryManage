@@ -26,7 +26,8 @@
                     <template #body="slotProps">
                         <Button icon="pi pi-info-circle" outlined rounded class="mr-2" @click="openSaleDetailDialog(slotProps.data)" />
                         <Button icon="pi pi-pencil" outlined rounded class="mr-2" @click="openUpdateSaleDialog(slotProps.data)" />
-                        <Button icon="pi pi-trash" outlined rounded severity="danger" @click="confirmDeleteSale(slotProps.data)" />
+                        <Button icon="pi pi-trash" outlined rounded class="mr-2" severity="danger" @click="confirmDeleteSale(slotProps.data)" />
+                        <Button icon="pi pi-print" outlined rounded  severity="info"   @click="openPrintDailog(slotProps.data)" />
                     </template>
                 </Column>
             </DataTable>
@@ -250,11 +251,73 @@
             </div>
         </Dialog>
 
+        <Dialog v-model:visible="printSale" maximizable modal  :style="{ width: '50rem' }" :breakpoints="{ '1199px': '75vw', '575px': '90vw' }">
+
+            <div class="p-8 bg-gray-800 text-white rounded-lg shadow-lg">
+                <!-- Fatura Başlık ve Logo -->
+                <div class="flex justify-content-between items-center mb-5">
+
+                    <div>
+                        <img src="../../../../public/Logo.png" alt="Logo" class="w-6 h-6" />
+                    </div>
+                    <div class="flex flex-column align-items-center justify-content-center w-4 ">
+                        <h2 class="text-3xl font-bold  text-black-alpha-90">Fatura</h2>
+                        <p class="text-sm text-gray-400">Fatura No: {{generateRandomNumber() }}</p>
+                        <p class="text-sm text-gray-400 mr ">Fatura Tarihi : {{ selectedPrintSales.sale_date }}</p>
+                    </div>
+                </div>
+
+                <!-- Müşteri Bilgileri -->
+                <div class="mb-6">
+                    <h3 class="text-xl font-semibold text-black-alpha-90">Müşteri Bilgileri</h3>
+                    <p class="text-gray-400">Ad: {{ selectedPrintSales.customer.name }}</p>
+                    <p class="text-gray-400">Adres: {{ selectedPrintSales.customer.address }}</p>
+                    <p class="text-gray-400">E-posta: {{ selectedPrintSales.customer.email }}</p>
+                </div>
+
+                <!-- Ürün Listesi -->
+                <div class="mb-6">
+                    <h3 class="text-xl font-semibold text-black-alpha-90">Ürünler</h3>
+                    <table class="w-full table-auto text-gray-300">
+                        <thead>
+                        <tr class="border-b border-gray-600">
+                            <th class="p-2 text-left">Ürün Adı</th>
+                            <th class="p-2 text-left">Miktar</th>
+                            <th class="p-2 text-left">Birim Fiyat</th>
+                            <th class="p-2 text-left">Toplam</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr v-for="(product, index) in selectedPrintSales.products" :key="index" class="border-b border-gray-600">
+                            <td class="p-2">{{ product.product_name }}</td>
+                            <td class="p-2">{{ product.pivot.quantity }}</td>
+                            <td class="p-2">{{ product.pivot.price }}</td>
+                            <td class="p-2">{{ (product.pivot.quantity * product.pivot.price)}}</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+
+                <div class="mt-6 flex flex-column">
+
+                    <div class="flex justify-content-end w-full mb-2">
+                        <p class="text-xl font-bold text-left text-black-alpha-90">Toplam Tutar</p>
+                        <p class="text-lg ml-5 font-bold text-black-alpha-90">{{ calculateTotalPrice(selectedPrintSales.products) }} TL</p>
+                    </div>
+                </div>
+
+            </div>
+
+
+        </Dialog>
+
+
     </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import {ref, onMounted} from 'vue';
 import axios from 'axios';
 import Button from 'primevue/button';
 import Toolbar from 'primevue/toolbar';
@@ -266,6 +329,7 @@ import Dialog from 'primevue/dialog';
 import Toast from 'primevue/toast';
 import Dropdown from 'primevue/dropdown';
 import Calendar from "primevue/calendar";
+
 
 const customers = ref([]);
 const products = ref([]);
@@ -288,7 +352,15 @@ const productQuantity = ref(1);
 const productPrice = ref();
 const saleProducts = ref([]);
 const saleDate = ref('');
+const printSale = ref(false)
+const  selectedPrintSales  = ref();
 
+
+onMounted(() => {
+    fetchSales();
+    fetchCustomers();
+    fetchProducts();
+});
 const fetchSales = () => {
     axios.get('/api/sales')
         .then(response => {
@@ -298,6 +370,7 @@ const fetchSales = () => {
             console.error("Satışları getirirken hata:", error);
         });
 };
+
 const fetchCustomers = () => {
     axios.get('/api/customers')
         .then(response => {
@@ -307,6 +380,7 @@ const fetchCustomers = () => {
             console.error("Müşterileri getirirken hata:", error);
         });
 };
+
 const fetchProducts = () => {
     axios.get('/api/products')
         .then(response => {
@@ -317,11 +391,15 @@ const fetchProducts = () => {
         });
 };
 
-onMounted(() => {
-    fetchSales();
-    fetchCustomers();
-    fetchProducts();
-});
+const openPrintDailog = (data) => {
+    selectedPrintSales.value = data;
+    console.log('selectedPrintSales',selectedPrintSales.value);
+    printSale.value=true;
+}
+
+const generateRandomNumber = () => {
+    return Math.floor(Math.random() * 1000000); // 0 ile 999999 arasında rastgele sayı
+};
 
 const openNew = () => {
     sale.value = {};
@@ -354,6 +432,7 @@ const openUpdateSaleDialog = (data) => {
     updateSaleDialog.value = true;
 
 }
+
 const openEditDialog = (product) => {
     editingProduct.value = { ...product };
     editingProduct.value.price = parseFloat(editingProduct.value.price);
@@ -538,8 +617,6 @@ const deleteSelectedSales = () => {
     selectedSales.value = [];
 };
 
-
-
 const exportCSV = () => {
     axios.get('/api/sales-export', { responseType: 'blob' })
         .then(response => {
@@ -573,5 +650,10 @@ const exportCSV = () => {
 <style scoped>
 .card {
     margin: 2rem 0;
+}
+@media print {
+    .p-button {
+        display: none;
+    }
 }
 </style>
