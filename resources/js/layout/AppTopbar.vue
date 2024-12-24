@@ -74,6 +74,7 @@ const username = computed(() => {
 <template>
     <div class="layout-topbar">
         <router-link to="/sys" class="layout-topbar-logo">
+            <img src="../../../public/Logo.png" alt="Logo" class="w-2 h-2 " />
             <span>{{ username }}</span>
         </router-link>
 
