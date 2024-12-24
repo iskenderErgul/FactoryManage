@@ -269,7 +269,7 @@
 
                 <!-- Müşteri Bilgileri -->
                 <div class="mb-6">
-                    <h3 class="text-xl font-semibold text-black-alpha-90">Müşteri Bilgileri</h3>
+                    <h3 class="text-xl font-semibold font-bold  text-black-alpha-90">Müşteri Bilgileri</h3>
                     <p class="text-gray-400">Ad: {{ selectedPrintSales.customer.name }}</p>
                     <p class="text-gray-400">Adres: {{ selectedPrintSales.customer.address }}</p>
                     <p class="text-gray-400">E-posta: {{ selectedPrintSales.customer.email }}</p>
@@ -277,7 +277,7 @@
 
                 <!-- Ürün Listesi -->
                 <div class="mb-6">
-                    <h3 class="text-xl font-semibold text-black-alpha-90">Ürünler</h3>
+                    <h3 class="text-xl font-bold  font-semibold text-black-alpha-90">Ürünler</h3>
                     <table class="w-full table-auto text-gray-300">
                         <thead>
                         <tr class="border-b border-gray-600">
