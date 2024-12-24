@@ -24,6 +24,7 @@ import SalesReports from "@/components/Reports/SalesReports.vue";
 import StockReports from "@/components/Reports/StockReports.vue";
 import FinancialReports from "@/components/Reports/FinancialReports.vue";
 import ShiftAssignments from "@/components/ShiftManagement/ShiftAssignments.vue";
+import ProductionForWorkers from "@/components/WorkerPages/ProductionForWorkers.vue";
 
 
 const routes = [
@@ -156,6 +157,18 @@ const routes = [
                 name : 'financialReport',
                 component : FinancialReports
             },
+
+//Worker Pages
+            {
+                path : '/sys/worker/production',
+                name : 'productionForWorker',
+                component : ProductionForWorkers
+            },
+            {
+                path : '/sys/worker/shifts',
+                name : 'workerShifts',
+                component : Shifts
+            }
 
         ]
     },

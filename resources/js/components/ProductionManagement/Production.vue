@@ -192,7 +192,7 @@ const filters = ref({
 const submitted = ref(false);
 
 // Üretimleri alma
-const fetchProductions = () => {
+const fetchProductions = () =>  {
     axios.get('/api/productions')
         .then(response => {
             productions.value = response.data;

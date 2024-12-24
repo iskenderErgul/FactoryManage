@@ -106,6 +106,20 @@ const model = ref([
             }
         ]
     },
+    {
+
+        items: [
+            {
+                label: 'Üretim Ekle',
+                icon: 'pi pi-chart-line',
+                items: [
+                    { label: 'Üretim Ekle', icon: 'pi pi-chart-line', to: '/sys/worker/production' },
+                    { label: 'Vardiyalar', icon: 'pi pi-calendar-plus', to: '/sys/worker/shifts' },
+
+                ]
+            }
+        ]
+    },
 
 ]);
 </script>
