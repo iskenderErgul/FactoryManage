@@ -14,7 +14,8 @@ return new class extends Migration
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
             $table->foreignId('customer_id')->constrained('customers')->onDelete('cascade'); // Müşteri ID'si (foreign key)
-            $table->enum('status', ['sipariş alındı', 'hazırlanıyor', 'teslim edildi'])
+            $table->timestamp('order_date')->nullable();
+            $table->enum('status', ['Sipariş alındı', 'Hazırlanıyor', 'Teslim edildi'])
                 ->default('sipariş alındı'); // Sipariş durumu
             $table->text('notes')->nullable(); // Ek notlar (isteğe bağlı)
             $table->timestamps();

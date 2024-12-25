@@ -93,7 +93,8 @@ const model = ref([
                 items: [
                     { label: 'Satış Yönetimi', icon: 'pi pi-shopping-cart', to: '/sys/sales' },
                     { label: 'Satış Logları', icon: 'pi pi-file', to: '/sys/sales-log' },
-                    { label: 'Müşteri Yönetimi', icon: 'pi pi-users', to: '/sys/customers' }
+                    { label: 'Müşteri Yönetimi', icon: 'pi pi-users', to: '/sys/customers' },
+                    { label: 'Sipariş Yönetimi', icon: 'pi pi-book', to: '/sys/orders' }
                 ]
             }
         ]

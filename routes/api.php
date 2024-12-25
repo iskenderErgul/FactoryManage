@@ -6,6 +6,7 @@ use App\Http\Controllers\Costs\CostsController;
 use App\Http\Controllers\Customer\CustomerController;
 use App\Http\Controllers\Exports\ExportController;
 use App\Http\Controllers\Machines\MachinesController;
+use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PacsEntry\PacsEntryController;
 use App\Http\Controllers\Product\ProductController;
 use App\Http\Controllers\Production\ProductionController;
@@ -126,6 +127,17 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/shift/shift-assignments',[ShiftAssignmentController::class, 'addShiftAssignments']);
     Route::delete('/shift/shift-assignments/{id}',[ShiftAssignmentController::class, 'destroyShiftAssignments']);
     Route::put('/shift/shift-assignments/{id}',[ShiftAssignmentController::class, 'updateShiftAssignments']);
+
+
+
+    Route::get('/orders',[OrderController::class, 'index']);
+    Route::post('/orders', [OrderController::class, 'store']);
+    Route::put('/orders/{id}', [OrderController::class, 'update']);
+    Route::delete('/orders/{id}', [OrderController::class, 'destroy']);
+
+
+
+
 
 
 

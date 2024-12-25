@@ -25,6 +25,7 @@ import StockReports from "@/components/Reports/StockReports.vue";
 import FinancialReports from "@/components/Reports/FinancialReports.vue";
 import ShiftAssignments from "@/components/ShiftManagement/ShiftAssignments.vue";
 import ProductionForWorkers from "@/components/WorkerPages/ProductionForWorkers.vue";
+import Orders from "@/components/SalesManagement/Orders.vue";
 
 
 const routes = [
@@ -134,6 +135,11 @@ const routes = [
                 path : '/sys/customers',
                 name : 'customers',
                 component : Customers
+            },
+            {
+                path : '/sys/orders',
+                name : 'orders',
+                component : Orders
             },
 
 // Reports
