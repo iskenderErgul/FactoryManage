@@ -6,7 +6,7 @@ use App\Http\Controllers\Costs\CostsController;
 use App\Http\Controllers\Customer\CustomerController;
 use App\Http\Controllers\Exports\ExportController;
 use App\Http\Controllers\Machines\MachinesController;
-use App\Http\Controllers\OrderController;
+use App\Http\Controllers\Orders\OrderController;
 use App\Http\Controllers\PacsEntry\PacsEntryController;
 use App\Http\Controllers\Product\ProductController;
 use App\Http\Controllers\Production\ProductionController;

@@ -2,9 +2,9 @@
 
 namespace App\Domains\Product\Models;
 
+use App\Domains\Orders\Models\Order;
 use App\Domains\Sales\Models\Sales;
 use App\Domains\Sales\Models\SalesProduct;
-use App\Models\Order;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;

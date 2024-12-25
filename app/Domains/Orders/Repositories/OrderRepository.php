@@ -1,16 +1,18 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Domains\Orders\Repositories;
 
-use App\Models\Order;
-use App\Models\OrderProduct;
+use App\Domains\Orders\Interfaces\OrderRepositoryInterface;
+use App\Domains\Orders\Models\Order;
+use App\Domains\Orders\Models\OrderProduct;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-class OrderController extends Controller
+class OrderRepository implements OrderRepositoryInterface
 {
+
     public function index(): JsonResponse
     {
         $orders =Order::with('products','customer')->get();
@@ -112,5 +114,4 @@ class OrderController extends Controller
         $order->delete();
         return response()->json(['success' => true, 'message' => 'Sipariş başarıyla silindi'], 200);
     }
-
 }

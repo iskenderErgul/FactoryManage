@@ -4,7 +4,6 @@
             <Toolbar class="mb-4">
                 <template #start>
                     <Button label="Yeni Sipariş" icon="pi pi-plus" severity="success" class="mr-2" @click="openNew" />
-                    <Button label="Sil" icon="pi pi-trash" severity="danger" @click="confirmDeleteSelected" :disabled="!selectedOrders || !selectedOrders.length" />
                 </template>
             </Toolbar>
 
