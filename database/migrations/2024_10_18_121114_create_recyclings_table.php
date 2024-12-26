@@ -13,11 +13,11 @@ return new class extends Migration
     {
         Schema::create('recyclings', function (Blueprint $table) {
             $table->id();
-            $table->string('month'); // Aylık bazda kayıt için
-            $table->string('material_type'); // Malzeme türü
-            $table->year('year'); // Yıl
-            $table->integer('recycling_quantity'); // Geri dönüşüm miktarı
-            $table->timestamps(); // Oluşturulma ve güncellenme zamanları
+            $table->string('company_name');
+            $table->string('material_type');
+            $table->date('recycling_date');
+            $table->integer('recycling_quantity');
+            $table->timestamps();
         });
     }
 

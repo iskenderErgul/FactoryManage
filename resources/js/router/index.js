@@ -26,6 +26,7 @@ import FinancialReports from "@/components/Reports/FinancialReports.vue";
 import ShiftAssignments from "@/components/ShiftManagement/ShiftAssignments.vue";
 import ProductionForWorkers from "@/components/WorkerPages/ProductionForWorkers.vue";
 import Orders from "@/components/SalesManagement/Orders.vue";
+import Recyclings from "@/components/Recycle/Recyclings.vue";
 
 
 const routes = [
@@ -162,6 +163,13 @@ const routes = [
                 path : '/sys/reports/financial',
                 name : 'financialReport',
                 component : FinancialReports
+            },
+
+//Recyclings
+            {
+                path : '/sys/recycling',
+                name : 'recycling',
+                component : Recyclings
             },
 
 //Worker Pages

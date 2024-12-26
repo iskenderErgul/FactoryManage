@@ -2,8 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\Recycling;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Domains\Recyclings\Models\Recycling;
 use Illuminate\Database\Seeder;
 
 class RecyclingSeeder extends Seeder

@@ -114,7 +114,15 @@ const model = ref([
             }
         ]
     },
-
+    {
+        items: [
+            {
+                label: 'Geri Dönüşüm',
+                icon: 'pi pi-replay',
+                to: '/sys/recycling'
+            }
+        ]
+    },
 
     {
         items: [
@@ -135,6 +143,7 @@ const model = ref([
         ]
     }
 
+
 ]);
 
 // Kullanıcının rolüne göre model üzerinde filtreleme yapıyoruz
@@ -149,6 +158,7 @@ if (userRole.value !== 'admin') {
                 subMenu.label !== 'Üretim Yönetimi' &&
                 subMenu.label !== 'Stok Yönetimi' &&
                 subMenu.label !== 'Satış Yönetimi' &&
+                subMenu.label !== 'Geri Dönüşüm' &&
                 subMenu.label !== 'Raporlar'
             );
         }

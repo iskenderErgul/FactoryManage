@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models;
+namespace App\Domains\Recyclings\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -10,9 +10,9 @@ class Recycling extends Model
     use HasFactory;
 
     protected $fillable = [
-        'month',
+        'company_name',
         'material_type',
-        'year',
+        'recycling_date',
         'recycling_quantity',
     ];
 }

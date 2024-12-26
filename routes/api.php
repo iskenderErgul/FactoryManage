@@ -10,8 +10,8 @@ use App\Http\Controllers\Orders\OrderController;
 use App\Http\Controllers\PacsEntry\PacsEntryController;
 use App\Http\Controllers\Product\ProductController;
 use App\Http\Controllers\Production\ProductionController;
+use App\Http\Controllers\Recyclings\RecyclingsController;
 use App\Http\Controllers\Sales\SalesController;
-use App\Http\Controllers\Sales\SalesProductController;
 use App\Http\Controllers\Shift\ShiftController;
 use App\Http\Controllers\ShiftAssignment\ShiftAssignmentController;
 use App\Http\Controllers\Stock\StockController;
@@ -50,6 +50,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/machines/{id}', [MachinesController::class, 'update']);
     Route::delete('/machines/{id}', [MachinesController::class, 'destroy']);
     Route::post('/machines/delete', [MachinesController::class, 'destroySelected']);
+
+    Route::get('/recyclings', [RecyclingsController::class, 'index']);
+    Route::post('/recyclings', [RecyclingsController::class, 'store']);
+    Route::get('/recyclings/{id}', [RecyclingsController::class, 'show']);
+    Route::put('/recyclings/{id}', [RecyclingsController::class, 'update']);
+    Route::delete('/recyclings/{id}', [RecyclingsController::class, 'destroy']);
+    Route::post('/recyclings/delete', [RecyclingsController::class, 'destroySelected']);
 
 
 
