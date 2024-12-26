@@ -91,11 +91,9 @@
                         <div class="p-field">
                             <label for="product_name">Ürün Adı</label>
                             <InputText v-model="editingProduct.product_name" />
+<!--                            <Dropdown id="productSelect" v-model="editingProduct.product_name" :options="products" optionLabel="product_name" placeholder="Ürün Seçin" />-->
                         </div>
-                        <div class="p-field">
-                            <label for="product_type">Ürün Türü</label>
-                            <InputText v-model="editingProduct.product_type" />
-                        </div>
+
                         <div class="p-field">
                             <label for="quantity">Miktar</label>
                             <InputNumber v-model="editingProduct.pivot.quantity" mode="decimal" />
