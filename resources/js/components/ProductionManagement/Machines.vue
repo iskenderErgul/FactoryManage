@@ -1,15 +1,14 @@
 <template>
     <div>
-        <h1>Machines</h1>
         <div class="card">
             <Toolbar class="mb-4">
                 <template #start>
-                    <Button label="New" icon="pi pi-plus" severity="success" class="mr-2" @click="openNew" />
-                    <Button label="Delete" icon="pi pi-trash" severity="danger" @click="confirmDeleteSelected" :disabled="!selectedMachines || !selectedMachines.length" />
+                    <Button label="Yeni" icon="pi pi-plus" severity="success" class="mr-2" @click="openNew" />
+                    <Button label="Sil" icon="pi pi-trash" severity="danger" @click="confirmDeleteSelected" :disabled="!selectedMachines || !selectedMachines.length" />
                 </template>
                 <template #end>
-                    <FileUpload mode="basic" accept="image/*" :maxFileSize="1000000" label="Import" chooseLabel="Import" class="mr-2 inline-block" />
-                    <Button label="Export" icon="pi pi-upload" severity="help" @click="exportCSV" />
+                    <FileUpload mode="basic" accept="image/*" :maxFileSize="1000000" label="Import" chooseLabel="İçe Aktar" class="mr-2 inline-block" />
+                    <Button label="Dışa Aktar" icon="pi pi-upload" severity="help" @click="exportCSV" />
                 </template>
             </Toolbar>
             <DataTable ref="dt" :value="machines" v-model:selection="selectedMachines" dataKey="id"
@@ -38,7 +37,7 @@
         <!-- Machine Details Dialog -->
         <Dialog v-model:visible="machineDialog" :style="{width: '450px'}" header="Machine Details" :modal="true" class="p-fluid">
             <div class="field">
-                <label for="name">Machine Name</label>
+                <label for="name">Makina Adı</label>
                 <InputText id="name" v-model.trim="machine.name" required :invalid="submitted && !machine.name" />
                 <small class="p-error" v-if="submitted && !machine.name">Name is required.</small>
             </div>
@@ -52,11 +51,11 @@
         <Dialog v-model:visible="deleteMachineDialog" :style="{width: '450px'}" header="Confirm" :modal="true">
             <div class="confirmation-content">
                 <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem" />
-                <span v-if="machine">Are you sure you want to delete <b>{{machine.name}}</b>?</span>
+                <span v-if="machine">Silmek istediğinizden emin misiniz? <b>{{machine.name}}</b>?</span>
             </div>
             <template #footer>
-                <Button label="No" icon="pi pi-times" text @click="deleteMachineDialog = false" />
-                <Button label="Yes" icon="pi pi-check" text @click="deleteMachine" />
+                <Button label="Hayır" icon="pi pi-times" text @click="deleteMachineDialog = false" />
+                <Button label="Evet" icon="pi pi-check" text @click="deleteMachine" />
             </template>
         </Dialog>
 
@@ -64,11 +63,11 @@
         <Dialog v-model:visible="deleteMachinesDialog" :style="{width: '450px'}" header="Confirm" :modal="true">
             <div class="confirmation-content">
                 <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem" />
-                <span>Are you sure you want to delete the selected machines?</span>
+                <span>Seçilen makinaları silmek istediğinizden emin misiniz?</span>
             </div>
             <template #footer>
-                <Button label="No" icon="pi pi-times" text @click="deleteMachinesDialog = false" />
-                <Button label="Yes" icon="pi pi-check" text @click="deleteSelectedMachines" />
+                <Button label="Hayır" icon="pi pi-times" text @click="deleteMachinesDialog = false" />
+                <Button label="Evet" icon="pi pi-check" text @click="deleteSelectedMachines" />
             </template>
         </Dialog>
     </div>
@@ -137,20 +136,20 @@ const saveMachine = () => {
         if (machine.value.id) {
             axios.put(`/api/machines/${machine.value.id}`, machine.value)
                 .then(() => {
-                    toast.value.add({ severity: 'success', summary: 'Success', detail: 'Machine updated successfully', life: 3000 });
+                    toast.value.add({ severity: 'success', summary: 'Success', detail: 'Makina başarıyla güncellendi', life: 3000 });
                     fetchMachines();
                 });
         } else {
             axios.post('/api/machines', machine.value)
                 .then(() => {
-                    toast.value.add({ severity: 'success', summary: 'Success', detail: 'Machine added successfully', life: 3000 });
+                    toast.value.add({ severity: 'success', summary: 'Success', detail: 'Makina başarıyla güncellendi', life: 3000 });
                     fetchMachines();
                 });
         }
         machineDialog.value = false;
         machine.value = {};
     } else {
-        toast.value.add({ severity: 'error', summary: 'Error', detail: 'Machine name is required', life: 3000 });
+        toast.value.add({ severity: 'error', summary: 'Error', detail: 'Makina adı giriniz!', life: 3000 });
     }
 };
 
@@ -167,7 +166,7 @@ const confirmDeleteMachine = (machineData) => {
 const deleteMachine = () => {
     axios.delete(`/api/machines/${machine.value.id}`)
         .then(() => {
-            toast.value.add({ severity: 'success', summary: 'Success', detail: 'Machine deleted successfully', life: 3000 });
+            toast.value.add({ severity: 'success', summary: 'Success', detail: 'Makina Başarıyla Silindi', life: 3000 });
             fetchMachines();
             deleteMachineDialog.value = false;
         });

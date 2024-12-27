@@ -167,20 +167,20 @@ const saveSupplier = () => {
         if (supplier.value.id) {
             axios.put(`/api/suppliers/${supplier.value.id}`, supplier.value)
                 .then(() => {
-                    toast.value.add({ severity: 'success', summary: 'Success', detail: 'Supplier updated successfully', life: 3000 });
+                    toast.value.add({ severity: 'success', summary: 'Başarılı', detail: 'Tedarikçi başarıyla güncellendi', life: 3000 });
                     fetchSuppliers();
                 });
         } else {
             axios.post('/api/suppliers', supplier.value)
                 .then(() => {
-                    toast.value.add({ severity: 'success', summary: 'Success', detail: 'Supplier added successfully', life: 3000 });
+                    toast.value.add({ severity: 'success', summary: 'Başarılı', detail: 'Tedarikçi başarıyla eklendi', life: 3000 });
                     fetchSuppliers();
                 });
         }
         supplierDialog.value = false;
         supplier.value = {};
     } else {
-        toast.value.add({ severity: 'error', summary: 'Error', detail: 'All fields are required', life: 3000 });
+        toast.value.add({ severity: 'error', summary: 'Hata', detail: 'Tüm alanlar zorunludur', life: 3000 });
     }
 };
 
@@ -197,7 +197,7 @@ const confirmDeleteSupplier = (supplierData) => {
 const deleteSupplier = () => {
     axios.delete(`/api/suppliers/${supplier.value.id}`)
         .then(() => {
-            toast.value.add({ severity: 'success', summary: 'Success', detail: 'Supplier deleted successfully', life: 3000 });
+            toast.value.add({ severity: 'success', summary: 'Başarılı', detail: 'Tedarikçi başarıyla silindi', life: 3000 });
             fetchSuppliers();
             deleteSupplierDialog.value = false;
         });
@@ -211,7 +211,7 @@ const deleteSelectedSuppliers = () => {
     const supplierIds = selectedSuppliers.value.map(supplier => supplier.id);
     axios.post('/api/suppliers/delete', { ids: supplierIds })
         .then(() => {
-            toast.value.add({ severity: 'success', summary: 'Success', detail: 'Selected suppliers deleted successfully', life: 3000 });
+            toast.value.add({ severity: 'success', summary: 'Başarılı', detail: 'Seçilen tedarikçiler başarıyla silindi', life: 3000 });
             fetchSuppliers();
             deleteSuppliersDialog.value = false;
             selectedSuppliers.value = [];

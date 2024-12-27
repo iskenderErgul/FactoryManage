@@ -1,4 +1,4 @@
-<template>
+    <template>
     <div>
         <div class="card">
             <Toolbar class="mb-4">
@@ -205,7 +205,7 @@ const fetchProductions = () =>  {
 const formattedShifts = computed(() => {
     return shifts.value.map(shift => ({
         id: shift.id,
-        label: `${shift.start_time} - ${shift.end_time}` // Burada formatlıyoruz
+        label: `${shift.template.start_time} - ${shift.template.end_time}` // Burada formatlıyoruz
     }));
 });
 

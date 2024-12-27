@@ -88,9 +88,11 @@ class StockMovementService
         $difference = $newQuantity - $previousQuantity;
 
         if ($difference > 0) {
-            $this->reduceStock($productId, $difference, 'Satış güncelleme');
-        } elseif ($difference < 0) {
-            $this->increaseStock($productId, abs($difference));
+            $this->increaseStock($productId, $difference);
+        }
+
+        elseif ($difference < 0) {
+            $this->reduceStock($productId, abs($difference), 'Satış güncelleme');
         }
     }
 }

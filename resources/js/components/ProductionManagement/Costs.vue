@@ -121,7 +121,7 @@ const submitted = ref(false);
 const fetchCosts = () => {
     axios.get('/api/costs')
         .then(response => {
-            costs.value = response.data;
+            costs.value = response.data.reverse();
         })
         .catch(error => {
             console.error("Maliyetleri getirirken hata:", error);

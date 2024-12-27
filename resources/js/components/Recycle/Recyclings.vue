@@ -149,20 +149,20 @@ const saveRecycling = () => {
         if (recycling.value.id) {
             axios.put(`/api/recyclings/${recycling.value.id}`, recycling.value)
                 .then(() => {
-                    toast.value.add({ severity: 'success', summary: 'Success', detail: 'Recycling updated successfully', life: 3000 });
+                    toast.value.add({ severity: 'success', summary: 'Başarılı', detail: 'Geri dönüşüm başarıyla güncellendi', life: 3000 });
                     fetchRecyclings();
                 });
         } else {
             axios.post('/api/recyclings', recycling.value)
                 .then(() => {
-                    toast.value.add({ severity: 'success', summary: 'Success', detail: 'Recycling added successfully', life: 3000 });
+                    toast.value.add({ severity: 'success', summary: 'Başarılı', detail: 'Geri dönüşüm başarıyla eklendi', life: 3000 });
                     fetchRecyclings();
                 });
         }
         recyclingDialog.value = false;
         recycling.value = {};
     } else {
-        toast.value.add({ severity: 'error', summary: 'Error', detail: 'All fields are required', life: 3000 });
+        toast.value.add({ severity: 'error', summary: 'Hata', detail: 'Tüm alanlar zorunludur', life: 3000 });
     }
 };
 
@@ -179,7 +179,7 @@ const confirmDeleteRecycling = (recyclingData) => {
 const deleteRecycling = () => {
     axios.delete(`/api/recyclings/${recycling.value.id}`)
         .then(() => {
-            toast.value.add({ severity: 'success', summary: 'Success', detail: 'Recycling deleted successfully', life: 3000 });
+            toast.value.add({ severity: 'success', summary: 'Başarılı', detail: 'Geri dönüşüm başarıyla silindi', life: 3000 });
             fetchRecyclings();
             deleteRecyclingDialog.value = false;
         });
@@ -193,7 +193,7 @@ const deleteSelectedRecyclings = () => {
     const recyclingIds = selectedRecyclings.value.map(recycling => recycling.id);
     axios.post('/api/recyclings/delete', { ids: recyclingIds })
         .then(() => {
-            toast.value.add({ severity: 'success', summary: 'Success', detail: 'Selected recyclings deleted successfully', life: 3000 });
+            toast.value.add({ severity: 'success', summary: 'Başarılı', detail: 'Seçilen geri dönüşümler başarıyla silindi', life: 3000 });
             fetchRecyclings();
             deleteRecyclingsDialog.value = false;
             selectedRecyclings.value = [];

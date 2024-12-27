@@ -28,7 +28,7 @@ class WorkerController extends Controller
      */
     public function getShifts(): JsonResponse
     {
-        $shifts = Shift::all();
+        $shifts = Shift::with('template')->get();
         return response()->json($shifts);
     }
 }

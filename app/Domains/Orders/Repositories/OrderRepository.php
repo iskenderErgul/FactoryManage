@@ -59,7 +59,7 @@ class OrderRepository implements OrderRepositoryInterface
     public function update(Request $request, $id): JsonResponse
     {
 
-        $status = $request->status['label'];
+        $status = $request->status['label'] ?? 'sipariş alındı';
         $customerId = $request->customer_id;
         $orderDate = Carbon::parse($request->order_date)->setTimezone('Asia/Istanbul')->format('Y-m-d H:i:s');
         $products = $request->products;

@@ -124,7 +124,7 @@ const submitted = ref(false);
 const fetchProducts = () => {
     axios.get('/api/products')
         .then(response => {
-            products.value = response.data;
+            products.value = response.data.reverse();
         })
         .catch(error => {
             console.error("Ürünleri getirirken hata:", error);

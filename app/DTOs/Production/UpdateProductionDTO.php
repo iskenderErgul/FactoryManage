@@ -16,6 +16,7 @@ class UpdateProductionDTO
 
     public static function buildFromRequest(UpdateProductionRequest $request): self
     {
+
         $updateProductionDTO = new self();
         $updateProductionDTO->id = $request->input('id');
         $updateProductionDTO->product_id = $request->input('product_id');

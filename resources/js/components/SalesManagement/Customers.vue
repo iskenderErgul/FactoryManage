@@ -12,9 +12,8 @@
             </Toolbar>
             <DataTable ref="dt" :value="customers" v-model:selection="selectedCustomers" dataKey="id"
                        :paginator="true" :rows="10" :filters="filters"
-                       paginatorTemplate="İlk Sayfa Bağlantısı Önceki Sayfa Bağlantısı Sayfa Bağlantıları Sonraki Sayfa Bağlantısı Mevcut Sayfa Raporu Sayfa Başına Satır Aşağı Aşağı"
-                       :rowsPerPageOptions="[5,10,25]"
-                       currentPageReportTemplate="Mevcut {first} ile {last} arasında, toplam {totalRecords} müşteri">
+                       paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown" :rowsPerPageOptions="[5,10,25]"
+                       currentPageReportTemplate="Showing {first} to {last} of {totalRecords} suppliers">
                 <template #header>
                     <div class="p-inputgroup">
                         <span class="p-inputgroup-addon"><i class="pi pi-search"></i></span>
@@ -117,7 +116,7 @@ const submitted = ref(false);
 const fetchCustomers = () => {
     axios.get('/api/customers')
         .then(response => {
-            customers.value = response.data.reverse();
+            customers.value = response.data;
         })
         .catch(error => {
             console.error("Müşterileri getirirken hata:", error);
