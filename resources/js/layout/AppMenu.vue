@@ -117,11 +117,22 @@ const model = ref([
     {
         items: [
             {
-                label: 'Geri Dönüşüm',
+                label: 'Geri Dönüşüm Kayıtları',
                 icon: 'pi pi-replay',
                 to: '/sys/recycling'
             }
         ]
+
+    },
+    {
+        items: [
+            {
+                label: 'Hammadde Tedarik Kayıtları',
+                icon: 'pi pi-truck',
+                to: '/sys/suppliers'
+            }
+        ]
+
     },
 
     {
@@ -146,7 +157,7 @@ const model = ref([
 
 ]);
 
-// Kullanıcının rolüne göre model üzerinde filtreleme yapıyoruz
+
 if (userRole.value !== 'admin') {
     // Admin olmayan kullanıcılar için 'Kullanıcı Yönetimi' sekmesini kaldırıyoruz
     model.value = model.value.filter(menu => {
@@ -158,11 +169,12 @@ if (userRole.value !== 'admin') {
                 subMenu.label !== 'Üretim Yönetimi' &&
                 subMenu.label !== 'Stok Yönetimi' &&
                 subMenu.label !== 'Satış Yönetimi' &&
-                subMenu.label !== 'Geri Dönüşüm' &&
+                subMenu.label !== 'Geri Dönüşüm Kayıtları' &&
+                subMenu.label !== 'Hammadde Tedarik Kayıtları' &&
                 subMenu.label !== 'Raporlar'
             );
         }
-        return menu.items.length > 0 || !menu.items; // Eğer menüde eleman varsa göster
+        return menu.items.length > 0 || !menu.items;
     });
 }
 
@@ -172,7 +184,7 @@ if (userRole.value !== 'worker') {
         if (menu.items) {
             menu.items = menu.items.filter(subMenu => subMenu.label !== 'Üretim Ekle' && subMenu.label !== 'Vardiyalar');
         }
-        return menu.items.length > 0 || !menu.items; // Eğer menüde eleman varsa göster
+        return menu.items.length > 0 || !menu.items;
     });
 }
 </script>

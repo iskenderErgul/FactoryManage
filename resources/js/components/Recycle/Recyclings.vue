@@ -3,8 +3,8 @@
         <div class="card">
             <Toolbar class="mb-4">
                 <template #start>
-                    <Button label="New" icon="pi pi-plus" severity="success" class="mr-2" @click="openNew" />
-                    <Button label="Delete" icon="pi pi-trash" severity="danger" @click="confirmDeleteSelected" :disabled="!selectedRecyclings || !selectedRecyclings.length" />
+                    <Button label="Yeni Kayıt Ekle" icon="pi pi-plus" severity="success" class="mr-2" @click="openNew" />
+                    <Button label="Sil" icon="pi pi-trash" severity="danger" @click="confirmDeleteSelected" :disabled="!selectedRecyclings || !selectedRecyclings.length" />
                 </template>
                 <template #end>
                     <FileUpload mode="basic" accept=".csv" :maxFileSize="1000000" label="Import" chooseLabel="Import" class="mr-2 inline-block" />
@@ -38,30 +38,30 @@
         <Toast ref="toast" />
 
         <!-- Recycling Details Dialog -->
-        <Dialog v-model:visible="recyclingDialog" :style="{width: '450px'}" header="Recycling Details" :modal="true" class="p-fluid">
+        <Dialog v-model:visible="recyclingDialog" :style="{width: '450px'}" header="Geri Dönüşüm    " :modal="true" class="p-fluid">
             <div class="field">
-                <label for="company_name">Company Name</label>
+                <label for="company_name">Firma Adı</label>
                 <InputText id="company_name" v-model.trim="recycling.company_name" required :invalid="submitted && !recycling.company_name" />
                 <small class="p-error" v-if="submitted && !recycling.company_name">Company Name is required.</small>
             </div>
             <div class="field">
-                <label for="material_type">Material Type</label>
+                <label for="material_type">Ürün Tipi</label>
                 <InputText id="material_type" v-model.trim="recycling.material_type" required :invalid="submitted && !recycling.material_type" />
                 <small class="p-error" v-if="submitted && !recycling.material_type">Material Type is required.</small>
             </div>
             <div class="field">
-                <label for="recycling_date">Recycling Date</label>
+                <label for="recycling_date">Tarih</label>
                 <Calendar id="recycling_date" v-model="recycling.recycling_date" required :invalid="submitted && !recycling.recycling_date" showIcon />
                 <small class="p-error" v-if="submitted && !recycling.recycling_date">Recycling Date is required.</small>
             </div>
             <div class="field">
-                <label for="recycling_quantity">Quantity</label>
+                <label for="recycling_quantity">Miktar(KG)</label>
                 <InputText id="recycling_quantity" v-model.number="recycling.recycling_quantity" required :invalid="submitted && !recycling.recycling_quantity" />
                 <small class="p-error" v-if="submitted && !recycling.recycling_quantity">Quantity is required.</small>
             </div>
             <template #footer>
-                <Button label="Cancel" icon="pi pi-times" text @click="hideDialog" />
-                <Button label="Save" icon="pi pi-check" text @click="saveRecycling" />
+                <Button label="İptal" icon="pi pi-times" text @click="hideDialog" />
+                <Button label="Kaydet" icon="pi pi-check" text @click="saveRecycling" />
             </template>
         </Dialog>
 
@@ -120,7 +120,7 @@ const submitted = ref(false);
 const fetchRecyclings = () => {
     axios.get('/api/recyclings')
         .then(response => {
-            recyclings.value = response.data;
+            recyclings.value = response.data.reverse()  ;
         })
         .catch(error => {
             console.error("Error fetching recyclings:", error);

@@ -27,6 +27,7 @@ import ShiftAssignments from "@/components/ShiftManagement/ShiftAssignments.vue"
 import ProductionForWorkers from "@/components/WorkerPages/ProductionForWorkers.vue";
 import Orders from "@/components/SalesManagement/Orders.vue";
 import Recyclings from "@/components/Recycle/Recyclings.vue";
+import Suppliers from "@/components/Suppliers/Suppliers.vue";
 
 
 const routes = [
@@ -170,6 +171,13 @@ const routes = [
                 path : '/sys/recycling',
                 name : 'recycling',
                 component : Recyclings
+            },
+
+//Suppliers
+            {
+                path: '/sys/suppliers',
+                name: 'suppliers',
+                component: Suppliers
             },
 
 //Worker Pages

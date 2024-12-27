@@ -15,6 +15,7 @@ use App\Http\Controllers\Sales\SalesController;
 use App\Http\Controllers\Shift\ShiftController;
 use App\Http\Controllers\ShiftAssignment\ShiftAssignmentController;
 use App\Http\Controllers\Stock\StockController;
+use App\Http\Controllers\Suppliers\SuppliersController;
 use App\Http\Controllers\Users\UsersController;
 use App\Http\Controllers\Worker\WorkerController;
 use Illuminate\Http\Request;
@@ -57,6 +58,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/recyclings/{id}', [RecyclingsController::class, 'update']);
     Route::delete('/recyclings/{id}', [RecyclingsController::class, 'destroy']);
     Route::post('/recyclings/delete', [RecyclingsController::class, 'destroySelected']);
+
+    Route::get('/suppliers', [SuppliersController::class, 'index']);
+    Route::post('/suppliers', [SuppliersController::class, 'store']);
+    Route::get('/suppliers/{id}', [SuppliersController::class, 'show']);
+    Route::put('/suppliers/{id}', [SuppliersController::class, 'update']);
+    Route::delete('/suppliers/{id}', [SuppliersController::class, 'destroy']);
+    Route::post('/suppliers/delete', [SuppliersController::class, 'destroySelected']);
 
 
 
