@@ -13,7 +13,7 @@
             <DataTable ref="dt" :value="customers" v-model:selection="selectedCustomers" dataKey="id"
                        :paginator="true" :rows="10" :filters="filters"
                        paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown" :rowsPerPageOptions="[5,10,25]"
-                       currentPageReportTemplate="Showing {first} to {last} of {totalRecords} suppliers">
+                       currentPageReportTemplate="Showing {first} to {last} of {totalRecords} customers">
                 <template #header>
                     <div class="p-inputgroup">
                         <span class="p-inputgroup-addon"><i class="pi pi-search"></i></span>
@@ -26,6 +26,7 @@
                 <Column field="email" header="E-posta" sortable style="min-width:12rem"></Column>
                 <Column field="phone" header="Telefon" sortable style="min-width:10rem"></Column>
                 <Column field="address" header="Adres" sortable style="min-width:10rem"></Column>
+                <Column field="debt" header="Borç (₺)" sortable style="min-width:8rem"></Column>
                 <Column :exportable="false" style="min-width:8rem">
                     <template #body="slotProps">
                         <Button icon="pi pi-pencil" outlined rounded class="mr-2" @click="editCustomer(slotProps.data)" />
@@ -52,16 +53,19 @@
                 <label for="customerPhone">Telefon</label>
                 <InputText id="customerPhone" v-model.trim="customer.phone" />
             </div>
-
             <div class="field">
                 <label for="customerAddress">Adres</label>
                 <InputText id="customerAddress" v-model.trim="customer.address" />
+            </div>
+            <div class="field">
+                <label for="customerDebt">Borç (₺)</label>
+                <InputText id="customerDebt" v-model.trim="customer.debt" type="number" required :invalid="submitted && !customer.debt" />
+                <small class="p-error" v-if="submitted && !customer.debt">Borç zorunludur.</small>
             </div>
             <template #footer>
                 <Button label="İptal" icon="pi pi-times" text @click="hideDialog" />
                 <Button label="Kaydet" icon="pi pi-check" text @click="saveCustomer" />
             </template>
-
         </Dialog>
 
         <Dialog v-model:visible="deleteCustomerDialog" :style="{width: '450px'}" header="Onayla" :modal="true">
@@ -106,7 +110,7 @@ const customers = ref([]);
 const customerDialog = ref(false);
 const deleteCustomerDialog = ref(false);
 const deleteCustomersDialog = ref(false);
-const customer = ref({});
+const customer = ref(); // Varsayılan olarak borç sıfır
 const selectedCustomers = ref([]);
 const filters = ref({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS },
@@ -127,14 +131,14 @@ onMounted(() => {
     fetchCustomers();
 });
 
-
 const editCustomer = (customerToEdit) => {
-    customer.value = { ...customerToEdit }; // Seçilen müşteri verilerini al
-    customerDialog.value = true; // Dialog'u aç
-    submitted.value = false; // Formun durumu sıfırlansın
+    customer.value = { ...customerToEdit };
+    customerDialog.value = true;
+    submitted.value = false;
 };
+
 const openNew = () => {
-    customer.value = {};
+    customer.value = { debt: 0 };
     submitted.value = false;
     customerDialog.value = true;
 };
@@ -147,7 +151,7 @@ const hideDialog = () => {
 const saveCustomer = () => {
     submitted.value = true;
 
-    if (customer.value.name && customer.value.email) {
+    if (customer.value.name && customer.value.email && customer.value.debt >= 0) {
         if (customer.value.id) {
             axios.put(`/api/customers/${customer.value.id}`, customer.value)
                 .then(() => {
@@ -164,7 +168,7 @@ const saveCustomer = () => {
         customerDialog.value = false;
         customer.value = {};
     } else {
-        toast.value.add({ severity: 'error', summary: 'Hata', detail: 'İsim ve e-posta zorunludur', life: 3000 });
+        toast.value.add({ severity: 'error', summary: 'Hata', detail: 'İsim, e-posta ve borç alanları zorunludur', life: 3000 });
     }
 };
 
@@ -172,6 +176,7 @@ const confirmDeleteCustomer = (customerToDelete) => {
     customer.value = { ...customerToDelete };
     deleteCustomerDialog.value = true;
 };
+
 const deleteCustomer = () => {
     axios.delete(`/api/customers/${customer.value.id}`)
         .then(() => {
@@ -182,9 +187,11 @@ const deleteCustomer = () => {
     deleteCustomerDialog.value = false;
     customer.value = {};
 };
+
 const confirmDeleteSelected = () => {
     deleteCustomersDialog.value = true;
 };
+
 const deleteSelectedCustomers = () => {
     const ids = selectedCustomers.value.map(customer => customer.id);
     axios.delete('/api/customers', { data: { ids } })
@@ -196,10 +203,10 @@ const deleteSelectedCustomers = () => {
     deleteCustomersDialog.value = false;
     selectedCustomers.value = [];
 };
+
 const exportCSV = () => {
     // CSV dışa aktarma işlemleri
 };
-
 </script>
 
 <style scoped>
