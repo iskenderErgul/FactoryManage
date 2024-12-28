@@ -7,10 +7,6 @@
                     <Button label="Delete" icon="pi pi-trash" severity="danger" @click="confirmDeleteSelected" :disabled="!selectedUsers || !selectedUsers.length" />
                 </template>
 
-                <template #end>
-                    <FileUpload mode="basic" accept="image/*" :maxFileSize="1000000" label="Import" chooseLabel="Import" class="mr-2 inline-block" />
-                    <Button label="Export" icon="pi pi-upload" severity="help" @click="exportCSV($event)"  />
-                </template>
             </Toolbar>
 
             <DataTable ref="dt" :value="users" v-model:selection="selectedUsers" dataKey="id"
@@ -34,7 +30,7 @@
 
                 <Column header="Image">
                     <template #body="slotProps">
-                        <img :src="`https://primefaces.org/cdn/primevue/images/product/${slotProps.data.image}`" :alt="slotProps.data.image" class="rounded" style="width: 64px" />
+                        <img src="../../../../public/user.jpg" :alt="slotProps.data.image" class="rounded" style="width: 45px" />
                     </template>
                 </Column>
 
@@ -151,18 +147,6 @@ const filters = ref({
 });
 const submitted = ref(false);
 
-const uploadStatus = ref('');
-
-// const getUsers = () => {
-//     axios.get('api/getAllUsers')
-//         .then(resp => {
-//             console.log(resp.data);
-//         })
-//         .catch(error => {
-//             console.error('Bir hata oluştu:', error);
-//         });
-// }
-
 onMounted(() => {
     // getUser();
     store.dispatch('fetchUsers');
@@ -216,24 +200,6 @@ const deleteuser = () => {
     user.value = {};
     toast.value.add({ severity: 'success', summary: 'Başarılı', detail: 'Kullanıcı başarıyla silindi!', life: 3000 });
 };
-const findIndexById = (id) => {
-    let index = -1;
-    for (let i = 0; i < users.value.length; i++) {
-        if (users.value[i].id === id) {
-            index = i;
-            break;
-        }
-    }
-    return index;
-};
-const createId = () => {
-    let id = '';
-    var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    for (var i = 0; i < 10; i++) {
-        id += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    return id;
-};
 const confirmDeleteSelected = () => {
     deleteUsersDialog.value = true;
 };
@@ -251,10 +217,6 @@ const onImageUpload = (event) => {
         user.value.image = uploadedFiles[0].name;
     }
 };
-const exportCSV = (event) => {
-    // Implement export functionality here
-};
-
 
 </script>
 
