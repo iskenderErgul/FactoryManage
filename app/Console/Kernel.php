@@ -13,7 +13,7 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        $schedule->job(new RotateShifts)->weeklyOn(1, '00:00');
+        $schedule->job(new RotateShifts)->weeklyOn(0, '00:00');
     }
 
     /**
