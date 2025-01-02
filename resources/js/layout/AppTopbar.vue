@@ -89,7 +89,7 @@ const username = computed(() => {
         <div class="layout-topbar-menu">
             <button @click="logout" class="p-link layout-topbar-button">
                 <i class="pi pi-sign-out"></i>
-                <span>Profile</span>
+
             </button>
         </div>
     </div>

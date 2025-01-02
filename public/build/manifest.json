@@ -1,0 +1,60 @@
+{
+  "node_modules/chart.js/auto/auto.js": {
+    "file": "assets/auto-cq6oPzDC.js",
+    "isDynamicEntry": true,
+    "src": "node_modules/chart.js/auto/auto.js"
+  },
+  "node_modules/primeicons/fonts/primeicons.eot": {
+    "file": "assets/primeicons-5P3lgTyi.eot",
+    "src": "node_modules/primeicons/fonts/primeicons.eot"
+  },
+  "node_modules/primeicons/fonts/primeicons.svg": {
+    "file": "assets/primeicons-bmyWY2nz.svg",
+    "src": "node_modules/primeicons/fonts/primeicons.svg"
+  },
+  "node_modules/primeicons/fonts/primeicons.ttf": {
+    "file": "assets/primeicons-DQ1UBV8x.ttf",
+    "src": "node_modules/primeicons/fonts/primeicons.ttf"
+  },
+  "node_modules/primeicons/fonts/primeicons.woff": {
+    "file": "assets/primeicons-ghXmUeij.woff",
+    "src": "node_modules/primeicons/fonts/primeicons.woff"
+  },
+  "node_modules/primeicons/fonts/primeicons.woff2": {
+    "file": "assets/primeicons-7GdVu_me.woff2",
+    "src": "node_modules/primeicons/fonts/primeicons.woff2"
+  },
+  "public/Logo.png": {
+    "file": "assets/Logo-Ma_oacBs.png",
+    "src": "public/Logo.png"
+  },
+  "public/user.jpg": {
+    "file": "assets/user-ETleUffz.jpg",
+    "src": "public/user.jpg"
+  },
+  "resources/js/app.js": {
+    "assets": [
+      "assets/Logo-Ma_oacBs.png",
+      "assets/user-ETleUffz.jpg",
+      "assets/primeicons-5P3lgTyi.eot",
+      "assets/primeicons-7GdVu_me.woff2",
+      "assets/primeicons-ghXmUeij.woff",
+      "assets/primeicons-DQ1UBV8x.ttf",
+      "assets/primeicons-bmyWY2nz.svg"
+    ],
+    "css": [
+      "assets/app-yeiRUjty.css"
+    ],
+    "dynamicImports": [
+      "node_modules/chart.js/auto/auto.js"
+    ],
+    "file": "assets/app-nWs6uAvl.js",
+    "isEntry": true,
+    "src": "resources/js/app.js"
+  },
+  "resources/sass/app.scss": {
+    "file": "assets/app-lhA9k1qk.css",
+    "isEntry": true,
+    "src": "resources/sass/app.scss"
+  }
+}

@@ -66,17 +66,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/suppliers/{id}', [SuppliersController::class, 'destroy']);
     Route::post('/suppliers/delete', [SuppliersController::class, 'destroySelected']);
 
-
-
-
     Route::get('/products', [ProductController::class, 'index']);
     Route::post('/products', [ProductController::class, 'store']);
     Route::get('/products/{id}', [ProductController::class, 'show']);
     Route::put('/products/{id}', [ProductController::class, 'update']);
     Route::delete('/products/{id}', [ProductController::class, 'destroy']);
     Route::delete('/products/delete-selected', [ProductController::class, 'destroySelected']);
-
-
 
     Route::get('/productions', [ProductionController::class, 'getAllProductions']);
     Route::post('/productions/worker', [ProductionController::class, 'storeByWorker']);
@@ -98,18 +93,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/sales/{id}', [SalesController::class, 'destroy']);
     Route::get('/getAllSalesLogs', [SalesController::class, 'getAllSalesLogs']);
 
-
     Route::get('/getAllPacsEntries', [PacsEntryController::class, 'getAllPacsEntries']);
     Route::get('/getAllPacsEntriesLogs', [PacsEntryController::class, 'getAllPacsEntriesLogs']);
     Route::post('/createPacsEntry', [PacsEntryController::class, 'createPacsEntry']);
     Route::get('/getAllWorkers',[WorkerController::class, 'getAllWorkers']);
     Route::get('/getShifts',[WorkerController::class, 'getShifts']);
 
-
     Route::get('/getStockMovementsLogs', [StockController::class, 'getStockMovementsLogs']);
     Route::get('/getStockMovements', [StockController::class, 'getStockMovements']);
-
-
 
     Route::get('/costs', [CostsController::class, 'index']);
     Route::post('/costs', [CostsController::class, 'store']);
@@ -117,8 +108,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/costs/{id}', [CostsController::class, 'update']);
     Route::delete('/costs/{id}', [CostsController::class, 'destroy']);
     Route::delete('/costs/delete-selected', [CostsController::class, 'destroySelected']);
-
-
 
     Route::get('/costs-export',[ExportController::class,'costsExport']);
     Route::get('/production-export',[ExportController::class,'productionExport']);
@@ -143,21 +132,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/shift/shift-assignments/{id}',[ShiftAssignmentController::class, 'destroyShiftAssignments']);
     Route::put('/shift/shift-assignments/{id}',[ShiftAssignmentController::class, 'updateShiftAssignments']);
 
-
-
     Route::get('/orders',[OrderController::class, 'index']);
     Route::post('/orders', [OrderController::class, 'store']);
     Route::put('/orders/{id}', [OrderController::class, 'update']);
     Route::delete('/orders/{id}', [OrderController::class, 'destroy']);
-
-
-
-
-
-
-
-
-
 
     Route::get('/logout', [LoginController::class, 'logout']);
 });

@@ -152,6 +152,18 @@ const model = ref([
                 to: '/sys/worker/shifts'
             }
         ]
+    },
+    {
+        items: [
+            {
+                label: 'Çıkış Yap',
+                icon: 'pi pi-sign-out',
+                command : () => {
+                    logout();
+                }
+
+            }
+        ]
     }
 
 
@@ -186,6 +198,10 @@ if (userRole.value !== 'worker') {
         }
         return menu.items.length > 0 || !menu.items;
     });
+}
+
+const  logout = () => {
+    store.dispatch('logout');
 }
 </script>
 
