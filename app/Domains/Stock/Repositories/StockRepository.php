@@ -28,7 +28,7 @@ class StockRepository implements StockRepositoryInterface
      */
     public function getStockMovements(): JsonResponse
     {
-        $movements = StockMovement::all();
+        $movements = StockMovement::with('product')->get();
         return response()->json($movements);
     }
 }

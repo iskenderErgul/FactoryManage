@@ -2,6 +2,7 @@
 
 namespace App\Common\Models;
 
+use App\Domains\Product\Models\Product;
 use App\Domains\Users\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -33,5 +34,10 @@ class StockMovement extends Model
      public function user(): BelongsTo
      {
          return $this->belongsTo(User::class);
+     }
+
+     public function product(): BelongsTo
+     {
+         return $this->belongsTo(Product::class);
      }
 }

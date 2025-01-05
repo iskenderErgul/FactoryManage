@@ -16,7 +16,7 @@
                 </div>
             </template>
             <Column field="id" header="Hareket Id" style="width: 10%" />
-            <Column field="product_id" header="Ürün Id" style="width: 15%" />
+            <Column field="product.product_name" header="Ürün Id" style="width: 15%" />
             <Column field="movement_type" header="Hareket Türü" style="width: 15%" />
             <Column field="quantity" header="Miktar" style="width: 15%" />
             <Column field="related_process" header="İlgili İşlem" style="width: 25%" />
