@@ -1,4 +1,5 @@
 <template>
+    <h1>Bu alan daha sonra 3 haftalık vardiyayı gösterecek şekilde düzenlenecek.Daha esnek bir tablo kullanılacak</h1>
     <h3 class="text-center">Vardiyanın Tarih Aralıgı gelecek</h3>
     <h3 class="text-center">11/11/2024 - 17/11/2024 </h3>
     <div class="flex justify-content-between flex-wrap border-round border-2 border-solid border-300">

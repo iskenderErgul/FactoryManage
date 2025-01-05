@@ -19,7 +19,6 @@ const login = () => {
 
 
 </script>
-
 <template>
     <div class="surface-ground flex align-items-center justify-content-center min-h-screen min-w-screen overflow-hidden">
         <div class="flex flex-column align-items-center justify-content-center">
@@ -33,15 +32,11 @@ const login = () => {
                     </div>
 
                     <div>
-
-
-
                         <label for="email1" class="block text-900 text-xl font-medium mb-2">Email</label>
                         <InputText id="email1" type="text" placeholder="Email address" class="w-full mb-5" style="padding: 1rem" v-model="user.email" />
 
                         <label for="password1" class="block text-900 font-medium text-xl mb-2">Şifre</label>
-                        <Password id="password1" v-model="user.password" placeholder="Password" :toggleMask="true" class="w-full mb-5" inputClass="w-full" :inputStyle="{ padding: '1rem' }"></Password>
-
+                        <Password id="password1" v-model="user.password" placeholder="Password" :toggleMask="true" class="w-full mb-5" inputClass="w-full" :inputStyle="{ padding: '1rem' }" fluid :feedback="false"></Password>
 
                         <Button @click="login" label="Sign In" class="w-full p-3 text-xl">Giriş Yap</Button>
                     </div>
@@ -51,3 +46,4 @@ const login = () => {
     </div>
     <AppConfig simple />
 </template>
+

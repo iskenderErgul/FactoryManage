@@ -1,4 +1,5 @@
 <template>
+    <h1>Bu Alan daha ilerki  zamanlarda yüz tanıma yada barkod ile giriş yapılacak şekilde düzenlenecek.1 aylık giriş çıkış ı chechbox ile gösterilecek</h1>
     <div class="text-center">
         <input v-model="userId" placeholder="ID girin" class="p-inputtext mb-2" />
         <div>
