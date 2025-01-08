@@ -16,6 +16,7 @@ class CustomerSeeder extends Seeder
             'name' => 'Müşteri A',
             'email' => 'musteri_a@example.com',
             'phone' => '0123456789',
+            'debt' => '1000',
             'address' => 'Müşteri adresi',
         ]);
         // Diğer örnek müşterileri buraya ekleyebilirsiniz

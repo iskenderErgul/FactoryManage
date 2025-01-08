@@ -27,34 +27,34 @@ const model = ref([
             }
         ]
     },
-    {
-
-        items: [
-            {
-                label: 'Giriş-Çıkış Yönetimi',
-                icon: 'pi pi-inbox',
-                items: [
-                    { label: 'PACS Giriş Kayıtları', icon: 'pi pi-inbox', to: '/sys/pacs-entries' },
-                    { label: 'Giriş-Çıkış Logları', icon: 'pi pi-calendar', to: '/sys/pacs-log' }
-                ]
-            }
-        ]
-    },
-    {
-
-        items: [
-            {
-                label: 'Vardiya Yönetimi',
-                icon: 'pi pi-calendar-times',
-                items: [
-                    { label: 'Vardiya Şablonları', icon: 'pi pi-calendar-plus', to: '/sys/shift-templates' },
-                    { label: 'Vardiya Kaydı Atamaları', icon: 'pi pi-calendar-times', to: '/sys/shift-assignments' },
-                    { label: 'Vardiya Kayıtları', icon: 'pi pi-table', to: '/sys/shifts' },
-
-                ]
-            }
-        ]
-    },
+    // {
+    //
+    //     items: [
+    //         {
+    //             label: 'Giriş-Çıkış Yönetimi',
+    //             icon: 'pi pi-inbox',
+    //             items: [
+    //                 { label: 'PACS Giriş Kayıtları', icon: 'pi pi-inbox', to: '/sys/pacs-entries' },
+    //                 { label: 'Giriş-Çıkış Logları', icon: 'pi pi-calendar', to: '/sys/pacs-log' }
+    //             ]
+    //         }
+    //     ]
+    // },
+    // {
+    //
+    //     items: [
+    //         {
+    //             label: 'Vardiya Yönetimi',
+    //             icon: 'pi pi-calendar-times',
+    //             items: [
+    //                 { label: 'Vardiya Şablonları', icon: 'pi pi-calendar-plus', to: '/sys/shift-templates' },
+    //                 { label: 'Vardiya Kaydı Atamaları', icon: 'pi pi-calendar-times', to: '/sys/shift-assignments' },
+    //                 { label: 'Vardiya Kayıtları', icon: 'pi pi-table', to: '/sys/shifts' },
+    //
+    //             ]
+    //         }
+    //     ]
+    // },
     {
 
         items: [
@@ -63,7 +63,6 @@ const model = ref([
                 icon: 'pi pi-chart-line',
                 items: [
                     { label: 'Üretim Takibi', icon: 'pi pi-chart-line', to: '/sys/production' },
-                    { label: 'Üretim Logları', icon: 'pi pi-file', to: '/sys/production-log' },
                     { label: 'Makine Yönetimi', icon: 'pi pi-cog', to: '/sys/machine-management' },
                     { label: 'Maliyet Yönetimi', icon: 'pi pi-money-bill', to: '/sys/cost-management' }
                 ]
@@ -78,8 +77,8 @@ const model = ref([
                 icon: 'pi pi-box',
                 items: [
                     { label: 'Ürün Yönetimi', icon: 'pi pi-box', to: '/sys/product-management' },
-                    { label: 'Stok Hareketleri', icon: 'pi pi-th-large', to: '/sys/stock-movements' },
-                    { label: 'Stok Hareketleri Logları', icon: 'pi pi-file', to: '/sys/stock-movements-log' }
+                    { label: 'Stok Hareketleri', icon: 'pi pi-th-large', to: '/sys/stock-movements' }
+
                 ]
             }
         ]
@@ -92,9 +91,22 @@ const model = ref([
                 icon: 'pi pi-shopping-cart',
                 items: [
                     { label: 'Satış Yönetimi', icon: 'pi pi-shopping-cart', to: '/sys/sales' },
-                    { label: 'Satış Logları', icon: 'pi pi-file', to: '/sys/sales-log' },
                     { label: 'Müşteri Yönetimi', icon: 'pi pi-users', to: '/sys/customers' },
                     { label: 'Sipariş Yönetimi', icon: 'pi pi-book', to: '/sys/orders' }
+                ]
+            }
+        ]
+    },
+    {
+
+        items: [
+            {
+                label: 'Müşteri İşlemleri',
+                icon: 'pi pi-users',
+                items: [
+                    { label: 'Müşteri Yönetimi', icon: 'pi pi-users', to: '/sys/customers' },
+                    { label: 'Hesap Kaydı İşlemleri', icon: 'pi pi-book', to: '/sys/customer/transactions' },
+
                 ]
             }
         ]
@@ -119,21 +131,21 @@ const model = ref([
         ]
 
     },
-    {
-
-        items: [
-            {
-                label: 'Raporlar',
-                icon: 'pi pi-chart-bar',
-                items: [
-                    { label: 'Üretim Raporları', icon: 'pi pi-chart-bar', to: '/sys/reports/production' },
-                    { label: 'Satış Raporları', icon: 'pi pi-chart-bar', to: '/sys/reports/sales' },
-                    { label: 'Stok Raporları', icon: 'pi pi-chart-bar', to: '/sys/reports/stocks' },
-                    { label: 'Finansal Raporlar', icon: 'pi pi-chart-bar', to: '/sys/reports/financial' }
-                ]
-            }
-        ]
-    },
+    // {
+    //
+    //     items: [
+    //         {
+    //             label: 'Raporlar',
+    //             icon: 'pi pi-chart-bar',
+    //             items: [
+    //                 { label: 'Üretim Raporları', icon: 'pi pi-chart-bar', to: '/sys/reports/production' },
+    //                 { label: 'Satış Raporları', icon: 'pi pi-chart-bar', to: '/sys/reports/sales' },
+    //                 { label: 'Stok Raporları', icon: 'pi pi-chart-bar', to: '/sys/reports/stocks' },
+    //                 { label: 'Finansal Raporlar', icon: 'pi pi-chart-bar', to: '/sys/reports/financial' }
+    //             ]
+    //         }
+    //     ]
+    // },
 
     {
         items: [
@@ -141,15 +153,6 @@ const model = ref([
                 label: 'Üretim Ekle',
                 icon: 'pi pi-chart-line',
                 to: '/sys/worker/production'
-            }
-        ]
-    },
-    {
-        items: [
-            {
-                label: 'Vardiyalar',
-                icon: 'pi pi-calendar-plus',
-                to: '/sys/worker/shifts'
             }
         ]
     },
@@ -164,7 +167,8 @@ const model = ref([
 
             }
         ]
-    }
+    },
+
 
 
 ]);
@@ -176,14 +180,12 @@ if (userRole.value !== 'admin') {
         if (menu.items) {
             menu.items = menu.items.filter(subMenu =>
                 subMenu.label !== 'Kullanıcı Yönetimi' &&
-                subMenu.label !== 'PACS Yönetimi' &&
-                subMenu.label !== 'Vardiya Yönetimi' &&
                 subMenu.label !== 'Üretim Yönetimi' &&
                 subMenu.label !== 'Stok Yönetimi' &&
                 subMenu.label !== 'Satış Yönetimi' &&
                 subMenu.label !== 'Geri Dönüşüm Kayıtları' &&
-                subMenu.label !== 'Hammadde Tedarik Kayıtları' &&
-                subMenu.label !== 'Raporlar'
+                subMenu.label !== 'Hammadde Tedarik Kayıtları'
+
             );
         }
         return menu.items.length > 0 || !menu.items;
@@ -194,7 +196,7 @@ if (userRole.value !== 'worker') {
     // Worker olmayan kullanıcılar için 'Üretim Ekle' sekmesini kaldırıyoruz
     model.value = model.value.filter(menu => {
         if (menu.items) {
-            menu.items = menu.items.filter(subMenu => subMenu.label !== 'Üretim Ekle' && subMenu.label !== 'Vardiyalar');
+            menu.items = menu.items.filter(subMenu => subMenu.label !== 'Üretim Ekle');
         }
         return menu.items.length > 0 || !menu.items;
     });

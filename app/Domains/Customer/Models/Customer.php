@@ -28,4 +28,9 @@ class Customer extends Model
     {
         return $this->hasMany(CustomersLog::class);
     }
+    public function transactions(): HasMany
+    {
+        return $this->hasMany(Transaction::class);
+    }
+
 }

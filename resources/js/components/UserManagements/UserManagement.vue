@@ -9,7 +9,7 @@
 
             </Toolbar>
 
-            <DataTable ref="dt" :value="users" v-model:selection="selectedUsers" dataKey="id"
+            <DataTable ref="dt" :value="users" v-model:selection="selectedUsers" dataKey="id" 
                        :paginator="true" :rows="10" :filters="filters"
                        paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown" :rowsPerPageOptions="[5,10,25]"
                        currentPageReportTemplate="Mevcut {first} ile {last} arasında {totalRecords} kullanıcı">
@@ -26,11 +26,11 @@
 
                 <Column selectionMode="multiple" style="width: 3rem" :exportable="false"></Column>
 
-                <Column field="id" header="Id" sortable style="min-width:12rem"></Column>
+                <Column field="id" header="Id" sortable style="min-width:6rem"></Column>
 
-                <Column header="Image">
+                <Column header="Image"  style="min-width:6rem">
                     <template #body="slotProps">
-                        <img src="../../../../public/user.jpg" :alt="slotProps.data.image" class="rounded" style="width: 45px" />
+                        <Avatar icon="pi pi-user" class="mr-2" size="xlarge" shape="circle"   style="background-color: #ece9fc; color: #2a1261 "  />
                     </template>
                 </Column>
 
@@ -123,6 +123,7 @@ import  InputText  from 'primevue/inputtext';
 import  Dialog  from 'primevue/dialog';
 import Dropdown from 'primevue/dropdown';
 import  Toast from 'primevue/toast';
+import Avatar from "primevue/avatar";
 
 
 const togglePasswordVisibility = () => {
