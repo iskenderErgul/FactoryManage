@@ -20,11 +20,10 @@
                 currentPageReportTemplate="Mevcut {first} ile {last} arasında, toplam {totalRecords} satış">
                 <Column selectionMode="multiple" style="width: 2rem" :exportable="false"></Column>
                 <Column field="name" header="Müşteri Adı" sortable style="min-width:10rem"></Column>
-                <Column field="debt" header="Total Borç" sortable style="min-width:10rem"></Column>
                 <Column :exportable="false" style="min-width:8rem">
                     <template #body="slotProps">
                         <Button icon="pi pi-info-circle" outlined rounded class="mr-2" @click="openSaleDetailDialog(slotProps.data)" />
-                        <Button icon="pi pi-pencil" outlined rounded class="mr-2" @click="openUpdateSaleDialog(slotProps.data)" />
+                        <Button icon="pi pi-pencil" outlined rounded class="mr-2" @click="openUpdateCustomerTransactionDialog(slotProps.data)" />
                         <Button icon="pi pi-trash" outlined rounded class="mr-2" severity="danger" @click="confirmDeleteSale(slotProps.data)" />
                         <Button icon="pi pi-print" outlined rounded  severity="info"   @click="openPrintDailog(slotProps.data)" />
                     </template>
@@ -80,7 +79,9 @@
                 </DataTable>
 
                 <div class="total-summary" style="text-align: right; margin-top: 20px;">
-                    <strong style="font-size: 1.5em; font-weight: bold;">Genel Toplam (TL): {{ calculateTotalAmount(customerTransactions) }}</strong>
+                    <p><strong>Toplam Borç:</strong> {{ formatAmount(totalDebt(customerTransactions)) }} TL</p>
+                    <p><strong>Toplam Ödeme:</strong> {{ formatAmount(totalCredit(customerTransactions)) }} TL</p>
+                    <p><strong style="font-size: 1.5em; font-weight: bold;">Genel Toplam:</strong> {{ formatSignedTotal(calculateTotalAmount(customerTransactions)) }} TL</p>
                 </div>
 
                 <div class="p-field" style="text-align: right; margin-top: 20px;">
@@ -134,7 +135,7 @@
                 <!-- Footer -->
                 <template #footer>
                     <Button label="İptal" icon="pi pi-times" class="p-button-text" @click="isEditDialogVisible = false" />
-                    <Button label="Kaydet" icon="pi pi-check" class="p-button-text" @click="saveEdit" />
+                    <Button label="Kaydetss" icon="pi pi-check" class="p-button-text" @click="saveEdit" />
                 </template>
             </Dialog>
 
@@ -218,7 +219,7 @@
                 <Button label="Evet" icon="pi pi-check" text @click="deleteSelectedSales" />
             </template>
         </Dialog>
-        <Dialog v-model:visible="detailCustomerTransactionDialog" maximizable modal header="Satış Detayları" :style="{ width: '50rem' }" :breakpoints="{ '1199px': '75vw', '575px': '90vw' }">
+        <Dialog v-model:visible="detailCustomerTransactionDialog" maximizable modal header="Satış Detayları" :style="{ width: '70rem' }" :breakpoints="{ '1199px': '75vw', '575px': '90vw' }">
             <div class="p-fluid">
                 <h3>Müşteri Bilgileri</h3>
                 <div class="p-field">
@@ -242,16 +243,20 @@
                 <DataTable :value="selectedCustomerTransaction.transactions" :paginator="true" :rows="5">
                     <Column field="date" header="İşlem Tarihi" sortable></Column>
                     <Column field="description" header="Açıklama" sortable></Column>
-                    <Column field="type" header="Tür"  sortable></Column>
-                    <Column field="amount" header="Miktar(TL)" sortable></Column>
-
-
+                    <Column field="type" header="Tür" sortable></Column>
+                    <Column field="amount" header="Miktar(TL)" body="formatAmount" sortable></Column>
                 </DataTable>
+
                 <div class="total-summary" style="text-align: right; margin-top: 20px;">
-                    <strong style="font-size: 1.5em; font-weight: bold;">Genel Toplam : {{ calculateTotalAmount(selectedCustomerTransaction.transactions) }} TL</strong>
+                    <p><strong>Toplam Borç:</strong> {{ formatAmount(totalDebt(selectedCustomerTransaction.transactions)) }} TL</p>
+                    <p><strong>Toplam Ödeme:</strong> {{ formatAmount(totalCredit(selectedCustomerTransaction.transactions)) }} TL</p>
+                    <p><strong style="font-size: 1.5em; font-weight: bold;">Genel Toplam:</strong> {{ formatSignedTotal(calculateTotalAmount(selectedCustomerTransaction.transactions)) }} TL</p>
                 </div>
             </div>
         </Dialog>
+
+
+
 
         <Dialog v-model:visible="printSale" maximizable modal  :style="{ width: '50rem' }" :breakpoints="{ '1199px': '75vw', '575px': '90vw' }">
 
@@ -389,7 +394,6 @@ const fetchCustomers = () => {
 
 const openPrintDailog = (data) => {
     selectedPrintSales.value = data;
-    console.log('selectedPrintSales',selectedPrintSales.value);
     printSale.value=true;
 }
 
@@ -417,8 +421,8 @@ const openSaleDetailDialog = (data) => {
     detailCustomerTransactionDialog.value = true;
 }
 
-const openUpdateSaleDialog = (data) => {
-    console.log('openupdatedialog',data)
+const openUpdateCustomerTransactionDialog = (data) => {
+
     // Gelen müşteri bilgilerini atama
     selectedCustomerTransaction.value = {
         id: data.id,
@@ -461,7 +465,6 @@ const openUpdateSaleDialog = (data) => {
 
 
 const openEditDialog = (transaction) => {
-    console.log('openeditdialog',transaction)
     editingTransaction.value = { ...transaction };
     editingTransaction.value.price = parseFloat(editingTransaction.value.price);
     isEditDialogVisible.value = true;
@@ -469,19 +472,26 @@ const openEditDialog = (transaction) => {
 };
 
 const saveEdit = () => {
-
-    const index = customerTransactions.value.findIndex(t => t.id === editingTransaction.id);
+    const index = customerTransactions.value.findIndex(t => t.id === editingTransaction.value.id);
     if (index !== -1) {
-        customerTransactions.value[index] = { ...editingTransaction };
+        // Daha güvenli bir güncelleme yöntemi
+        customerTransactions.value.splice(index, 1, { ...editingTransaction.value });
     }
+    // Güncel borç, ödeme ve genel toplam hesapla
+    const updatedDebt = totalDebt(customerTransactions.value);
+    const updatedCredit = totalCredit(customerTransactions.value);
+    const updatedBalance = calculateTotalAmount(customerTransactions.value);
+
+
     isEditDialogVisible.value = false; // Dialogu kapat
 };
 
 
 
 
+
+
 const removeTransaction = (transaction) => {
-    console.log('removeTransiction',transaction)
     customerTransactions.value = customerTransactions.value.filter(t => t.id !== transaction.id);
 };
 
@@ -489,24 +499,47 @@ const removeTransaction = (transaction) => {
 const calculateTotalAmount = (transactions) => {
     let totalDebt = 0;
 
-    transactions.forEach(transaction => {
+    transactions.forEach((transaction) => {
         const type = transaction.type.toLowerCase(); // Türü küçük harfe çevir
-        if (type === 'borç') {
+        if (type === "borç") {
             totalDebt += parseFloat(transaction.amount); // Borç ekle
-        } else if (type === 'ödeme') {
+        } else if (type === "ödeme") {
             totalDebt -= parseFloat(transaction.amount); // Ödemeyi borçtan çıkar
         }
     });
 
-    // Sayıyı tam sayıya dönüştürüp döndür
-    return Math.round(totalDebt);
+    return totalDebt; // Genel toplamı döndür
 };
+
+// Sayıları formatlamak için
+const formatSignedTotal = (value) => {
+    const formattedValue = formatAmount(Math.abs(value));
+    return value > 0 ? `-${formattedValue}` : `+${formattedValue}`;
+};
+
+// Format edilen değer
+const formatAmount = (value) => {
+    return new Intl.NumberFormat("tr-TR", { minimumFractionDigits: 0 }).format(value);
+};
+
+const totalDebt = (transactions) => {
+    return transactions
+        .filter((transaction) => transaction.type.toLowerCase() === "borç")
+        .reduce((sum, transaction) => sum + parseFloat(transaction.amount), 0);
+};
+
+const totalCredit = (transactions) => {
+    return transactions
+        .filter((transaction) => transaction.type.toLowerCase() === "ödeme")
+        .reduce((sum, transaction) => sum + parseFloat(transaction.amount), 0);
+};
+
 
 
 
 const saveSale = () => {
     submitted.value = true;
-    console.log('selected customeer',selectedCustomer);
+
     if (selectedCustomer && saleProducts.value.length > 0) {
         const saleData = {
             customer_id: selectedCustomer.value.id,
