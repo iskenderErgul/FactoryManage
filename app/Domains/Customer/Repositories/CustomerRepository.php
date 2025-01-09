@@ -18,7 +18,7 @@ class CustomerRepository implements CustomerRepositoryInterface
      */
     public function index(): JsonResponse
     {
-        $customer = Customer::all();
+        $customer = Customer::with('transactions')->get();
         return response()->json($customer);
     }
 
@@ -76,4 +76,7 @@ class CustomerRepository implements CustomerRepositoryInterface
 
         return response()->json(null);
     }
+
+
+
 }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Customer;
 
+use App\Domains\Customer\Models\Transaction;
 use App\Domains\Customer\Repositories\CustomerRepository;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Customer\StoreCustomerRequest;
@@ -72,4 +73,6 @@ class CustomerController extends Controller
     {
         return $this->customerRepository->deleteSelected($request);
     }
+
+
 }

@@ -18,7 +18,7 @@ import StockMovements from "@/components/StockManagement/StockMovements.vue";
 import StockMovementsLog from "@/components/StockManagement/StockMovementsLog.vue";
 import Sales from "@/components/SalesManagement/Sales.vue";
 import SalesLog from "@/components/SalesManagement/SalesLog.vue";
-import Customers from "@/components/SalesManagement/Customers.vue";
+import Customers from "@/components/Customers/Customers.vue";
 import ProductionReports from "@/components/Reports/ProductionReports.vue";
 import SalesReports from "@/components/Reports/SalesReports.vue";
 import StockReports from "@/components/Reports/StockReports.vue";
@@ -28,6 +28,7 @@ import ProductionForWorkers from "@/components/WorkerPages/ProductionForWorkers.
 import Orders from "@/components/SalesManagement/Orders.vue";
 import Recyclings from "@/components/Recycle/Recyclings.vue";
 import Suppliers from "@/components/Suppliers/Suppliers.vue";
+import Transactions from "@/components/Customers/Transactions.vue";
 
 
 const routes = [
@@ -137,6 +138,11 @@ const routes = [
                 path : '/sys/customers',
                 name : 'customers',
                 component : Customers
+            },
+            {
+                path : '/sys/customers/transactions',
+                name : 'transactions',
+                component : Transactions
             },
             {
                 path : '/sys/orders',

@@ -91,7 +91,6 @@ const model = ref([
                 icon: 'pi pi-shopping-cart',
                 items: [
                     { label: 'Satış Yönetimi', icon: 'pi pi-shopping-cart', to: '/sys/sales' },
-                    { label: 'Müşteri Yönetimi', icon: 'pi pi-users', to: '/sys/customers' },
                     { label: 'Sipariş Yönetimi', icon: 'pi pi-book', to: '/sys/orders' }
                 ]
             }
@@ -105,7 +104,7 @@ const model = ref([
                 icon: 'pi pi-users',
                 items: [
                     { label: 'Müşteri Yönetimi', icon: 'pi pi-users', to: '/sys/customers' },
-                    { label: 'Hesap Kaydı İşlemleri', icon: 'pi pi-book', to: '/sys/customer/transactions' },
+                    { label: 'Hesap Kaydı İşlemleri', icon: 'pi pi-book', to: '/sys/customers/transactions' },
 
                 ]
             }
