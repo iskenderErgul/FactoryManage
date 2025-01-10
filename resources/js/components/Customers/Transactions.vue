@@ -3,7 +3,7 @@
         <div class="card">
             <Toolbar class="mb-4">
                 <template #start>
-                    <Button label="Yeni Satış" icon="pi pi-plus" severity="success" class="mr-2" @click="openNew" />
+                    <Button label="Yeni İşlem Ekle" icon="pi pi-plus" severity="success" class="mr-2" @click="openNew" />
                     <Button label="Sil" icon="pi pi-trash" severity="danger" @click="confirmDeleteSelected" :disabled="!selectedCustomerTransaction || !selectedCustomerTransaction.length" />
                 </template>
                 <template #end>
@@ -33,10 +33,8 @@
         </div>
         <Toast ref="toast" />
 
-        <!-- Satış Detayları Diyaloğu -->
         <Dialog v-model:visible="updateCustomerTransactionDialog" maximizable modal header="Müşteri İşlemleri Düzenle" :style="{ width: '50rem' }" :breakpoints="{ '1199px': '75vw', '575px': '90vw' }">
             <div class="p-fluid">
-                <!-- Müşteri Bilgileri -->
                 <h3 class="text-center">Müşteri Bilgileri</h3>
                 <div class="p-field">
                     <label for="customerName">Ad:</label>
@@ -55,7 +53,7 @@
                     <InputText id="customerAddress" v-model="selectedCustomerTransaction.address" readonly />
                 </div>
 
-                <!-- İşlemler Tablosu -->
+
                 <h3 class="text-center">İşlem Geçmişi</h3>
                 <DataTable :value="customerTransactions">
                     <Column field="date" header="Tarih" sortable></Column>
@@ -85,139 +83,115 @@
                 </div>
 
                 <div class="p-field" style="text-align: right; margin-top: 20px;">
-                    <Button label="Kaydet" @click="" />
+                    <Button label="Kaydet" @click="saveAllTransactions" />
                 </div>
             </div>
-
-            <Dialog header="İşlem Düzenle" v-model:visible="isEditDialogVisible" :modal="true" :closable="false">
-                <div class="p-fluid">
-                    <!-- İşlem Türü -->
-                    <div class="p-field">
-                        <label for="type">İşlem Türü</label>
-                        <Dropdown
-                            id="type"
-                            v-model="editingTransaction.type"
-                            :options="[
-                    { label: 'Borç', value: 'borç' },
-                    { label: 'Ödeme', value: 'ödeme' }
-                ]"
-                            optionLabel="label"
-                            optionValue="value"
-                            placeholder="İşlem Türü Seçin"
-                        />
-                    </div>
-
-                    <!-- Tarih -->
-                    <div class="p-field">
-                        <label for="date">Tarih</label>
-                        <Calendar id="date" v-model="editingTransaction.date" />
-                    </div>
-
-                    <!-- Tutar -->
-                    <div class="p-field">
-                        <label for="amount">Tutar (TL)</label>
-                        <InputNumber
-                            id="amount"
-                            v-model="editingTransaction.amount"
-                            mode="currency"
-                            currency="TRY"
-                            locale="tr-TR"
-                        />
-                    </div>
-
-                    <!-- Açıklama -->
-                    <div class="p-field">
-                        <label for="description">Açıklama</label>
-                        <InputText id="description" v-model="editingTransaction.description" />
-                    </div>
-                </div>
-
-                <!-- Footer -->
-                <template #footer>
-                    <Button label="İptal" icon="pi pi-times" class="p-button-text" @click="isEditDialogVisible = false" />
-                    <Button label="Kaydetss" icon="pi pi-check" class="p-button-text" @click="saveEdit" />
-                </template>
-            </Dialog>
-
         </Dialog>
-
-        <Dialog v-model:visible="addCustomerTransactionDialog" maximizable modal header="Yeni Satış Ekle" :style="{ width: '50rem' }" :breakpoints="{ '1199px': '75vw', '575px': '90vw' }">
+        <Dialog header="İşlem Düzenle" v-model:visible="isEditDialogVisible" :modal="true" :closable="false">
             <div class="p-fluid">
-                <!-- Müşteri Bilgileri -->
-                <h3>Müşteri Bilgileri</h3>
-                <div class="p-field">
-                    <label for="customerSelect">Müşteri Seç:</label>
-                    <Dropdown id="customerSelect" v-model="selectedCustomer" :options="customers" optionLabel="name" placeholder="Müşteri Seçin" />
-                </div>
 
                 <div class="p-field">
-                    <label for="saleDate">Satış Tarihi:</label>
-
-                    <Calendar
-                        id="saleDate"
-                        v-model="saleDate"
-                        required
-                        :invalid="submitted && !saleDate"
+                    <label for="type">İşlem Türü</label>
+                    <Dropdown
+                        id="type"
+                        v-model="editingTransaction.type"
+                        :options="[ { label: 'Borç', value: 'borç' }, { label: 'Ödeme', value: 'ödeme' } ]"
+                        optionLabel="label"
+                        optionValue="value"
+                        placeholder="İşlem Türü Seçin"
                     />
                 </div>
 
-                <!-- Ürün Ekleme -->
-                <h3>Ürün Ekle</h3>
-                <div class="product-selection">
-                    <div class="p-field">
-                        <label for="productSelect">Ürün Seç:</label>
-                        <Dropdown id="productSelect" v-model="selectedProduct" :options="products" optionLabel="product_name" placeholder="Ürün Seçin"/>
 
-                    </div>
-                    <div class="p-field">
-                        <label for="productQuantity">Miktar:</label>
-                        <InputText id="productQuantity" v-model.number="productQuantity" type="number" min="1"  required/>
-                    </div>
-                    <div class="p-field">
-                        <label for="productPrice">Birim Fiyat (TL):</label>
-                        <InputText id="productPrice" v-model.number="productPrice" type="number" min="0" required/>
-                    </div>
-                    <Button label="Ekle" @click="addProductToSale" />
+                <div class="p-field">
+                    <label for="date">Tarih</label>
+                    <Calendar id="date" v-model="editingTransaction.date" />
                 </div>
 
-                <!-- Satış Ürünleri Tablosu -->
-                <h3>Satış Ürünleri</h3>
-                <DataTable :value="saleProducts" :paginator="true" :rows="5">
-                    <Column field="product_name" header="Ürün Adı" sortable></Column>
-                    <Column field="product_type" header="Ürün Türü" sortable></Column>
-                    <Column field="quantity" header="Miktar" sortable></Column>
-                    <Column field="price" header="Birim Fiyat (TL)" sortable></Column>
-                    <Column field="total_price" header="Toplam (TL)" sortable></Column>
-                </DataTable>
 
-                <div class="total-summary" style="text-align: right; margin-top: 20px;">
-                    <strong style="font-size: 1.5em; font-weight: bold;">Genel Toplam (TL): {{ calculateTotalPrice(saleProducts) }}</strong>
+                <div class="p-field">
+                    <label for="amount">Tutar (TL)</label>
+                    <InputNumber
+                        id="amount"
+                        v-model="editingTransaction.amount"
+                        mode="currency"
+                        currency="TRY"
+                        locale="tr-TR"
+                    />
+                </div>
+
+
+                <div class="p-field">
+                    <label for="description">Açıklama</label>
+                    <InputText id="description" v-model="editingTransaction.description" />
+                </div>
+            </div>
+
+
+            <template #footer>
+                <Button label="İptal" icon="pi pi-times" class="p-button-text" @click="isEditDialogVisible = false" />
+                <Button label="Kaydet" icon="pi pi-check" class="p-button-text" @click="saveEdit" />
+            </template>
+        </Dialog>
+        <Dialog v-model:visible="addCustomerTransactionDialog" maximizable modal header="Yeni İşlem Ekle" :style="{ width: '50rem' }" :breakpoints="{ '1199px': '75vw', '575px': '90vw' }"
+        >
+            <div class="p-fluid">
+                <h3>Müşteri Bilgileri</h3>
+                <div class="p-field">
+                    <label for="customerSelect">Müşteri Seç:</label>
+                    <Dropdown
+                        id="newTransactionCustomer"
+                        v-model="newTransactionCustomer"
+                        :options="customers"
+                        optionLabel="name"
+                        placeholder="Müşteri Seçin"
+                    />
+                </div>
+
+                <div class="p-field">
+                    <label for="transactionDate">İşlem Tarihi:</label>
+                    <Calendar
+                        id="newTransactionDate"
+                        v-model="newTransactionDate"
+                        required
+                        :invalid="submitted && !transactionDate"
+                    />
+                </div>
+
+                <h3>İşlem Detayları</h3>
+                <div class="p-field">
+                    <label for="transactionType">İşlem Türü:</label>
+                    <Dropdown
+                        id="newTransactionType"
+                        v-model="newTransactionType"
+                        :options="transactionTypes"
+                        option-label="label"
+                        placeholder="İşlem Türü Seçin"
+                    />
+                </div>
+                <div class="p-field">
+                    <label for="transactionDescription">Açıklama:</label>
+                    <InputText
+                        id="newTransactionDescription"
+                        v-model="newTransactionDescription"
+                        placeholder="Açıklama Girin"
+                    />
+                </div>
+                <div class="p-field">
+                    <label for="transactionAmount">Miktar (TL):</label>
+                    <InputText
+                        id="newTransactionAmount"
+                        v-model.number="newTransactionAmount"
+                        type="number"
+                        min="0"
+                        placeholder="Miktar Girin"
+                    />
                 </div>
 
                 <div class="p-field" style="text-align: right; margin-top: 20px;">
-                    <Button label="Kaydet" @click="saveSale" />
+                    <Button label="Kaydet" @click="saveTransaction" />
                 </div>
             </div>
-        </Dialog>
-        <Dialog v-model:visible="deleteCustomerTransactionDialog" :style="{width: '450px'}" header="Onayla" :modal="true">
-            <div class="confirmation-content">
-                <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem" />
-                <span v-if="sale">Silmek istediğinize emin misiniz <b>{{ sale.customer_name }}</b>?</span>
-            </div>
-            <template #footer>
-                <Button label="Hayır" icon="pi pi-times" text @click="deleteSaleDialog = false" />
-                <Button label="Evet" icon="pi pi-check" text @click="deleteSale" />
-            </template>
-        </Dialog>
-        <Dialog v-model:visible="deleteCustomerTransactionsDialog" :style="{width: '450px'}" header="Onayla" :modal="true">
-            <div class="confirmation-content">
-                <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem" />
-                <span>Seçilen satışları silmek istediğinize emin misiniz?</span>
-            </div>
-            <template #footer>
-                <Button label="Hayır" icon="pi pi-times" text @click="deleteSalesDialog = false" />
-                <Button label="Evet" icon="pi pi-check" text @click="deleteSelectedSales" />
-            </template>
         </Dialog>
         <Dialog v-model:visible="detailCustomerTransactionDialog" maximizable modal header="Satış Detayları" :style="{ width: '70rem' }" :breakpoints="{ '1199px': '75vw', '575px': '90vw' }">
             <div class="p-fluid">
@@ -254,10 +228,6 @@
                 </div>
             </div>
         </Dialog>
-
-
-
-
         <Dialog v-model:visible="printSale" maximizable modal  :style="{ width: '50rem' }" :breakpoints="{ '1199px': '75vw', '575px': '90vw' }">
 
             <div class="p-8 bg-gray-800 text-white rounded-lg shadow-lg">
@@ -339,10 +309,7 @@ import Calendar from "primevue/calendar";
 
 
 const customers = ref([]);
-const products = ref([]);
 const toast = ref(null);
-const sales = ref([]);
-const saleDialog = ref(false);
 const addCustomerTransactionDialog = ref(false);
 const updateCustomerTransactionDialog = ref(false);
 const detailCustomerTransactionDialog = ref(false);
@@ -351,35 +318,22 @@ const deleteCustomerTransactionsDialog = ref(false);
 const selectedCustomerTransaction = ref([]);
 const submitted = ref(false);
 const isEditDialogVisible = ref(false);
-const editingTransaction = ref({});
+const editingTransaction = ref([]);
 const selectedCustomer = ref(null);
-const newTransaction = ref({
-    type: '',
-    date: '',
-    amount: null,
-    description: '',
-});
+const newTransactionCustomer = ref(null);
+const newTransactionDate = ref(null);
+const newTransactionType = ref(null);
+const newTransactionDescription = ref("");
+const newTransactionAmount = ref(null);
 
 const customerTransactions = ref([]);
-const saleDate = ref('');
-const printSale = ref(false)
-const  selectedPrintSales  = ref();
+const transactionTypes = ref([  { label: "Borç", value: "borç" },
+    { label: "Ödeme", value: "ödeme" }])
 
 
 onMounted(() => {
-    fetchSales();
     fetchCustomers();
 });
-const fetchSales = () => {
-    axios.get('/api/sales')
-        .then(response => {
-            sales.value = response.data.reverse();
-        })
-        .catch(error => {
-            console.error("Satışları getirirken hata:", error);
-        });
-};
-
 const fetchCustomers = () => {
     axios.get('/api/customers')
         .then(response => {
@@ -389,41 +343,24 @@ const fetchCustomers = () => {
             console.error("Müşterileri getirirken hata:", error);
         });
 };
-
-
-
 const openPrintDailog = (data) => {
     selectedPrintSales.value = data;
     printSale.value=true;
 }
-
 const generateRandomNumber = () => {
     return Math.floor(Math.random() * 1000000); // 0 ile 999999 arasında rastgele sayı
 };
-
 const openNew = () => {
-    sale.value = {};
     selectedCustomer.value = null;
-    saleDate.value = '';
-    saleProducts.value = [];
-    productQuantity.value = 1;
-    productPrice.value = '';
-
-
+    addCustomerTransactionDialog.value=true
     submitted.value = false;
-    saleDialog.value = true;
-    addSaleDialog.value = true;
-
 };
-
 const openSaleDetailDialog = (data) => {
     selectedCustomerTransaction.value = data;
     detailCustomerTransactionDialog.value = true;
 }
-
 const openUpdateCustomerTransactionDialog = (data) => {
 
-    // Gelen müşteri bilgilerini atama
     selectedCustomerTransaction.value = {
         id: data.id,
         name: data.name,
@@ -436,11 +373,6 @@ const openUpdateCustomerTransactionDialog = (data) => {
             amount: parseFloat(transaction.amount), // Miktarı sayıya çevir
         })),
     };
-
-    // İlk işlem tarihini varsayılan olarak alıyoruz
-    saleDate.value = data.transactions[0]?.date || '';
-
-    // Müşteri bilgisi
     selectedCustomer.value = {
         id: data.id,
         name: data.name,
@@ -448,232 +380,129 @@ const openUpdateCustomerTransactionDialog = (data) => {
         phone: data.phone,
         address: data.address,
     };
-
-    // İşlem detayları (satış ürünleri yerine işlemler)
     customerTransactions.value = data.transactions.map(transaction => ({
         id : transaction.id,
-        description: transaction.description, // Açıklama
-        type: transaction.type === 'borç' ? 'Borç' : 'Ödeme', // Tür
-        amount: transaction.amount, // Miktar
-        date: transaction.date, // İşlem tarihi
+        description: transaction.description,
+        type: transaction.type === 'borç' ? 'Borç' : 'Ödeme',
+        amount: transaction.amount,
+        date: transaction.date,
     }));
 
-
-    // Dialogu açıyoruz
     updateCustomerTransactionDialog.value = true;
 };
-
-
 const openEditDialog = (transaction) => {
     editingTransaction.value = { ...transaction };
-    editingTransaction.value.price = parseFloat(editingTransaction.value.price);
     isEditDialogVisible.value = true;
 
 };
-
 const saveEdit = () => {
-    const index = customerTransactions.value.findIndex(t => t.id === editingTransaction.value.id);
-    if (index !== -1) {
-        // Daha güvenli bir güncelleme yöntemi
-        customerTransactions.value.splice(index, 1, { ...editingTransaction.value });
-    }
-    // Güncel borç, ödeme ve genel toplam hesapla
-    const updatedDebt = totalDebt(customerTransactions.value);
-    const updatedCredit = totalCredit(customerTransactions.value);
-    const updatedBalance = calculateTotalAmount(customerTransactions.value);
 
+    const updatedTransaction = {
+        id: editingTransaction.value.id,
+        type: editingTransaction.value.type,
+        date: editingTransaction.value.date,
+        amount: editingTransaction.value.amount,
+        description: editingTransaction.value.description,
+    };
 
-    isEditDialogVisible.value = false; // Dialogu kapat
+    customerTransactions.value = customerTransactions.value.map((transaction) =>
+        transaction.id === updatedTransaction.id ? updatedTransaction : transaction
+    );
+
+    updateCalculations();
+    isEditDialogVisible.value = false;
 };
+const saveAllTransactions = async () => {
+    try {
+        const updatedTransactions = customerTransactions.value.map(transaction => ({
+            id: transaction.id,
+            type: transaction.type,
+            date: transaction.date,
+            amount: transaction.amount,
+            description: transaction.description,
+        }));
 
 
+        const resp =await axios.post('/api/transactions/bulk-update', updatedTransactions);
+        toast.value.add({ severity: 'success', summary: 'İşlem Başarılı', detail: resp.data.message, life: 3000 });
+        updateCustomerTransactionDialog.value=false
+        updateCalculations();
+        fetchCustomers();
+
+    } catch (error) {
+        toast.value.add({ severity: 'errorr', summary: 'İşlem Başarısız', detail: error.data, life: 3000 });
+    }
+};
+const updateCalculations = () => {
+
+    const totalDebtAmount = totalDebt(customerTransactions.value);
+    const totalCreditAmount = totalCredit(customerTransactions.value);
+    const totalAmount = calculateTotalAmount(customerTransactions.value);
 
 
-
-
+};
 const removeTransaction = (transaction) => {
     customerTransactions.value = customerTransactions.value.filter(t => t.id !== transaction.id);
 };
-
-
 const calculateTotalAmount = (transactions) => {
     let totalDebt = 0;
 
     transactions.forEach((transaction) => {
-        const type = transaction.type.toLowerCase(); // Türü küçük harfe çevir
+        const type = transaction.type.toLowerCase();
         if (type === "borç") {
-            totalDebt += parseFloat(transaction.amount); // Borç ekle
+            totalDebt += parseFloat(transaction.amount);
         } else if (type === "ödeme") {
-            totalDebt -= parseFloat(transaction.amount); // Ödemeyi borçtan çıkar
+            totalDebt -= parseFloat(transaction.amount);
         }
     });
 
     return totalDebt; // Genel toplamı döndür
 };
-
-// Sayıları formatlamak için
 const formatSignedTotal = (value) => {
     const formattedValue = formatAmount(Math.abs(value));
     return value > 0 ? `-${formattedValue}` : `+${formattedValue}`;
 };
-
-// Format edilen değer
 const formatAmount = (value) => {
     return new Intl.NumberFormat("tr-TR", { minimumFractionDigits: 0 }).format(value);
 };
-
 const totalDebt = (transactions) => {
     return transactions
         .filter((transaction) => transaction.type.toLowerCase() === "borç")
         .reduce((sum, transaction) => sum + parseFloat(transaction.amount), 0);
 };
-
 const totalCredit = (transactions) => {
     return transactions
         .filter((transaction) => transaction.type.toLowerCase() === "ödeme")
         .reduce((sum, transaction) => sum + parseFloat(transaction.amount), 0);
 };
-
-
-
-
-const saveSale = () => {
-    submitted.value = true;
-
-    if (selectedCustomer && saleProducts.value.length > 0) {
-        const saleData = {
-            customer_id: selectedCustomer.value.id,
-            sale_date: saleDate.value,
-            products: saleProducts.value,
-        };
-
-        axios.post('/api/sales', saleData)
-            .then(() => {
-                toast.value.add({ severity: 'success', summary: 'Başarılı', detail: 'Satış başarıyla eklendi', life: 3000 });
-                fetchSales();
+const resetTransactionForm = () => {
+    selectedCustomer.value = null;
+    transactionDate.value = null;
+    transactionType.value = null;
+    transactionDescription.value = "";
+    transactionAmount.value = null;
+};
+const saveTransaction = async () => {
+        try {
+            const resp =await axios.post("/api/transactions", {
+                customer_id : newTransactionCustomer.value.id,
+                type : newTransactionType.value.value,
+                date : newTransactionDate.value,
+                description : newTransactionDescription.value,
+                amount : newTransactionAmount.value
             });
-        addSaleDialog.value = false;
-    }
-};
+            toast.value.add({ severity: 'success', summary: 'İşlem Başarılı', detail: resp.data, life: 3000 });
+            resetTransactionForm();
 
-const updateSale = () => {
-    if (selectedCustomer && saleProducts.value.length > 0) {
-        const saleData = {
-            customer_id: selectedCustomer.value.id,
-            sale_date: saleDate.value,
-            products: saleProducts.value,
-        };
+        } catch (error) {
+            toast.value.add({ severity: 'errorr', summary: 'İşlem Başarısız', detail: error.data, life: 3000 });
 
-        axios.put(`/api/sales/${selectedCustomerTransaction.value.id}`, saleData)
-            .then(() => {
-                toast.value.add({ severity: 'success', summary: 'Başarılı', detail: 'Satış başarıyla güncellendi', life: 3000 });
-                fetchSales();
-
-
-                sale.value = {};
-                selectedCustomer.value = null;
-                saleDate.value = '';
-                saleProducts.value = [];
-                productQuantity.value = 1;
-                productPrice.value = '';
-            })
-            .catch(error => {
-                toast.value.add({ severity: 'error', summary: 'Hata', detail: 'Güncelleme başarısız.', life: 3000 });
-            });
-        updateSaleDialog.value = false;
-    }
-};
-
-const addProductToSale = () => {
-    if (selectedProduct && selectedProduct.value && productQuantity.value > 0 && productPrice.value > 0) {
-        const productStock = selectedProduct.value.stock_quantity;
-
-        if (productQuantity.value > productStock) {
-            toast.value.add({ severity: 'error', summary: 'Hata', detail: 'Yeterli stok yok! Lütfen daha düşük bir miktar seçin.', life: 3000 });
-            return;
         }
+        addCustomerTransactionDialog.value = false;
+        fetchCustomers();
+    };
 
-        const existingProductIndex = saleProducts.value.findIndex(product => product.id === selectedProduct.value.id);
 
-        if (existingProductIndex !== -1) {
-            saleProducts.value[existingProductIndex].quantity += productQuantity.value;
-            saleProducts.value[existingProductIndex].total_price = parseFloat(productPrice.value) * saleProducts.value[existingProductIndex].quantity;
-        } else {
-            const product = {
-                ...selectedProduct.value,
-                quantity: productQuantity.value,
-                price: parseFloat(productPrice.value),
-                total_price: parseFloat(productPrice.value) * productQuantity.value
-            };
-            saleProducts.value.push(product);
-        }
-        selectedProduct.value = null;
-        productQuantity.value = 1;
-        productPrice.value = '';
-    } else {
-        toast.value.add({ severity: 'warn', summary: 'Uyarı', detail: 'Lütfen tüm alanları doldurun.', life: 3000 });
-    }
-};
-
-const confirmDeleteSale = (saleToDelete) => {
-    sale.value = { ...saleToDelete };
-    deleteSaleDialog.value = true;
-};
-
-const deleteSale = () => {
-    axios.delete(`/api/sales/${sale.value.id}`)
-        .then(() => {
-            toast.value.add({ severity: 'success', summary: 'Başarılı', detail: 'Satış başarıyla silindi', life: 3000 });
-            fetchSales();
-        });
-
-    deleteSaleDialog.value = false;
-    sale.value = {};
-};
-
-const confirmDeleteSelected = () => {
-    deleteSalesDialog.value = true;
-};
-
-const deleteSelectedSales = () => {
-    const ids = selectedCustomerTransaction.value.map(sale => sale.id);
-    axios.delete('/api/sales', { data: { ids } })
-        .then(() => {
-            toast.value.add({ severity: 'success', summary: 'Başarılı', detail: 'Seçilen satışlar başarıyla silindi', life: 3000 });
-            fetchSales();
-        });
-
-    deleteSalesDialog.value = false;
-    selectedCustomerTransaction.value = [];
-};
-
-const exportCSV = () => {
-    axios.get('/api/sales-export', { responseType: 'blob' })
-        .then(response => {
-            const url = window.URL.createObjectURL(new Blob([response.data]));
-            const link = document.createElement('a');
-            link.href = url;
-            link.setAttribute('download', 'sales.xlsx');
-            document.body.appendChild(link);
-            link.click();
-        })
-        .catch(error => {
-            console.error('Export failed:', error);
-        });
-
-    axios.get('/api/sales-product-export', { responseType: 'blob' })
-        .then(response => {
-            const url = window.URL.createObjectURL(new Blob([response.data]));
-            const link = document.createElement('a');
-            link.href = url;
-            link.setAttribute('download', 'sales-product.xlsx');
-            document.body.appendChild(link);
-            link.click();
-        })
-        .catch(error => {
-            console.error('Export failed:', error);
-        });
-};
 
 </script>
 

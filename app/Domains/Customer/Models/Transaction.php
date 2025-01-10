@@ -1,8 +1,7 @@
 <?php
 
-namespace App\Models;
+namespace App\Domains\Customer\Models;
 
-use App\Domains\Customer\Models\Customer;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -11,7 +10,13 @@ class Transaction extends Model
 {
     use HasFactory;
 
-    protected $guarded = [];
+    protected $fillable= [
+        'customer_id',
+        'type',
+        'amount',
+        'date',
+        'description'
+    ];
 
     public function customer(): BelongsTo
     {

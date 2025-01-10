@@ -4,8 +4,10 @@ namespace App\Domains\Customer\Repositories;
 
 use App\Domains\Customer\Interfaces\CustomerRepositoryInterface;
 use App\Domains\Customer\Models\Customer;
+use App\Domains\Customer\Models\Transaction;
 use App\Http\Requests\Customer\StoreCustomerRequest;
 use App\Http\Requests\Customer\UpdateCustomerRequest;
+use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -75,6 +77,42 @@ class CustomerRepository implements CustomerRepositoryInterface
         Customer::destroy($request->ids);
 
         return response()->json(null);
+    }
+
+    public function addTransaction(Request $request): JsonResponse
+    {
+        $date = Carbon::parse($request->date)->format('Y-m-d');
+
+        $transaction = Transaction::create([
+            'customer_id' => $request->customer_id,
+            'type' => $request->type,
+            'description' => $request->description,
+            'date' => $date,
+            'amount' => $request->amount,
+        ]);
+
+        return response()->json($transaction, 201);
+    }
+    public function bulkUpdateTransactions(Request $request): JsonResponse
+    {
+
+        $transactions = $request->all();
+
+        foreach ($transactions as $transactionData) {
+            $transaction = Transaction::find($transactionData['id']);
+            if (!$transaction) {
+                return response()->json(['message' => 'Bir işlem bulunamadı: ' . $transactionData['id']], 404);
+            }
+
+            $transaction->update([
+                'type' => $transactionData['type'],
+                'date' => $transactionData['date'],
+                'amount' => $transactionData['amount'],
+                'description' => $transactionData['description'],
+            ]);
+        }
+
+        return response()->json(['message' => 'İşlemler başarıyla güncellendi!'], 200);
     }
 
 

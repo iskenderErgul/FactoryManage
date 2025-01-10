@@ -86,7 +86,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/customers/{id}', [CustomerController::class, 'update']);
     Route::delete('/customers/{id}', [CustomerController::class, 'destroy']);
     Route::delete('/customers', [CustomerController::class, 'deleteSelected']);
-    Route::get('/transactions',[CustomerController::class,'getAllTransaction']);
+    Route::post('/transactions', [CustomerController::class, 'addTransaction']);
+    Route::post('/transactions/bulk-update', [CustomerController::class, 'bulkUpdateTransactions']);
+
 
     Route::get('/sales', [SalesController::class, 'index']);
     Route::post('/sales', [SalesController::class, 'store']);

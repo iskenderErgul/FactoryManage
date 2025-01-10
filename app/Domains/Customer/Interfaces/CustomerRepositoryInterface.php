@@ -48,4 +48,8 @@ interface CustomerRepositoryInterface
      * @return JsonResponse
      */
     public function deleteSelected(Request $request): JsonResponse;
+
+    public function addTransaction(Request $request): JsonResponse;
+
+    public function bulkUpdateTransactions(Request $request): JsonResponse;
 }

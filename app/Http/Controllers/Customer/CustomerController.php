@@ -7,6 +7,7 @@ use App\Domains\Customer\Repositories\CustomerRepository;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Customer\StoreCustomerRequest;
 use App\Http\Requests\Customer\UpdateCustomerRequest;
+use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -72,6 +73,15 @@ class CustomerController extends Controller
     public function deleteSelected(Request $request): JsonResponse
     {
         return $this->customerRepository->deleteSelected($request);
+    }
+
+    public function addTransaction(Request $request): JsonResponse
+    {
+        return $this->customerRepository->addTransaction($request);
+    }
+    public function bulkUpdateTransactions(Request $request): JsonResponse
+    {
+        return $this->customerRepository->bulkUpdateTransactions($request);
     }
 
 
