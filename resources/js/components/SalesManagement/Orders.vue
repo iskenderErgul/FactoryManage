@@ -408,7 +408,6 @@ const saveOrder = () => {
             products: orderProducts.value,
             status: selectedStatus.value,
         };
-        console.log('ooo',orderData);
 
         axios.post('/api/orders', orderData)
             .then(() => {

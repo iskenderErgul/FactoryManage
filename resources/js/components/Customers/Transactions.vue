@@ -314,12 +314,11 @@ const fetchCustomers = () => {
             customers.value = response.data;
         })
         .catch(error => {
-            console.error("Müşterileri getirirken hata:", error);
+            toast.value.add({ severity: 'errorr', summary: 'İşlem Başarısız', detail: error.data, life: 3000 });
         });
 };
 const openPrintDailog = (data) => {
     selectedPrintCustomerTransaction.value = data;
-    console.log(selectedPrintCustomerTransaction.value);
     printTransaction.value=true;
 }
 const openNew = () => {
@@ -463,11 +462,11 @@ const saveTransaction = async () => {
                 description : newTransactionDescription.value,
                 amount : newTransactionAmount.value
             });
-            toast.value.add({ severity: 'success', summary: 'İşlem Başarılı', detail: resp.data, life: 3000 });
+            toast.value.add({ severity: 'success', summary: 'İşlem Başarılı', detail: 'İşlem Başarıyla Eklendi', life: 3000 });
             resetTransactionForm();
 
         } catch (error) {
-            toast.value.add({ severity: 'errorr', summary: 'İşlem Başarısız', detail: error.data, life: 3000 });
+            toast.value.add({ severity: 'errorr', summary: 'İşlem Başarısız', detail: 'İşlem Başarısız', life: 3000 });
 
         }
         addCustomerTransactionDialog.value = false;

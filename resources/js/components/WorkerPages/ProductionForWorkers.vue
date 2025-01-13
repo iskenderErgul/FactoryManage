@@ -92,7 +92,6 @@ const fetchMachines = async () => {
         const response = await axios.get('/api/machines'); // Backend API endpoint
         machines.value = response.data; // API'den gelen makineleri kaydet
     } catch (error) {
-        console.error('Makine verileri alınamadı:', error);
         toast.add({ severity: 'error', summary: 'Hata', detail: 'Makine verileri alınırken bir hata oluştu.', life: 3000 });
     }
 };
@@ -101,7 +100,6 @@ const fetchProducts = async () => {
         const response = await axios.get('/api/products'); // Backend API endpoint
         products.value = response.data; // API'den gelen ürünleri kaydet
     } catch (error) {
-        console.error('Ürün verileri alınamadı:', error);
         toast.add({ severity: 'error', summary: 'Hata', detail: 'Ürün verileri alınırken bir hata oluştu.', life: 3000 });
     }
 };
@@ -110,7 +108,6 @@ const fetchShifts = async () => {
         const response = await axios.get('/api/shift/shifts');
         shifts.value = response.data;
     } catch (error) {
-        console.error(error);
         toast.value.add({ severity: 'error', summary: 'Hata', detail: 'Şablonlar yüklenemedi', life: 3000 });
     }
 }
@@ -125,7 +122,6 @@ onMounted(async () => {
 });
 
 const currentShift = computed(() => {
-    console.log('shifts computed içi ', shifts.value);
     return shifts.value.find(shift =>
         shift.shift_assignments.some(assignment => assignment.user_id === currentUser.value.id)
     );
@@ -133,7 +129,6 @@ const currentShift = computed(() => {
 
 
 const currentShiftId = computed(() => {
-    console.log('currentShift',currentShift);
     return currentShift.value?.id || null;
 });
 
@@ -166,7 +161,6 @@ const saveProduction = async () => {
             production.product = null;
             production.quantity = null;
         } catch (error) {
-            console.error('Üretim kaydedilirken bir hata oluştu:', error);
             toast.value.add({ severity: 'error', summary: 'Hata', detail: 'Üretim kaydedilirken bir hata oluştu.', life: 3000 });
         }
     } else {

@@ -251,7 +251,7 @@
             </div>
         </Dialog>
 
-        <Dialog v-model:visible="printSale" maximizable modal  :style="{ width: '50rem' }" :breakpoints="{ '1199px': '75vw', '575px': '90vw' }">
+        <Dialog v-model:visible="printSale" maximizable modal  :style="{ width: '70rem' }" :breakpoints="{ '1199px': '75vw', '575px': '90vw' }">
 
             <div class="p-8 bg-gray-800 text-white rounded-lg shadow-lg">
                 <!-- Fatura Başlık ve Logo -->
@@ -262,18 +262,32 @@
                     </div>
                     <div class="flex flex-column align-items-center justify-content-center w-4 ">
                         <h2 class="text-3xl font-bold  text-black-alpha-90">Fatura</h2>
-                        <p class="text-sm text-gray-400">Fatura No: {{generateRandomNumber() }}</p>
+                        <p class="text-sm text-gray-400">Fatura No: {{selectedPrintSales.customer_id }}</p>
                         <p class="text-sm text-gray-400 mr ">Fatura Tarihi : {{ selectedPrintSales.sale_date }}</p>
                     </div>
                 </div>
 
-                <!-- Müşteri Bilgileri -->
-                <div class="mb-6">
-                    <h3 class="text-xl font-semibold font-bold  text-black-alpha-90">Müşteri Bilgileri</h3>
-                    <p class="text-gray-400">Ad: {{ selectedPrintSales.customer.name }}</p>
-                    <p class="text-gray-400">Adres: {{ selectedPrintSales.customer.address }}</p>
-                    <p class="text-gray-400">E-posta: {{ selectedPrintSales.customer.email }}</p>
+
+                <div class="flex justify-content-between ">
+                    <!-- Müşteri Bilgileri -->
+                    <div class="mb-6">
+                        <h3 class="text-xl font-semibold font-bold  text-black-alpha-90">Müşteri Bilgileri</h3>
+                        <p class="text-gray-400">Ad: {{ selectedPrintSales.customer.name }}</p>
+                        <p class="text-gray-400">Adres: {{ selectedPrintSales.customer.address }}</p>
+                        <p class="text-gray-400">E-posta: {{ selectedPrintSales.customer.email }}</p>
+                        <p class="text-gray-400">Telefon: {{ selectedPrintSales.customer.phone }}</p>
+                    </div>
+
+                    <div class="mb-6 w-75">
+                        <h3 class="text-xl font-semibold font-bold  text-black-alpha-90">Teslim Alan</h3>
+                        <p class="text-gray-400">Ad-Soyadı: </p>
+                        <p class="text-gray-400">Telefon: </p>
+                        <p class="text-gray-400">Tc Kimlik Numarası:</p>
+                        <p class="text-gray-400">Araç Plakası:</p>
+                        <p class="text-gray-400">İmza:</p>
+                    </div>
                 </div>
+
 
                 <!-- Ürün Listesi -->
                 <div class="mb-6">
@@ -393,7 +407,6 @@ const fetchProducts = () => {
 
 const openPrintDailog = (data) => {
     selectedPrintSales.value = data;
-    console.log('selectedPrintSales',selectedPrintSales.value);
     printSale.value=true;
 }
 
@@ -509,7 +522,6 @@ const calculateTotalPrice = (rowData) => {
 
 const saveSale = () => {
     submitted.value = true;
-        console.log('selected customeer',selectedCustomer);
     if (selectedCustomer && saleProducts.value.length > 0) {
         const saleData = {
             customer_id: selectedCustomer.value.id,
