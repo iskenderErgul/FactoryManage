@@ -61,6 +61,7 @@ class CustomerRepository implements CustomerRepositoryInterface
     public function destroy($id): JsonResponse
     {
         $customer = Customer::findOrFail($id);
+        $customer->transactions()->delete();
         $customer->delete();
 
         return response()->json(null);
