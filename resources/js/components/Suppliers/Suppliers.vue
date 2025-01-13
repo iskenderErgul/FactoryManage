@@ -26,8 +26,13 @@
                 <Column field="suppliers_name" header="Firma Adı" sortable style="min-width:16rem"></Column>
                 <Column field="suppliers_address" header="Adres" sortable style="min-width:16rem"></Column>
                 <Column field="supplied_product" header="Ürün" sortable style="min-width:16rem"></Column>
-                <Column field="supplied_product_quantity" header="Miktar" sortable style="min-width:12rem"></Column>
-                <Column field="supplied_product_price" header="Fiyat" sortable style="min-width:12rem"></Column>
+                <Column field="supplied_product_quantity" header="Miktar ( KG )" sortable style="min-width:12rem"></Column>
+                <Column field="supplied_product_price" header="Birim Fiyat" sortable style="min-width:12rem"></Column>
+                <Column field="calculateTotalPrice" header="Toplam Tutar" sortable style="min-width:12rem">
+                    <template #body="slotProps">
+                        <span>{{ calculateTotalPrice(slotProps.data) }} TL</span>
+                    </template>
+                </Column>
                 <Column field="supply_date" header="Tedarik Tarihi" sortable style="min-width:16rem"></Column>
                 <Column :exportable="false" style="min-width:8rem">
                     <template #body="slotProps">
@@ -39,7 +44,6 @@
         </div>
         <Toast ref="toast" />
 
-        <!-- Supplier Details Dialog -->
         <Dialog v-model:visible="supplierDialog" :style="{width: '450px'}" header="Tedarikçi" :modal="true" class="p-fluid">
             <div class="field">
                 <label for="suppliers_name">Firma Adı</label>
@@ -76,8 +80,6 @@
                 <Button label="Kaydet" icon="pi pi-check" text @click="saveSupplier" />
             </template>
         </Dialog>
-
-        <!-- Delete Supplier Confirmation Dialog -->
         <Dialog v-model:visible="deleteSupplierDialog" :style="{width: '450px'}" header="Onay" :modal="true">
             <div class="confirmation-content">
                 <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem" />
@@ -88,8 +90,6 @@
                 <Button label="Evet" icon="pi pi-check" text @click="deleteSupplier" />
             </template>
         </Dialog>
-
-        <!-- Delete Selected Suppliers Confirmation Dialog -->
         <Dialog v-model:visible="deleteSuppliersDialog" :style="{width: '450px'}" header="Onay" :modal="true">
             <div class="confirmation-content">
                 <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem" />
@@ -217,6 +217,11 @@ const deleteSelectedSuppliers = () => {
             selectedSuppliers.value = [];
         });
 };
+const calculateTotalPrice = (rowData) => {
+    const totalPrice = rowData.supplied_product_quantity * rowData.supplied_product_price;
+    return totalPrice.toLocaleString('tr-TR'); // Türkçe formatta sayıyı biçimlendir
+};
+
 
 const exportCSV = () => {
     // Export functionality implementation
