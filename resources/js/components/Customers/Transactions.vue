@@ -4,10 +4,10 @@
             <Toolbar class="mb-4">
                 <template #start>
                     <Button label="Yeni İşlem Ekle" icon="pi pi-plus" severity="success" class="mr-2" @click="openNew" />
-                    <Button label="Sil" icon="pi pi-trash" severity="danger" @click="confirmDeleteSelected" :disabled="!selectedCustomerTransaction || !selectedCustomerTransaction.length" />
+                    <Button label="Sil" icon="pi pi-trash" severity="danger"  :disabled="!selectedCustomerTransaction || !selectedCustomerTransaction.length" />
                 </template>
                 <template #end>
-                    <Button label="Dışa Aktar" icon="pi pi-upload" severity="help" @click="exportCSV" />
+                    <Button label="Dışa Aktar" icon="pi pi-upload" severity="help"/>
                 </template>
             </Toolbar>
             <DataTable
@@ -22,9 +22,8 @@
                 <Column field="name" header="Müşteri Adı" sortable style="min-width:10rem"></Column>
                 <Column :exportable="false" style="min-width:8rem">
                     <template #body="slotProps">
-                        <Button icon="pi pi-info-circle" outlined rounded class="mr-2" @click="openSaleDetailDialog(slotProps.data)" />
+                        <Button icon="pi pi-info-circle" outlined rounded class="mr-2" @click="openCustomerTransactionsDetailDialog(slotProps.data)" />
                         <Button icon="pi pi-pencil" outlined rounded class="mr-2" @click="openUpdateCustomerTransactionDialog(slotProps.data)" />
-                        <Button icon="pi pi-trash" outlined rounded class="mr-2" severity="danger" @click="confirmDeleteSale(slotProps.data)" />
                         <Button icon="pi pi-print" outlined rounded  severity="info"   @click="openPrintDailog(slotProps.data)" />
                     </template>
                 </Column>
@@ -228,66 +227,42 @@
                 </div>
             </div>
         </Dialog>
-        <Dialog v-model:visible="printSale" maximizable modal  :style="{ width: '50rem' }" :breakpoints="{ '1199px': '75vw', '575px': '90vw' }">
+        <Dialog v-model:visible="printTransaction" maximizable modal :style="{ width: '70rem' }" :breakpoints="{ '1199px': '75vw', '575px': '90vw' }">
 
-            <div class="p-8 bg-gray-800 text-white rounded-lg shadow-lg">
-                <!-- Fatura Başlık ve Logo -->
+            <div class="p-fluid">
                 <div class="flex justify-content-between items-center mb-5">
-
                     <div>
                         <img src="../../../../public/Logo.png" alt="Logo" class="w-6 h-6" />
                     </div>
-                    <div class="flex flex-column align-items-center justify-content-center w-4 ">
-                        <h2 class="text-3xl font-bold  text-black-alpha-90">Fatura</h2>
-                        <p class="text-sm text-gray-400">Fatura No: {{generateRandomNumber() }}</p>
-                        <p class="text-sm text-gray-400 mr ">Fatura Tarihi : {{ selectedPrintSales.sale_date }}</p>
+                    <div class="">
+                        <h3 >Müşteri Bilgileri</h3>
+                        <p class="text-gray-400">Ad: {{ selectedPrintCustomerTransaction.name }}</p>
+                        <p class="text-gray-400">Adres: {{ selectedPrintCustomerTransaction.address }}</p>
+                        <p class="text-gray-400">E-Posta: {{ selectedPrintCustomerTransaction.email }}</p>
+                        <p class="text-gray-400">Telefon: {{ selectedPrintCustomerTransaction.phone }}</p>
                     </div>
                 </div>
 
-                <!-- Müşteri Bilgileri -->
-                <div class="mb-6">
-                    <h3 class="text-xl font-semibold font-bold  text-black-alpha-90">Müşteri Bilgileri</h3>
-                    <p class="text-gray-400">Ad: {{ selectedPrintSales.customer.name }}</p>
-                    <p class="text-gray-400">Adres: {{ selectedPrintSales.customer.address }}</p>
-                    <p class="text-gray-400">E-posta: {{ selectedPrintSales.customer.email }}</p>
+
+                <!-- İşlem Geçmişi -->
+                <h3 class="text-center">İşlem Geçmişi</h3>
+                <DataTable :value="selectedPrintCustomerTransaction.transactions" >
+                    <Column field="date" header="İşlem Tarihi" sortable></Column>
+                    <Column field="description" header="Açıklama" sortable></Column>
+                    <Column field="type" header="Tür" sortable></Column>
+                    <Column field="amount" header="Miktar (TL)" :body="formatAmount" sortable></Column>
+
+                </DataTable>
+
+                <!-- Toplam Bilgiler -->
+                <div class="total-summary" style="text-align: right; margin-top: 20px;">
+                    <p><strong>Toplam Borç:</strong> {{ formatAmount(totalDebt(selectedPrintCustomerTransaction.transactions)) }} TL</p>
+                    <p><strong>Toplam Ödeme:</strong> {{ formatAmount(totalCredit(selectedPrintCustomerTransaction.transactions)) }} TL</p>
+                    <p><strong style="font-size: 1.5em; font-weight: bold;">Genel Toplam:</strong> {{ formatSignedTotal(calculateTotalAmount(selectedPrintCustomerTransaction.transactions)) }} TL</p>
                 </div>
-
-                <!-- Ürün Listesi -->
-                <div class="mb-6">
-                    <h3 class="text-xl font-bold  font-semibold text-black-alpha-90">Ürünler</h3>
-                    <table class="w-full table-auto text-gray-300">
-                        <thead>
-                        <tr class="border-b border-gray-600">
-                            <th class="p-2 text-left">Ürün Adı</th>
-                            <th class="p-2 text-left">Miktar</th>
-                            <th class="p-2 text-left">Birim Fiyat</th>
-                            <th class="p-2 text-left">Toplam</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr v-for="(product, index) in selectedPrintSales.products" :key="index" class="border-b border-gray-600">
-                            <td class="p-2">{{ product.product_name }}</td>
-                            <td class="p-2">{{ product.pivot.quantity }}</td>
-                            <td class="p-2">{{ product.pivot.price }}</td>
-                            <td class="p-2">{{ (product.pivot.quantity * product.pivot.price)}}</td>
-                        </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-
-                <div class="mt-6 flex flex-column">
-
-                    <div class="flex justify-content-end w-full mb-2">
-                        <p class="text-xl font-bold text-left text-black-alpha-90">Toplam Tutar</p>
-                        <p class="text-lg ml-5 font-bold text-black-alpha-90">{{ calculateTotalPrice(selectedPrintSales.products) }} TL</p>
-                    </div>
-                </div>
-
             </div>
-
-
         </Dialog>
+
 
 
     </div>
@@ -313,8 +288,6 @@ const toast = ref(null);
 const addCustomerTransactionDialog = ref(false);
 const updateCustomerTransactionDialog = ref(false);
 const detailCustomerTransactionDialog = ref(false);
-const deleteCustomerTransactionDialog = ref(false);
-const deleteCustomerTransactionsDialog = ref(false);
 const selectedCustomerTransaction = ref([]);
 const submitted = ref(false);
 const isEditDialogVisible = ref(false);
@@ -325,10 +298,11 @@ const newTransactionDate = ref(null);
 const newTransactionType = ref(null);
 const newTransactionDescription = ref("");
 const newTransactionAmount = ref(null);
-
 const customerTransactions = ref([]);
+const printTransaction = ref(false);
 const transactionTypes = ref([  { label: "Borç", value: "borç" },
     { label: "Ödeme", value: "ödeme" }])
+const selectedPrintCustomerTransaction = ref([]);
 
 
 onMounted(() => {
@@ -344,18 +318,16 @@ const fetchCustomers = () => {
         });
 };
 const openPrintDailog = (data) => {
-    selectedPrintSales.value = data;
-    printSale.value=true;
+    selectedPrintCustomerTransaction.value = data;
+    console.log(selectedPrintCustomerTransaction.value);
+    printTransaction.value=true;
 }
-const generateRandomNumber = () => {
-    return Math.floor(Math.random() * 1000000); // 0 ile 999999 arasında rastgele sayı
-};
 const openNew = () => {
     selectedCustomer.value = null;
     addCustomerTransactionDialog.value=true
     submitted.value = false;
 };
-const openSaleDetailDialog = (data) => {
+const openCustomerTransactionsDetailDialog = (data) => {
     selectedCustomerTransaction.value = data;
     detailCustomerTransactionDialog.value = true;
 }
@@ -510,9 +482,5 @@ const saveTransaction = async () => {
 .card {
     margin: 2rem 0;
 }
-@media print {
-    .p-button {
-        display: none;
-    }
-}
+
 </style>
