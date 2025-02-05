@@ -2,13 +2,16 @@
 
 namespace App\Domains\Orders\Repositories;
 
-use App\Domains\Orders\Interfaces\OrderRepositoryInterface;
-use App\Domains\Orders\Models\Order;
-use App\Domains\Orders\Models\OrderProduct;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+
+
+use App\Domains\Orders\Interfaces\OrderRepositoryInterface;
+use App\Domains\Orders\Models\Order;
+use App\Domains\Orders\Models\OrderProduct;
+use App\Domains\Enums\OrderStatus;
 
 class OrderRepository implements OrderRepositoryInterface
 {
@@ -23,7 +26,7 @@ class OrderRepository implements OrderRepositoryInterface
     {
 
         $products = $request->products;
-        $status = $request->status['label'];
+        $status = OrderStatus::tryFrom($request->status['label']) ?? OrderStatus::Received;
         DB::beginTransaction();
         try {
 
@@ -32,7 +35,7 @@ class OrderRepository implements OrderRepositoryInterface
             $order = Order::create([
                 'customer_id' => $request->customer_id,
                 'order_date' => $orderDate,
-                'status' => $status ?? 'Sipariş Alındı',
+                'status' => $status->value,
                 'notes' => $request->notes ?? null,
             ]);
 
@@ -59,7 +62,7 @@ class OrderRepository implements OrderRepositoryInterface
     public function update(Request $request, $id): JsonResponse
     {
 
-        $status = $request->status['label'] ?? 'sipariş alındı';
+        $status = OrderStatus::tryFrom($request->status['label']) ?? OrderStatus::Received;
         $customerId = $request->customer_id;
         $orderDate = Carbon::parse($request->order_date)->setTimezone('Asia/Istanbul')->format('Y-m-d H:i:s');
         $products = $request->products;
@@ -72,7 +75,7 @@ class OrderRepository implements OrderRepositoryInterface
         $order->update([
             'customer_id' => $customerId,
             'order_date' => $orderDate,
-            'status' => $status
+            'status' => $status->value
         ]);
 
         $existingProductIds = $order->products->pluck('id')->toArray();

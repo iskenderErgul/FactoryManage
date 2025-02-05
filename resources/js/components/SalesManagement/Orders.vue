@@ -19,7 +19,7 @@
                 <Column field="id" header="Sipariş ID" sortable style="min-width:8rem"></Column>
                 <Column field="customer.name" header="Müşteri Adı" sortable style="min-width:10rem"></Column>
                 <Column field="order_date" header="Sipariş Tarihi" sortable style="min-width:10rem"></Column>
-                <Column field="status" header="Sipariş Tarihi" sortable style="min-width:10rem"></Column>
+                <Column field="status" header="Sipariş Durumu" sortable style="min-width:10rem"></Column>
                 <Column :exportable="false" style="min-width:8rem">
                     <template #body="slotProps">
                         <Button icon="pi pi-info-circle" outlined rounded class="mr-2" @click="openOrderDetailDialog(slotProps.data)" />
