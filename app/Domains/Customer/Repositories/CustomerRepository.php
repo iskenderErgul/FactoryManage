@@ -1,15 +1,16 @@
 <?php
 
 namespace App\Domains\Customer\Repositories;
+use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 use App\Domains\Customer\Interfaces\CustomerRepositoryInterface;
 use App\Domains\Customer\Models\Customer;
 use App\Domains\Customer\Models\Transaction;
 use App\Http\Requests\Customer\StoreCustomerRequest;
 use App\Http\Requests\Customer\UpdateCustomerRequest;
-use Carbon\Carbon;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
+use App\Services\Whattsapp\WhatsAppService;
 
 class CustomerRepository implements CustomerRepositoryInterface
 {
@@ -92,6 +93,19 @@ class CustomerRepository implements CustomerRepositoryInterface
             'amount' => $request->amount,
         ]);
 
+        $totalDebt = Transaction::where('customer_id', $request->customer_id)
+            ->where('type', 'borç')
+            ->sum('amount');
+
+        $totalPayment = Transaction::where('customer_id', $request->customer_id)
+            ->where('type', 'ödeme')
+            ->sum('amount');
+
+        $remainingDebt = $totalDebt - $totalPayment;
+
+        $message = "Yeni işlem eklendi!\n\nMüşteri ID: {$request->customer_id}\nTür: {$request->type}\nTutar: {$request->amount} ₺\nAçıklama: {$request->description}\nTarih: {$date}\n\nToplam Borç: {$totalDebt} ₺\nÖdeme: {$totalPayment} ₺\nKalan Borç: {$remainingDebt} ₺";
+        $this->whatsapp->sendMessage($request->phone_number, $message);
+
         return response()->json($transaction, 201);
     }
     public function bulkUpdateTransactions(Request $request): JsonResponse
@@ -111,6 +125,19 @@ class CustomerRepository implements CustomerRepositoryInterface
                 'amount' => $transactionData['amount'],
                 'description' => $transactionData['description'],
             ]);
+
+            // Güncellenen işlem sonrası toplam borç ve ödeme hesapla
+            $totalDebt = Transaction::where('customer_id', $transaction->customer_id)
+                ->where('type', 'borç')
+                ->sum('amount');
+
+            $totalPayment = Transaction::where('customer_id', $transaction->customer_id)
+                ->where('type', 'ödeme')
+                ->sum('amount');
+
+            $remainingDebt = $totalDebt - $totalPayment;
+            $message = "İşlem güncellendi!\n\nMüşteri ID: {$transaction->customer_id}\nTür: {$transaction->type}\nTutar: {$transaction->amount} ₺\nAçıklama: {$transaction->description}\nTarih: {$transaction->date}\n\nToplam Borç: {$totalDebt} ₺\nÖdeme: {$totalPayment} ₺\nKalan Borç: {$remainingDebt} ₺";
+            $this->whatsapp->sendMessage($transaction->phone_number, $message);
         }
 
         return response()->json(['message' => 'İşlemler başarıyla güncellendi!'], 200);
