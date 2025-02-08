@@ -3,6 +3,7 @@
 namespace App\Domains\Customer\Models;
 
 use App\Domains\Sales\Models\Sales;
+use App\Domains\Suppliers\Models\Supplier;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -31,6 +32,10 @@ class Customer extends Model
     public function transactions(): HasMany
     {
         return $this->hasMany(Transaction::class);
+    }
+    public function suppliers(): HasMany
+    {
+        return $this->hasMany(Supplier::class); // Bir müşteri birden fazla tedarikçiye sahip olabilir
     }
 
 }

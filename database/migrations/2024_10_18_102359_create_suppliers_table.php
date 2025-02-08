@@ -13,12 +13,12 @@ return new class extends Migration
     {
         Schema::create('suppliers', function (Blueprint $table) {
             $table->id();
-            $table->string('suppliers_name');
-            $table->string('suppliers_address');
+            $table->foreignId('customer_id')->constrained('customers')->onDelete('cascade'); // 'customers' tablosuna bağlanıyor
             $table->string('supplied_product');
             $table->string('supplied_product_quantity');
             $table->string('supplied_product_price');
             $table->date('supply_date');
+
             $table->timestamps();
         });
     }

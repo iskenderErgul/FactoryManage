@@ -6,34 +6,23 @@
                     <Button label="Yeni Kayıt Ekle" icon="pi pi-plus" severity="success" class="mr-2" @click="openNew" />
                     <Button label="Sil" icon="pi pi-trash" severity="danger" @click="confirmDeleteSelected" :disabled="!selectedSuppliers || !selectedSuppliers.length" />
                 </template>
-                <template #end>
-                    <FileUpload mode="basic" accept=".csv" :maxFileSize="1000000" label="Import" chooseLabel="Import" class="mr-2 inline-block" />
-                    <Button label="Export" icon="pi pi-upload" severity="help" @click="exportCSV" />
-                </template>
             </Toolbar>
             <DataTable ref="dt" :value="suppliers" v-model:selection="selectedSuppliers" dataKey="id"
-                       :paginator="true" :rows="10" :filters="filters"
-                       paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown" :rowsPerPageOptions="[5,10,25]"
-                       currentPageReportTemplate="Showing {first} to {last} of {totalRecords} suppliers">
-                <template #header>
-                    <div class="p-inputgroup">
-                        <span class="p-inputgroup-addon"><i class="pi pi-search"></i></span>
-                        <InputText v-model="filters['global'].value" placeholder="Search..." />
-                    </div>
-                </template>
+                       :paginator="true" :rows="10"
+                       paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown" :rowsPerPageOptions="[5,10,25]">
+
                 <Column selectionMode="multiple" style="width: 3rem" :exportable="false"></Column>
-                <Column field="id" header="ID" sortable style="min-width:12rem"></Column>
-                <Column field="suppliers_name" header="Firma Adı" sortable style="min-width:16rem"></Column>
-                <Column field="suppliers_address" header="Adres" sortable style="min-width:16rem"></Column>
-                <Column field="supplied_product" header="Ürün" sortable style="min-width:16rem"></Column>
-                <Column field="supplied_product_quantity" header="Miktar ( KG )" sortable style="min-width:12rem"></Column>
-                <Column field="supplied_product_price" header="Birim Fiyat" sortable style="min-width:12rem"></Column>
-                <Column field="calculateTotalPrice" header="Toplam Tutar" sortable style="min-width:12rem">
+                <Column field="id" header="ID" sortable style="min-width:2rem"></Column>
+                <Column field="customer.name" header="Müşteri Adı" sortable style="min-width:5rem" :body="customerName"></Column>
+                <Column field="supplied_product" header="Ürün" sortable style="min-width:5rem"></Column>
+                <Column field="supplied_product_quantity" header="Miktar ( KG )" sortable style="min-width:5rem"></Column>
+                <Column field="supplied_product_price" header="Birim Fiyat" sortable style="min-width:5rem"></Column>
+                <Column field="calculateTotalPrice" header="Toplam Tutar" sortable style="min-width:5rem">
                     <template #body="slotProps">
-                        <span>{{ calculateTotalPrice(slotProps.data) }} TL</span>
+                        <span>{{ formatPrice(calculateTotalPrice(slotProps.data)) }} TL</span>
                     </template>
                 </Column>
-                <Column field="supply_date" header="Tedarik Tarihi" sortable style="min-width:16rem"></Column>
+                <Column field="supply_date" header="Tedarik Tarihi" sortable style="min-width:5rem"></Column>
                 <Column :exportable="false" style="min-width:8rem">
                     <template #body="slotProps">
                         <Button icon="pi pi-pencil" outlined rounded class="mr-2" @click="editSupplier(slotProps.data)" />
@@ -44,16 +33,12 @@
         </div>
         <Toast ref="toast" />
 
+        <!-- Tedarikçi Ekle/Güncelle Dialog -->
         <Dialog v-model:visible="supplierDialog" :style="{width: '450px'}" header="Tedarikçi" :modal="true" class="p-fluid">
             <div class="field">
-                <label for="suppliers_name">Firma Adı</label>
-                <InputText id="suppliers_name" v-model.trim="supplier.suppliers_name" required :invalid="submitted && !supplier.suppliers_name" />
-                <small class="p-error" v-if="submitted && !supplier.suppliers_name">Firma Adı gereklidir.</small>
-            </div>
-            <div class="field">
-                <label for="suppliers_address">Adres</label>
-                <InputText id="suppliers_address" v-model.trim="supplier.suppliers_address" required :invalid="submitted && !supplier.suppliers_address" />
-                <small class="p-error" v-if="submitted && !supplier.suppliers_address">Adres gereklidir.</small>
+                <label for="customer_id">Müşteri</label>
+                <Dropdown id="customer_id" v-model="supplier.customer_id" :options="customers" optionLabel="name" placeholder="Müşteri Seçin" required :invalid="submitted && !supplier.customer_id" />
+                <small class="p-error" v-if="submitted && !supplier.customer_id">Müşteri seçilmelidir.</small>
             </div>
             <div class="field">
                 <label for="supplied_product">Ürün</label>
@@ -80,24 +65,13 @@
                 <Button label="Kaydet" icon="pi pi-check" text @click="saveSupplier" />
             </template>
         </Dialog>
-        <Dialog v-model:visible="deleteSupplierDialog" :style="{width: '450px'}" header="Onay" :modal="true">
-            <div class="confirmation-content">
-                <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem" />
-                <span v-if="supplier">Tedarikçi <b>{{supplier.suppliers_name}}</b> silinecek. Emin misiniz?</span>
-            </div>
+
+        <!-- Tedarikçi Silme Onay Dialog -->
+        <Dialog v-model:visible="deleteSupplierDialog" :style="{width: '450px'}" header="Tedarikçi Sil" :modal="true" class="p-fluid">
+            <p>Bu tedarikçiyi silmek istediğinize emin misiniz?</p>
             <template #footer>
-                <Button label="Hayır" icon="pi pi-times" text @click="deleteSupplierDialog = false" />
-                <Button label="Evet" icon="pi pi-check" text @click="deleteSupplier" />
-            </template>
-        </Dialog>
-        <Dialog v-model:visible="deleteSuppliersDialog" :style="{width: '450px'}" header="Onay" :modal="true">
-            <div class="confirmation-content">
-                <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem" />
-                <span>Seçilen tedarikçiler silinecek. Emin misiniz?</span>
-            </div>
-            <template #footer>
-                <Button label="Hayır" icon="pi pi-times" text @click="deleteSuppliersDialog = false" />
-                <Button label="Evet" icon="pi pi-check" text @click="deleteSelectedSuppliers" />
+                <Button label="İptal" icon="pi pi-times" text @click="hideDeleteDialog" />
+                <Button label="Sil" icon="pi pi-check" severity="danger" @click="deleteSupplier" />
             </template>
         </Dialog>
     </div>
@@ -106,7 +80,6 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
-import { FilterMatchMode } from 'primevue/api';
 import Button from 'primevue/button';
 import Toolbar from 'primevue/toolbar';
 import DataTable from 'primevue/datatable';
@@ -116,19 +89,30 @@ import InputText from 'primevue/inputtext';
 import Dialog from 'primevue/dialog';
 import Toast from 'primevue/toast';
 import Calendar from 'primevue/calendar';
+import Dropdown from 'primevue/dropdown';
 
 const toast = ref(null);
 const suppliers = ref([]);
+const customers = ref([]);
 const supplierDialog = ref(false);
 const deleteSupplierDialog = ref(false);
-const deleteSuppliersDialog = ref(false);
 const supplier = ref({});
 const selectedSuppliers = ref([]);
-const filters = ref({
-    global: { value: null, matchMode: FilterMatchMode.CONTAINS },
-});
+
 const submitted = ref(false);
 
+// Müşterileri al
+const fetchCustomers = () => {
+    axios.get('/api/customers')
+        .then(response => {
+            customers.value = response.data;
+        })
+        .catch(error => {
+            console.error("Error fetching customers:", error);
+        });
+};
+
+// Tedarikçileri al
 const fetchSuppliers = () => {
     axios.get('/api/suppliers')
         .then(response => {
@@ -140,30 +124,28 @@ const fetchSuppliers = () => {
 };
 
 onMounted(() => {
+    fetchCustomers();
     fetchSuppliers();
 });
 
+// Yeni tedarikçi ekleme işlemi
 const openNew = () => {
     supplier.value = {};
     submitted.value = false;
     supplierDialog.value = true;
 };
 
+// Formu kapatma işlemi
 const hideDialog = () => {
     supplierDialog.value = false;
     submitted.value = false;
 };
 
+// Tedarikçi kaydetme işlemi
 const saveSupplier = () => {
     submitted.value = true;
-
-    if (
-        supplier.value.suppliers_name &&
-        supplier.value.suppliers_address &&
-        supplier.value.supplied_product &&
-        supplier.value.supplied_product_quantity &&
-        supplier.value.supplied_product_price &&
-        supplier.value.supply_date) {
+    if (supplier.value.customer_id && supplier.value.supplied_product && supplier.value.supplied_product_quantity &&
+        supplier.value.supplied_product_price && supplier.value.supply_date) {
         if (supplier.value.id) {
             axios.put(`/api/suppliers/${supplier.value.id}`, supplier.value)
                 .then(() => {
@@ -189,9 +171,27 @@ const editSupplier = (supplierData) => {
     supplierDialog.value = true;
 };
 
+// Müşteri adı gösterme fonksiyonu
+const customerName = (data) => {
+    return data.customer ? data.customer.name : '';
+};
+
+// Tedarikçi silme işlemi
 const confirmDeleteSupplier = (supplierData) => {
     supplier.value = supplierData;
     deleteSupplierDialog.value = true;
+};
+
+const confirmDeleteSelected = () => {
+    if (selectedSuppliers.value.length > 0) {
+        deleteSupplierDialog.value = true;
+    } else {
+        toast.value.add({ severity: 'warn', summary: 'Uyarı', detail: 'Silmek için bir tedarikçi seçmelisiniz', life: 3000 });
+    }
+};
+
+const hideDeleteDialog = () => {
+    deleteSupplierDialog.value = false;
 };
 
 const deleteSupplier = () => {
@@ -200,30 +200,22 @@ const deleteSupplier = () => {
             toast.value.add({ severity: 'success', summary: 'Başarılı', detail: 'Tedarikçi başarıyla silindi', life: 3000 });
             fetchSuppliers();
             deleteSupplierDialog.value = false;
+        })
+        .catch(error => {
+            console.error("Error deleting supplier:", error);
+            toast.value.add({ severity: 'error', summary: 'Hata', detail: 'Tedarikçi silinemedi', life: 3000 });
         });
 };
 
-const confirmDeleteSelected = () => {
-    deleteSuppliersDialog.value = true;
+// Toplam fiyat hesaplama fonksiyonu
+const calculateTotalPrice = (data) => {
+    if (data.supplied_product_quantity && data.supplied_product_price) {
+        return parseFloat((data.supplied_product_quantity * data.supplied_product_price)).toFixed(2);
+    }
+    return '0.00'; // Eğer miktar veya fiyat yoksa 0 döndürülür
 };
 
-const deleteSelectedSuppliers = () => {
-    const supplierIds = selectedSuppliers.value.map(supplier => supplier.id);
-    axios.post('/api/suppliers/delete', { ids: supplierIds })
-        .then(() => {
-            toast.value.add({ severity: 'success', summary: 'Başarılı', detail: 'Seçilen tedarikçiler başarıyla silindi', life: 3000 });
-            fetchSuppliers();
-            deleteSuppliersDialog.value = false;
-            selectedSuppliers.value = [];
-        });
-};
-const calculateTotalPrice = (rowData) => {
-    const totalPrice = rowData.supplied_product_quantity * rowData.supplied_product_price;
-    return totalPrice.toLocaleString('tr-TR'); // Türkçe formatta sayıyı biçimlendir
-};
-
-
-const exportCSV = () => {
-    // Export functionality implementation
+const formatPrice = (price) => {
+    return new Intl.NumberFormat('tr-TR').format(price); // Türkçe formatta binlik ayırıcı kullanır
 };
 </script>

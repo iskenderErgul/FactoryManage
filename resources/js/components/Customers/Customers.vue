@@ -26,7 +26,6 @@
                 <Column field="email" header="E-posta" sortable style="min-width:12rem"></Column>
                 <Column field="phone" header="Telefon" sortable style="min-width:10rem"></Column>
                 <Column field="address" header="Adres" sortable style="min-width:10rem"></Column>
-                <Column field="debt" header="Borç (₺)" sortable style="min-width:8rem"></Column>
                 <Column :exportable="false" style="min-width:8rem">
                     <template #body="slotProps">
                         <Button icon="pi pi-pencil" outlined rounded class="mr-2" @click="editCustomer(slotProps.data)" />
@@ -56,11 +55,6 @@
             <div class="field">
                 <label for="customerAddress">Adres</label>
                 <InputText id="customerAddress" v-model.trim="customer.address" />
-            </div>
-            <div class="field">
-                <label for="customerDebt">Borç (₺)</label>
-                <InputText id="customerDebt" v-model.trim="customer.debt" type="number" required :invalid="submitted && !customer.debt" />
-                <small class="p-error" v-if="submitted && !customer.debt">Borç zorunludur.</small>
             </div>
             <template #footer>
                 <Button label="İptal" icon="pi pi-times" text @click="hideDialog" />

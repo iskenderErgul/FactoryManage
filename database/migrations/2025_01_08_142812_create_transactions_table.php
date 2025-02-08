@@ -18,6 +18,7 @@ return new class extends Migration
             $table->decimal('amount', 10, 2);
             $table->date('date');
             $table->integer('sale_id')->nullable();
+            $table->integer('supplier_id')->nullable();
             $table->text('description')->nullable();
             $table->timestamps();
 
