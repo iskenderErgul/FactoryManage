@@ -70,7 +70,15 @@
                     </div>
                     <div class="p-field">
                         <label for="productPrice">Birim Fiyat (TL):</label>
-                        <InputText id="productPrice" v-model.number="productPrice" type="number" min="0" />
+
+                        <InputNumber
+                            id="productPrice"
+                            v-model.number="productPrice"
+                            type="number"
+                            min="0"
+                            placeholder="Fiyat Girin"
+                            required
+                        />
                     </div>
                     <Button label="Ekle" @click="addUpdatingProductToSale" />
                 </div>
@@ -167,7 +175,14 @@
                     </div>
                     <div class="p-field">
                         <label for="productPrice">Birim Fiyat (TL):</label>
-                        <InputText id="productPrice" v-model.number="productPrice" type="number" min="0" required/>
+                        <InputNumber
+                            id="productPrice"
+                            v-model.number="productPrice"
+                            type="number"
+                            min="1"
+                            placeholder="Fiyat Girin"
+                            required
+                        />
                     </div>
                     <Button label="Ekle" @click="addProductToSale" />
                 </div>

@@ -178,11 +178,11 @@
                 </div>
                 <div class="p-field">
                     <label for="transactionAmount">Miktar (TL):</label>
-                    <InputText
+                    <InputNumber
                         id="newTransactionAmount"
                         v-model.number="newTransactionAmount"
                         type="number"
-                        min="0"
+                        min="1"
                         placeholder="Miktar Girin"
                     />
                 </div>
@@ -332,7 +332,6 @@ const openCustomerTransactionsDetailDialog = (data) => {
     detailCustomerTransactionDialog.value = true;
 }
 const openUpdateCustomerTransactionDialog = (data) => {
-
     selectedCustomerTransaction.value = {
         id: data.id,
         name: data.name,
@@ -353,6 +352,7 @@ const openUpdateCustomerTransactionDialog = (data) => {
         address: data.address,
     };
     customerTransactions.value = data.transactions.map(transaction => ({
+        customer_id : data.id,
         id : transaction.id,
         description: transaction.description,
         type: transaction.type === 'borç' ? 'Borç' : 'Ödeme',
@@ -393,8 +393,10 @@ const saveEdit = () => {
     isEditDialogVisible.value = false;
 };
 const saveAllTransactions = async () => {
+    console.log('customer transactions',customerTransactions);
     try {
         const updatedTransactions = customerTransactions.value.map(transaction => ({
+            customer_id :transaction.customer_id ,
             id: transaction.id,
             type: transaction.type,
             date: transaction.date,
@@ -402,6 +404,7 @@ const saveAllTransactions = async () => {
             description: transaction.description,
         }));
         const resp =await axios.post('/api/transactions/bulk-update', updatedTransactions);
+        console.log('updated transactions',updatedTransactions)
         toast.value.add({ severity: 'success', summary: 'İşlem Başarılı', detail: resp.data.message, life: 3000 });
         updateCustomerTransactionDialog.value=false
         updateCalculations();

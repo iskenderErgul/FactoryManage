@@ -100,20 +100,34 @@ class CustomerRepository implements CustomerRepositoryInterface
     {
 
         $transactions = $request->all();
+        if (empty($transactions)) {
+            return response()->json(['message' => 'Hiçbir işlem verisi bulunamadı.'], 400);
+        }
+
+        $customerId = $transactions[0]['customer_id'] ?? null;
+        if (!$customerId) {
+            return response()->json(['message' => 'Müşteri ID si bulunamadı.'], 400);
+        }
+
+        $existingTransactions = Transaction::where('customer_id', $customerId)->get();
+        $incomingTransactionIds = collect($transactions)->pluck('id')->toArray();
+        $existingTransactionIds = $existingTransactions->pluck('id')->toArray();
+        $transactionsToDelete = array_diff($existingTransactionIds, $incomingTransactionIds);
+
+        if (!empty($transactionsToDelete)) {
+            Transaction::whereIn('id', $transactionsToDelete)->delete();
+        }
 
         foreach ($transactions as $transactionData) {
             $transaction = Transaction::find($transactionData['id']);
-            if (!$transaction) {
-                return response()->json(['message' => 'Bir işlem bulunamadı: ' . $transactionData['id']], 404);
+            if ($transaction) {
+                $transaction->update([
+                    'type' => $transactionData['type'],
+                    'date' => $transactionData['date'],
+                    'amount' => $transactionData['amount'],
+                    'description' => $transactionData['description'],
+                ]);
             }
-
-            $transaction->update([
-                'type' => $transactionData['type'],
-                'date' => $transactionData['date'],
-                'amount' => $transactionData['amount'],
-                'description' => $transactionData['description'],
-            ]);
-
         }
 
         return response()->json(['message' => 'İşlemler başarıyla güncellendi!'], 200);

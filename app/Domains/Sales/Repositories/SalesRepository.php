@@ -50,7 +50,6 @@ class SalesRepository implements SalesRepositoryInterface
 
         DB::beginTransaction();
         try {
-            // Satış tarihi formatını düzenliyoruz
 
             // Yeni satış kaydı oluşturuyoruz
             $sale = Sales::create([
