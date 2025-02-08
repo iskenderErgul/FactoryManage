@@ -323,6 +323,7 @@ const openPrintDailog = (data) => {
 }
 const openNew = () => {
     selectedCustomer.value = null;
+    cleanNewTransaction();
     addCustomerTransactionDialog.value=true
     submitted.value = false;
 };
@@ -366,6 +367,14 @@ const openEditDialog = (transaction) => {
     isEditDialogVisible.value = true;
 
 };
+
+const cleanNewTransaction = () =>{
+    newTransactionDate.value=null;
+    newTransactionAmount.value=null;
+    newTransactionCustomer.value=null;
+    newTransactionType.value=null;
+    newTransactionDescription.value=null;
+}
 const saveEdit = () => {
 
     const updatedTransaction = {
@@ -392,14 +401,12 @@ const saveAllTransactions = async () => {
             amount: transaction.amount,
             description: transaction.description,
         }));
-
-
         const resp =await axios.post('/api/transactions/bulk-update', updatedTransactions);
         toast.value.add({ severity: 'success', summary: 'İşlem Başarılı', detail: resp.data.message, life: 3000 });
         updateCustomerTransactionDialog.value=false
         updateCalculations();
         fetchCustomers();
-
+        selectedCustomer.value=null;
     } catch (error) {
         toast.value.add({ severity: 'errorr', summary: 'İşlem Başarısız', detail: error.data, life: 3000 });
     }

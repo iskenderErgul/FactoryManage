@@ -93,18 +93,6 @@ class CustomerRepository implements CustomerRepositoryInterface
             'amount' => $request->amount,
         ]);
 
-        $totalDebt = Transaction::where('customer_id', $request->customer_id)
-            ->where('type', 'borç')
-            ->sum('amount');
-
-        $totalPayment = Transaction::where('customer_id', $request->customer_id)
-            ->where('type', 'ödeme')
-            ->sum('amount');
-
-        $remainingDebt = $totalDebt - $totalPayment;
-
-        $message = "Yeni işlem eklendi!\n\nMüşteri ID: {$request->customer_id}\nTür: {$request->type}\nTutar: {$request->amount} ₺\nAçıklama: {$request->description}\nTarih: {$date}\n\nToplam Borç: {$totalDebt} ₺\nÖdeme: {$totalPayment} ₺\nKalan Borç: {$remainingDebt} ₺";
-        $this->whatsapp->sendMessage($request->phone_number, $message);
 
         return response()->json($transaction, 201);
     }
@@ -126,18 +114,6 @@ class CustomerRepository implements CustomerRepositoryInterface
                 'description' => $transactionData['description'],
             ]);
 
-            // Güncellenen işlem sonrası toplam borç ve ödeme hesapla
-            $totalDebt = Transaction::where('customer_id', $transaction->customer_id)
-                ->where('type', 'borç')
-                ->sum('amount');
-
-            $totalPayment = Transaction::where('customer_id', $transaction->customer_id)
-                ->where('type', 'ödeme')
-                ->sum('amount');
-
-            $remainingDebt = $totalDebt - $totalPayment;
-            $message = "İşlem güncellendi!\n\nMüşteri ID: {$transaction->customer_id}\nTür: {$transaction->type}\nTutar: {$transaction->amount} ₺\nAçıklama: {$transaction->description}\nTarih: {$transaction->date}\n\nToplam Borç: {$totalDebt} ₺\nÖdeme: {$totalPayment} ₺\nKalan Borç: {$remainingDebt} ₺";
-            $this->whatsapp->sendMessage($transaction->phone_number, $message);
         }
 
         return response()->json(['message' => 'İşlemler başarıyla güncellendi!'], 200);
