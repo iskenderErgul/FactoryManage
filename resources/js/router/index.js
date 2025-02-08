@@ -223,9 +223,15 @@ router.beforeEach(async (to, from, next) => {
         if (store.getters.authenticated && to.name === 'login') {
             // Ana sayfaya veya başka bir sayfaya yönlendirebilirsiniz
             next({ name: 'home' }); // 'home' sayfasına yönlendirin
-        } else if (store.getters.authenticated || to.name === 'login') {
+        }
+        else if (store.getters.authenticated && to.path === '/' ) {
+            next({ name: 'home' });
+        }
+        else if (store.getters.authenticated || to.name === 'login' ) {
             next();
-        } else {
+        }
+
+        else {
             next({ name: 'login' });
         }
     } catch (error) {
