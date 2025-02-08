@@ -17,6 +17,7 @@ return new class extends Migration
             $table->enum('type', ['borç', 'ödeme']);
             $table->decimal('amount', 10, 2);
             $table->date('date');
+            $table->integer('sale_id')->nullable();
             $table->text('description')->nullable();
             $table->timestamps();
 

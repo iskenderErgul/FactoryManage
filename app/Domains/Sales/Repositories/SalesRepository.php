@@ -4,6 +4,7 @@ namespace App\Domains\Sales\Repositories;
 
 use App\Common\Services\LoggerService;
 use App\Common\Services\StockMovementService;
+use App\Domains\Customer\Models\Transaction;
 use App\Domains\Product\Models\Product;
 use App\Domains\Sales\Interfaces\SalesRepositoryInterface;
 use App\Domains\Sales\Models\Sales;
@@ -47,6 +48,7 @@ class SalesRepository implements SalesRepositoryInterface
     {
 
         $products = $request->products;
+        $totalAmount = 0;
 
         DB::beginTransaction();
         try {
@@ -56,6 +58,7 @@ class SalesRepository implements SalesRepositoryInterface
                 'customer_id' => $request->customer_id,
                 'sale_date' => $request->sale_date,
             ]);
+
 
             foreach ($products as $product) {
                 $productModel = Product::find($product['id']);
@@ -68,6 +71,10 @@ class SalesRepository implements SalesRepositoryInterface
                         'quantity' => $product['quantity'],
                         'price' => $product['price'],
                     ]);
+
+                    $totalAmount += $product['price'] * $product['quantity'];
+
+
 
                     // **Güncelleme**: Stok azaltma işlemini servis sınıfıyla yapıyoruz
                     $this->stockMovementService->reduceStock(
@@ -85,8 +92,10 @@ class SalesRepository implements SalesRepositoryInterface
             }
 
             DB::commit();
+            $this->createTransaction($sale->customer_id, $totalAmount, $sale->id, $sale->sale_date);
             // **Güncelleme**: Satış log kaydını servis sınıfıyla yapıyoruz
             $this->loggerService->logSaleAction('create', $sale, 'Satış başarıyla oluşturuldu.','Yeni Satış Kaydı Oluşturuldu');
+
             return response()->json(['success' => true, 'sale_id' => $sale->id]);
         } catch (\Exception $e) {
             DB::rollBack();
@@ -108,6 +117,7 @@ class SalesRepository implements SalesRepositoryInterface
         $customerId = $request->customer_id;
         $saleDate = $request->sale_date;
         $products = $request->products;
+        $totalAmount = 0;
 
 
         $sale = Sales::findOrFail($id);
@@ -124,7 +134,7 @@ class SalesRepository implements SalesRepositoryInterface
             $productId = $productData['id'];
             $quantity = $productData['pivot']['quantity'];
             $price = $productData['pivot']['price'];
-
+            $totalAmount += $price * $quantity;
             if (in_array($productId, $existingProductIds)) {
 
                 $previousQuantity = $sale->products()->where('product_id', $productId)->first()->pivot->quantity;
@@ -162,6 +172,15 @@ class SalesRepository implements SalesRepositoryInterface
             // Pivot tablosundan ürünü çıkarma
             $sale->products()->detach($removedProductId);
         }
+        // Transaction'ı güncelleme
+        $transaction = Transaction::where('sale_id', $sale->id)->first();
+
+        if ($transaction) {
+            $transaction->update([
+                'amount' => $totalAmount,
+                'date' => $sale->sale_date, // veya yeni tarih
+            ]);
+        }
 
         $this->loggerService->logSaleAction('update', $sale, 'Satış güncelleme işlemi.','Satış kaydı Güncelleme İşlemi');
         return response()->json($sale->load('products'), 200);
@@ -182,6 +201,9 @@ class SalesRepository implements SalesRepositoryInterface
             $this->stockMovementService->increaseStock($saleProduct->product_id, $saleProduct->quantity);
         }
 
+        $transaction = Transaction::where('sale_id',$sale->id)->first();
+        $transaction->delete();
+
         DB::table('sales_products')->where('sales_id', $id)->delete();
 
         $this->loggerService->logSaleAction('delete', $sale, 'Satış başarıyla silindi.','Satış Kaydı Silme İşlemi');
@@ -200,6 +222,22 @@ class SalesRepository implements SalesRepositoryInterface
         $salesLogs = SalesLog::with('user','sale')->get();
 
         return response()->json($salesLogs);
+    }
+
+
+    private function createTransaction($customerId, $totalAmount, $saleId, $saleDate): void
+    {
+
+        DB::table('transactions')->insert([
+            'customer_id' => $customerId,
+            'sale_id' =>$saleId,  // Yeni ilişkiyi burada ekliyoruz
+            'type' => 'borç',
+            'date' => $saleDate,
+            'amount' => $totalAmount,
+            'description' => 'Satış işlemi',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
     }
 
 
