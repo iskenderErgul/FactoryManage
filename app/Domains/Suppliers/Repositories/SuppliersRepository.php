@@ -13,7 +13,6 @@ class SuppliersRepository
 {
     public function index(): JsonResponse
     {
-        // Tedarikçileri ve ilişkili müşteri bilgilerini alıyoruz
         $suppliers = Supplier::with('customer')->get();
         return response()->json($suppliers);
     }
@@ -22,12 +21,12 @@ class SuppliersRepository
     {
 
         $totalAmount = 0;
-        // supply_date'yi dönüştürüyoruz
+
         $supplyDate = Carbon::parse($request->supply_date)->setTimezone('Asia/Istanbul')->format('Y-m-d H:i:s');
         $customer_id =$request->customer_id['id'];
-        // Yeni tedarikçi kaydını yapıyoruz
+
         $supplier = Supplier::create([
-            'customer_id' => $customer_id, // Customer ID'yi alıp kaydediyoruz
+            'customer_id' => $customer_id,
             'supplied_product' => $request->supplied_product,
             'supplied_product_quantity' => $request->supplied_product_quantity,
             'supplied_product_price' => $request->supplied_product_price,
@@ -53,10 +52,10 @@ class SuppliersRepository
     {
         $supplier = Supplier::findOrFail($id);
 
-        // supply_date'yi dönüştürüyoruz
+
         $supplyDate = Carbon::parse($request->supply_date)->setTimezone('Asia/Istanbul')->format('Y-m-d H:i:s');
 
-        // Tedarikçi bilgilerini güncelliyoruz
+
         $supplier->update([
             'customer_id' => $request->customer_id, // Customer ID'yi güncelliyoruz
             'supplied_product' => $request->supplied_product,
@@ -77,6 +76,7 @@ class SuppliersRepository
     {
         $supplier = Supplier::findOrFail($id);
         $supplier->delete();
+        Transaction::where('supplier_id',$supplier->id)->delete();
 
         return response()->json(null, 204);
     }
