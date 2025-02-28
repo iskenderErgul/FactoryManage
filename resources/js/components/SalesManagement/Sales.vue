@@ -601,6 +601,14 @@ const calculateTotalPrice = (rowData) => {
 const saveSale = () => {
     submitted.value = true;
     if (selectedCustomer && saleProducts.value.length > 0) {
+
+        const totalAmount = saleProducts.value.reduce((sum, product) => sum + (product.price * product.quantity), 0);
+
+        if (paymentType.value === 'kismi' && partialPayment.value >= totalAmount) {
+            toast.value.add({ severity: 'error', summary: 'Hata', detail: 'Kısmi ödeme toplam tutardan küçük olmalıdır.', life: 3000 });
+            return;
+        }
+
         const saleData = {
             customer_id: selectedCustomer.value.id,
             sale_date: saleDate.value,
@@ -615,11 +623,22 @@ const saveSale = () => {
                 fetchSales();
             });
         addSaleDialog.value = false;
+        selectedPymentType.value=null;
+        selectedPartialPayment.value=null;
+
     }
 };
 
 const updateSale = () => {
     if (selectedCustomer && saleProducts.value.length > 0) {
+        const selectedProductss = selectedSales.value.products;
+        const totalAmount = selectedProductss.reduce((sum, product) =>
+            sum + (product.pivot.price * product.pivot.quantity), 0
+        );
+        if (selectedPymentType.value === 'kismi' && selectedPartialPayment.value >= totalAmount) {
+            toast.value.add({ severity: 'error', summary: 'Hata', detail: 'Kısmi ödeme toplam tutardan küçük olmalıdır.', life: 3000 });
+            return;
+        }
         const saleData = {
             customer_id: selectedCustomer.value.id,
             sale_date: saleDate.value,
@@ -640,6 +659,8 @@ const updateSale = () => {
                 saleProducts.value = [];
                 productQuantity.value = 1;
                 productPrice.value = '';
+                selectedPymentType.value=null;
+                selectedPartialPayment.value=null;
             })
             .catch(error => {
                 toast.value.add({ severity: 'error', summary: 'Hata', detail: 'Güncelleme başarısız.', life: 3000 });

@@ -186,8 +186,8 @@ class SalesRepository implements SalesRepositoryInterface
             // Pivot tablosundan ürünü çıkarma
             $sale->products()->detach($removedProductId);
         }
-        // Transaction'ı güncelleme
 
+        // Transaction'ı güncelleme
         $this->transactionService->updateTransaction($sale, $totalAmount, $paymentType, $partialPayment);
 
 
