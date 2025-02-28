@@ -2,6 +2,13 @@
 
 namespace App\Domains\Sales\Repositories;
 
+
+
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\DB;
+
+
 use App\Common\Services\LoggerService;
 use App\Common\Services\StockMovementService;
 use App\Domains\Customer\Models\Transaction;
@@ -11,10 +18,7 @@ use App\Domains\Sales\Models\Sales;
 use App\Domains\Sales\Models\SalesLog;
 use App\Domains\Sales\Models\SalesProduct;
 use App\DTOs\Sales\SalesDTO;
-use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\DB;
+use App\Common\Services\TransactionService;
 
 class SalesRepository implements SalesRepositoryInterface
 {
@@ -22,10 +26,11 @@ class SalesRepository implements SalesRepositoryInterface
     protected StockMovementService $stockMovementService;
     protected LoggerService $loggerService;
 
-    public function __construct(StockMovementService $stockMovementService, LoggerService $loggerService)
+    public function __construct(StockMovementService $stockMovementService, LoggerService $loggerService,TransactionService $transactionService)
     {
         $this->stockMovementService = $stockMovementService;
         $this->loggerService = $loggerService;
+        $this->transactionService = $transactionService;
     }
 
     /**
@@ -56,6 +61,8 @@ class SalesRepository implements SalesRepositoryInterface
             // Yeni satış kaydı oluşturuyoruz
             $sale = Sales::create([
                 'customer_id' => $request->customer_id,
+                'payment_type'=> $request->paymentType,
+                'paid_amount'=> $request->partialPayment,
                 'sale_date' => $request->sale_date,
             ]);
 
@@ -92,7 +99,8 @@ class SalesRepository implements SalesRepositoryInterface
             }
 
             DB::commit();
-            $this->createTransaction($sale->customer_id, $totalAmount, $sale->id, $sale->sale_date);
+            $this->transactionService->createTransaction($sale, $totalAmount,$request->paymentType, $request->partialPayment);
+
             // **Güncelleme**: Satış log kaydını servis sınıfıyla yapıyoruz
             $this->loggerService->logSaleAction('create', $sale, 'Satış başarıyla oluşturuldu.','Yeni Satış Kaydı Oluşturuldu');
 
@@ -117,7 +125,10 @@ class SalesRepository implements SalesRepositoryInterface
         $customerId = $request->customer_id;
         $saleDate = $request->sale_date;
         $products = $request->products;
+        $paymentType = $request->paymentType;
+        $partialPayment = $request->partialPayment ?? 0;
         $totalAmount = 0;
+
 
 
         $sale = Sales::findOrFail($id);
@@ -126,7 +137,10 @@ class SalesRepository implements SalesRepositoryInterface
         $sale->update([
             'customer_id' => $customerId,
             'sale_date' => $saleDate,
+            'payment_type' => $paymentType,
+            'paid_amount' => $partialPayment,
         ]);
+
 
         $existingProductIds = $sale->products->pluck('id')->toArray();
 
@@ -173,14 +187,10 @@ class SalesRepository implements SalesRepositoryInterface
             $sale->products()->detach($removedProductId);
         }
         // Transaction'ı güncelleme
-        $transaction = Transaction::where('sale_id', $sale->id)->first();
 
-        if ($transaction) {
-            $transaction->update([
-                'amount' => $totalAmount,
-                'date' => $sale->sale_date, // veya yeni tarih
-            ]);
-        }
+        $this->transactionService->updateTransaction($sale, $totalAmount, $paymentType, $partialPayment);
+
+
 
         $this->loggerService->logSaleAction('update', $sale, 'Satış güncelleme işlemi.','Satış kaydı Güncelleme İşlemi');
         return response()->json($sale->load('products'), 200);
@@ -212,6 +222,7 @@ class SalesRepository implements SalesRepositoryInterface
         return response()->json(null, 204);
     }
 
+
     /**
      * Tüm satış loglarını alır.
      *
@@ -225,20 +236,7 @@ class SalesRepository implements SalesRepositoryInterface
     }
 
 
-    private function createTransaction($customerId, $totalAmount, $saleId, $saleDate): void
-    {
 
-        DB::table('transactions')->insert([
-            'customer_id' => $customerId,
-            'sale_id' =>$saleId,  // Yeni ilişkiyi burada ekliyoruz
-            'type' => 'borç',
-            'date' => $saleDate,
-            'amount' => $totalAmount,
-            'description' => 'Satış işlemi',
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-    }
 
 
 }

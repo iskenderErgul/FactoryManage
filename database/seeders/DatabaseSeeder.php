@@ -13,23 +13,6 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             UserSeeder::class,
-            PacsEntrySeeder::class,
-            MachineSeeder::class,
-            ShiftTemplateSeeder::class,
-            ShiftSeeder::class,
-            ProductionSeeder::class,
-            ProductSeeder::class,
-            CustomerSeeder::class,
-            SalesSeeder::class,
-            StockMovementsSeeder::class,
-            InvoiceSeeder::class,
-            RecyclingSeeder::class,
-            CostSeeder::class,
-            SupplierSeeder::class,
-            PacsEntriesLogSeeder::class,
-            UsersLogSeeder::class,
-           ShiftAssignmentSeeder::class,
-
         ]);
     }
 }

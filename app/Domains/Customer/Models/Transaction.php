@@ -14,6 +14,7 @@ class Transaction extends Model
         'customer_id',
         'type',
         'amount',
+        'sale_id',
         'date',
         'description'
     ];

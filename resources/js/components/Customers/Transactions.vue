@@ -328,9 +328,12 @@ const openNew = () => {
     submitted.value = false;
 };
 const openCustomerTransactionsDetailDialog = (data) => {
-    selectedCustomerTransaction.value = data;
+    selectedCustomerTransaction.value = {
+        ...data,
+        transactions: [...data.transactions].reverse()
+    };
     detailCustomerTransactionDialog.value = true;
-}
+};
 const openUpdateCustomerTransactionDialog = (data) => {
     selectedCustomerTransaction.value = {
         id: data.id,
@@ -476,8 +479,6 @@ const saveTransaction = async () => {
             resetTransactionForm();
 
         } catch (error) {
-            toast.value.add({ severity: 'errorr', summary: 'İşlem Başarısız', detail: 'İşlem Başarısız', life: 3000 });
-
         }
         addCustomerTransactionDialog.value = false;
         fetchCustomers();

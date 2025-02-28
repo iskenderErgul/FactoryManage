@@ -14,6 +14,8 @@ class Sales extends Model
     protected $fillable = [
         'customer_id',
         'sale_date',
+        'payment_type',
+        'paid_amount'
     ];
 
     public function customer()

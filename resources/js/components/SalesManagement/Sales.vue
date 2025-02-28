@@ -42,12 +42,11 @@
                 <h3>Müşteri Bilgileri</h3>
                 <div class="p-field">
                     <label for="customerSelect">Müşteri Seç:</label>
-                    <Dropdown id="customerSelect" v-model="selectedCustomer" :options="customers" optionLabel="name" placeholder="Müşteri Seçin" />
+                    <Dropdown id="customerSelect"  v-model="selectedCustomer" :options="customers" optionLabel="name" placeholder="Müşteri Seçin" />
                 </div>
 
                 <div class="p-field">
                     <label for="saleDate">Satış Tarihi:</label>
-<!--                    <InputText id="saleDate" v-model="saleDate" />-->
                     <Calendar
                         id="saleDate"
                         v-model="saleDate"
@@ -55,6 +54,18 @@
                         :invalid="submitted && !saleDate"
                     />
                 </div>
+                <!-- Ödeme Bilgileri -->
+                <h3>Ödeme Bilgileri</h3>
+                <div class="p-field">
+                    <label for="paymentType">Ödeme Türü:</label>
+                    <Dropdown id="paymentType" option-label="label" v-model="selectedPymentType" :options="paymentOptions" placeholder="Ödeme Türü Seçin"  optionValue="value" />
+                </div>
+
+                <div v-if="selectedPymentType === 'kismi'" class="p-field mt-2">
+                    <label for="partialPayment">Kısmi Ödeme Miktarı (TL):</label>
+                    <InputNumber id="partialPayment" v-model.number="selectedPartialPayment" mode="currency" currency="TRY" locale="tr-TR" />
+                </div>
+
 
                 <!-- Ürün Ekleme -->
                 <h3>Ürün Ekle</h3>
@@ -70,12 +81,10 @@
                     </div>
                     <div class="p-field">
                         <label for="productPrice">Birim Fiyat (TL):</label>
-
                         <InputNumber
                             id="productPrice"
                             v-model.number="productPrice"
                             type="number"
-                            min="0"
                             placeholder="Fiyat Girin"
                             required
                         />
@@ -83,9 +92,7 @@
                     <Button label="Ekle" @click="addUpdatingProductToSale" />
                 </div>
 
-                <!-- Satış Ürünleri Tablosu -->
                 <h3>Satış Ürünleri</h3>
-                <!-- DataTable: Satır düzenleme ve silme işlemleri için düğmeler eklendi -->
 
                 <DataTable :value="saleProducts" :paginator="true" :rows="5">
                     <Column field="product_name" header="Ürün Adı" sortable></Column>
@@ -94,7 +101,6 @@
                     <Column field="pivot.price" header="Birim Fiyat (TL)" sortable></Column>
                     <Column field="total_price" header="Toplam (TL)" sortable></Column>
 
-                    <!-- Düzenle ve Sil Butonları Sütunu -->
                     <Column :header="''" style="width: 8rem">
                         <template #body="slotProps">
                             <Button icon="pi pi-pencil" class="p-button-rounded p-button-info mr-2"
@@ -108,11 +114,13 @@
                     <strong style="font-size: 1.5em; font-weight: bold;">Genel Toplam (TL): {{ calculateTotalPrice(saleProducts) }}</strong>
                 </div>
 
+
+
+
                 <div class="p-field" style="text-align: right; margin-top: 20px;">
                     <Button label="Kaydet" @click="updateSale" />
                 </div>
 
-                <!-- Düzenleme Dialogu -->
                 <Dialog header="Ürün Düzenle" v-model:visible="isEditDialogVisible" :modal="true" :closable="false">
 
                     <div class="p-fluid">
@@ -201,6 +209,37 @@
                     <strong style="font-size: 1.5em; font-weight: bold;">Genel Toplam (TL): {{ calculateTotalPrice(saleProducts) }}</strong>
                 </div>
 
+                <Card class="mb-4">
+                    <template #title>Ödeme Bilgileri</template>
+                    <template #content>
+                        <div class="formgrid grid">
+                            <!-- Ödeme Türü Seçimi -->
+                            <div class="field col-12">
+                                <label class="font-bold text-lg">Ödeme Türü:</label>
+                                <div class="flex align-items-center gap-3 mt-2">
+                                    <RadioButton id="pesin" v-model="paymentType" name="paymentType" value="pesin" />
+                                    <label for="pesin" class="mr-4 cursor-pointer">Peşin</label>
+
+                                    <RadioButton id="borc" v-model="paymentType" name="paymentType" value="borc" />
+                                    <label for="borc" class="mr-4 cursor-pointer">Borç</label>
+
+                                    <RadioButton id="kismi" v-model="paymentType" name="paymentType" value="kismi" />
+                                    <label for="kismi" class="cursor-pointer">Kısmi Ödeme</label>
+                                </div>
+                            </div>
+
+                            <!-- Kısmi Ödeme Tutarı (Sadece Kısmi Ödeme seçildiğinde görünür) -->
+                            <div v-if="paymentType === 'kismi'" class="field col-12">
+                                <label for="partialPayment" class="font-bold">Ödenen Tutar (TL):</label>
+                                <div class="p-inputgroup">
+                                    <span class="p-inputgroup-addon"><i class="pi pi-wallet"></i></span>
+                                    <InputNumber id="partialPayment" v-model="partialPayment" :min="1" :max="calculateTotalPrice" placeholder="Tutar Girin" />
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </Card>
+
                 <div class="p-field" style="text-align: right; margin-top: 20px;">
                     <Button label="Kaydet" @click="saveSale" />
                 </div>
@@ -250,6 +289,18 @@
                     <label for="saleDate">Satış Tarihi:</label>
                     <InputText id="saleDate" v-model="selectedSales.sale_date" readonly />
                 </div>
+                <!-- Ödeme Bilgileri -->
+                <h3>Ödeme Bilgileri</h3>
+                <div class="p-field">
+                    <label for="paymentType">Ödeme Türü:</label>
+                    <InputText id="paymentType" v-model="selectedSales.payment_type" readonly />
+                </div>
+
+                <div v-if="selectedSales.payment_type === 'kismi'" class="p-field">
+                    <label for="paidAmount">Kısmi Ödeme Miktarı (TL):</label>
+                    <InputNumber id="paidAmount" v-model="selectedSales.paid_amount" mode="currency" currency="TRY" locale="tr-TR" readonly />
+                </div>
+
 
                 <h3>Satış Ürünleri</h3>
                 <DataTable :value="selectedSales.products" :paginator="true" :rows="5">
@@ -358,6 +409,8 @@ import Dialog from 'primevue/dialog';
 import Toast from 'primevue/toast';
 import Dropdown from 'primevue/dropdown';
 import Calendar from "primevue/calendar";
+import RadioButton from "primevue/radiobutton";
+import Card from "primevue/card";
 
 
 const customers = ref([]);
@@ -377,12 +430,22 @@ const isEditDialogVisible = ref(false);
 const editingProduct = ref({});
 const selectedCustomer = ref(null);
 const selectedProduct = ref(null);
+const selectedPymentType = ref(null);
+const selectedPartialPayment = ref(null);
 const productQuantity = ref(1);
 const productPrice = ref();
 const saleProducts = ref([]);
 const saleDate = ref('');
 const printSale = ref(false)
-const  selectedPrintSales  = ref();
+const selectedPrintSales  = ref();
+const paymentType = ref();
+const partialPayment = ref(null);
+const paymentOptions = [
+    { label: 'Borç', value: 'borc' },
+    { label: 'Kısmi', value: 'kismi' },
+    { label: 'Peşin', value: 'pesin' },
+];
+
 
 
 onMounted(() => {
@@ -426,7 +489,7 @@ const openPrintDailog = (data) => {
 }
 
 const generateRandomNumber = () => {
-    return Math.floor(Math.random() * 1000000); // 0 ile 999999 arasında rastgele sayı
+    return Math.floor(Math.random() * 1000000);
 };
 
 const openNew = () => {
@@ -542,6 +605,8 @@ const saveSale = () => {
             customer_id: selectedCustomer.value.id,
             sale_date: saleDate.value,
             products: saleProducts.value,
+            paymentType : paymentType.value,
+            partialPayment : partialPayment.value,
         };
 
         axios.post('/api/sales', saleData)
@@ -559,6 +624,8 @@ const updateSale = () => {
             customer_id: selectedCustomer.value.id,
             sale_date: saleDate.value,
             products: saleProducts.value,
+            paymentType :selectedPymentType.value,
+            partialPayment :selectedPartialPayment.value ,
         };
 
         axios.put(`/api/sales/${selectedSales.value.id}`, saleData)
