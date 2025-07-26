@@ -72,10 +72,11 @@
             <div class="field">
                 <label for="password">Password</label>
                 <div class="flex align-items-center">
-                    <InputText id="password" v-model.trim="user.password" :type="showPassword ? 'text' : 'password'" required="true" :invalid="submitted && !user.password" />
-                    <Button icon="pi" :class="showPassword ? 'pi-eye-slash' : 'pi-eye'" @click="togglePasswordVisibility" />
+                    <InputText id="password" v-model.trim="user.password" :type="showPassword ? 'text' : 'password'" :required="!user.id" :invalid="submitted && !user.password && !user.id" />
+                    <Button :icon="showPassword ? 'pi pi-eye-slash' : 'pi pi-eye'" @click="togglePasswordVisibility" />
                 </div>
-                <small class="p-error" v-if="submitted && !user.password">Password is required.</small>
+                <small class="p-error" v-if="submitted && !user.password && !user.id">Password is required for new users.</small>
+                <small class="p-info" v-if="user.id">Leave empty to keep current password.</small>
             </div>
 
             <template #footer>
@@ -166,14 +167,17 @@ const saveuser = () => {
 
     if (user.value.name && user.value.name.trim()) {
         if (user.value.id) {
+            // Kullanıcı düzenleniyor
             console.log('component içerisi',user.value);
             store.dispatch('updateUser', {
                 ...user.value,
             });
-
-
         } else {
-            // Yeni kullanıcı ekleniyor
+            // Yeni kullanıcı ekleniyor - şifre zorunlu
+            if (!user.value.password || !user.value.password.trim()) {
+                toast.value.add({ severity: 'error', summary: 'Hata', detail: 'Yeni kullanıcı için şifre zorunludur!', life: 3000 });
+                return;
+            }
             user.value.image = 'user-placeholder.svg';
             user.value.role = user.value.role.name;
             store.dispatch('createUser', user.value);
@@ -188,7 +192,10 @@ const saveuser = () => {
 };
 
 const edituser = (prod) => {
-    user.value = { ...prod };
+    user.value = { 
+        ...prod,
+        password: '' // Şifre alanını boş bırak
+    };
     userDialog.value = true;
 };
 const confirmDeleteuser = (prod) => {

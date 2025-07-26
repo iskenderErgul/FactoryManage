@@ -40,7 +40,7 @@ class TransactionService
         }
     }
 
-
+    //TODO Bu fonksiyon çok az  yanlış
     public function createTransaction( $sale, $totalAmount, $paymentType, $partialPayment): void
     {
         if ($paymentType === 'pesin') {

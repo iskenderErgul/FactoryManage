@@ -36,6 +36,7 @@ class SalesController
      */
     public function store(SalesRequest $request): JsonResponse
     {
+        //Service içerisine yönlendirilecek.
         return $this->salesRepository->store(SalesDTO::buildFromRequest($request));
     }
 

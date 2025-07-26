@@ -49,6 +49,8 @@ class SalesRepository implements SalesRepositoryInterface
      * @param SalesDTO $request  Satış kaydı oluşturmak için gerekli bilgiler
      * @return JsonResponse
      */
+
+    //SalesDTO $request değil $salesdto
     public function store(SalesDTO $request): JsonResponse
     {
 
@@ -68,9 +70,10 @@ class SalesRepository implements SalesRepositoryInterface
 
 
             foreach ($products as $product) {
-                $productModel = Product::find($product['id']);
+                $productModel = Product::findOrFail($product['id']);//Burdaki hatanın yakalanması lazm.Bu kontrol requestte yapılabilir.
 
-                if ($productModel && $productModel->stock_quantity >= $product['quantity']) {
+
+                if ($productModel->stock_quantity >= $product['quantity']) {
                     // Satış ürün kaydı yapıyoruz
                     SalesProduct::create([
                         'sales_id' => $sale->id,

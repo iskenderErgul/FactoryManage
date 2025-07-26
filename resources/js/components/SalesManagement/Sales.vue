@@ -602,13 +602,14 @@ const saveSale = () => {
     submitted.value = true;
     if (selectedCustomer && saleProducts.value.length > 0) {
 
+        //Bunu validasyon yapan bir fonksiyonla yap.Burada değil
         const totalAmount = saleProducts.value.reduce((sum, product) => sum + (product.price * product.quantity), 0);
 
         if (paymentType.value === 'kismi' && partialPayment.value >= totalAmount) {
             toast.value.add({ severity: 'error', summary: 'Hata', detail: 'Kısmi ödeme toplam tutardan küçük olmalıdır.', life: 3000 });
             return;
         }
-
+        //product içerisindeki gerekli bilgileri yolla
         const saleData = {
             customer_id: selectedCustomer.value.id,
             sale_date: saleDate.value,

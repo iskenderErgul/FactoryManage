@@ -116,7 +116,8 @@ class UserRepository implements UserInterface
         $user->email = $request->email;
         $user->role = is_array($request->role) ? $request->role['name'] : $request->role;
 
-        if ($request->password && !Hash::check($request->password, $user->password)) {
+        // Şifre alanı dolu gelirse şifreyi güncelle, boş gelirse güncelleme
+        if ($request->password && !empty(trim($request->password))) {
             $user->password = bcrypt($request->password);
         }
         $user->save();

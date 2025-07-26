@@ -17,6 +17,7 @@ class SalesRequest extends FormRequest
         return [
             'customer_id' => 'required|integer|exists:customers,id',
             'sale_date' => 'required|',
+            //produycts lar tabloda olmalı
             'products' => 'required|array',
 
         ];
