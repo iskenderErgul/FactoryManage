@@ -20,7 +20,6 @@ class UpdateUserRequest extends FormRequest
             'email' => 'required|email|unique:users,email,' . $userId,
             'role' => 'required',
             'password' => 'nullable|string|min:3',
-            'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:10000',
         ];
     }
 
@@ -32,9 +31,7 @@ class UpdateUserRequest extends FormRequest
             'email.unique' => 'Bu email zaten kullanılıyor.',
             'role.required' => 'Rol alanı gereklidir.',
             'password.min' => 'Şifre en az 8 karakter olmalıdır.',
-            'photo.image' => 'Yalnızca resim dosyası yüklenebilir.',
-            'photo.mimes' => 'Yalnızca jpeg, png, jpg ve gif dosyaları yüklenebilir.',
-            'photo.max' => 'Resim dosyası 2MB\'dan küçük olmalıdır.',
+
         ];
     }
 }

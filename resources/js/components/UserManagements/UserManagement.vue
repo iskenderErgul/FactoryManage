@@ -9,7 +9,7 @@
 
             </Toolbar>
 
-            <DataTable ref="dt" :value="users" v-model:selection="selectedUsers" dataKey="id" 
+            <DataTable ref="dt" :value="users" v-model:selection="selectedUsers" dataKey="id"
                        :paginator="true" :rows="10" :filters="filters"
                        paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown" :rowsPerPageOptions="[5,10,25]"
                        currentPageReportTemplate="Mevcut {first} ile {last} arasında {totalRecords} kullanıcı">
@@ -172,6 +172,7 @@ const saveuser = () => {
             store.dispatch('updateUser', {
                 ...user.value,
             });
+            toast.value.add({ severity: 'success', summary: 'Başarılı', detail: 'Kullanıcı başarıyla Güncellendi!', life: 3000 });
         } else {
             // Yeni kullanıcı ekleniyor - şifre zorunlu
             if (!user.value.password || !user.value.password.trim()) {
@@ -192,7 +193,7 @@ const saveuser = () => {
 };
 
 const edituser = (prod) => {
-    user.value = { 
+    user.value = {
         ...prod,
         password: '' // Şifre alanını boş bırak
     };

@@ -46,12 +46,12 @@
                 <small class="p-error" v-if="submitted && !supplier.supplied_product">Ürün gereklidir.</small>
             </div>
             <div class="field">
-                <label for="supplied_product_quantity">Miktar</label>
+                <label for="supplied_product_quantity">Miktar(KG)</label>
                 <InputText id="supplied_product_quantity" v-model.number="supplier.supplied_product_quantity" required :invalid="submitted && !supplier.supplied_product_quantity" />
                 <small class="p-error" v-if="submitted && !supplier.supplied_product_quantity">Miktar gereklidir.</small>
             </div>
             <div class="field">
-                <label for="supplied_product_price">Fiyat</label>
+                <label for="supplied_product_price">Fiyat(Birim)</label>
                 <InputText id="supplied_product_price" v-model.number="supplier.supplied_product_price" required :invalid="submitted && !supplier.supplied_product_price" />
                 <small class="p-error" v-if="submitted && !supplier.supplied_product_price">Fiyat gereklidir.</small>
             </div>
