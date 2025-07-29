@@ -7,7 +7,9 @@
                 <OverviewTab
                     ref="overviewTabRef"
                     :dashboardData="dashboardData"
-                    :chartOptions="chartOptions" />
+                    :chartOptions="chartOptions"
+                    class="mt-4"
+                />
             </TabPanel>
 
             <!-- Üretim Analizi Tab -->
@@ -19,17 +21,6 @@
                     :machines="machines"
                     :workers="workers"
                     @filter="handleProductionFilter" />
-            </TabPanel>
-
-            <!-- Satış Performansı Tab -->
-            <TabPanel header="💰 Satış Performansı">
-                <SalesTab
-                    ref="salesTabRef"
-                    :chartOptions="chartOptions"
-                    :doughnutOptions="doughnutOptions"
-                    :salesData="salesData"
-                    :customers="customers"
-                    @filter="handleSalesFilter" />
             </TabPanel>
 
             <!-- Stok Yönetimi Tab -->
@@ -306,9 +297,7 @@ const formatDate = (dateString) => {
 
 <style scoped>
 .dashboard-container {
-    padding: 20px;
-    max-width: 1400px;
-    margin: 0 auto;
+    width: 100%;
     background: transparent;
 }
 
@@ -338,12 +327,27 @@ const formatDate = (dateString) => {
 :deep(.p-tabview .p-tabview-nav) {
     background: rgba(30, 41, 59, 0.95) !important;
     border-bottom: 1px solid rgba(71, 85, 105, 0.3) !important;
+    display: flex !important;
+    width: 100% !important;
+}
+
+:deep(.p-tabview .p-tabview-nav li) {
+    flex: 1 !important;
+    min-width: 0 !important;
 }
 
 :deep(.p-tabview .p-tabview-nav li .p-tabview-nav-link) {
     color: #94A3B8 !important;
     background: transparent !important;
     border: none !important;
+    width: 100% !important;
+    text-align: center !important;
+    padding: 16px 20px !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
 }
 
 :deep(.p-tabview .p-tabview-nav li.p-highlight .p-tabview-nav-link) {
@@ -355,6 +359,7 @@ const formatDate = (dateString) => {
 :deep(.p-tabview .p-tabview-panels) {
     background: transparent !important;
     border: none !important;
+    padding : 0 !important;
 }
 
 @media (max-width: 768px) {

@@ -264,7 +264,7 @@ defineExpose({
 .overview-container {
     display: flex;
     flex-direction: column;
-    gap: 30px;
+
 }
 
 .kpi-grid {

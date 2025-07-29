@@ -138,13 +138,13 @@ const clearFilters = () => {
 
 <style scoped>
 .filter-section {
-    margin-bottom: 25px;
+    margin-bottom: 20px;
 }
 
 .filter-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 20px;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 15px;
     align-items: end;
 }
 

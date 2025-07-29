@@ -68,6 +68,11 @@
                             {{ formatDate(slotProps.data[col.field]) }}
                         </span>
 
+                        <!-- Actions -->
+                        <div v-else-if="col.type === 'actions'">
+                            <slot name="actions" :data="slotProps.data"></slot>
+                        </div>
+
                         <!-- Default text -->
                         <span v-else>{{ slotProps.data[col.field] }}</span>
                     </template>

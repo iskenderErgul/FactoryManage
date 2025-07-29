@@ -4,6 +4,7 @@
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Costs\CostsController;
 use App\Http\Controllers\Customer\CustomerController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Exports\ExportController;
 use App\Http\Controllers\Machines\MachinesController;
 use App\Http\Controllers\Orders\OrderController;
@@ -141,6 +142,31 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/orders/{id}', [OrderController::class, 'destroy']);
 
     Route::get('/logout', [LoginController::class, 'logout']);
+
+
+
+    // Dashboard API Routes
+    Route::prefix('dashboard')->group(function () {
+
+        // Üretim verileri
+        Route::get('/production/daily', [DashboardController::class, 'getDailyProduction']);
+        Route::get('/production/products', [DashboardController::class, 'getProductDistribution']);
+        Route::post('/production/filtered', [DashboardController::class, 'getFilteredProduction']);
+
+        // İşçi üretim verileri
+        Route::get('/production/workers', [DashboardController::class, 'getWorkerProduction']);
+        Route::post('/production/workers/filtered', [DashboardController::class, 'getFilteredWorkerProduction']);
+        Route::get('/production/workers/detail', [DashboardController::class, 'getWorkerDetailProduction']);
+
+        // Filtreleme için listeler
+        Route::get('/machines', [DashboardController::class, 'getMachines']);
+        Route::get('/workers', [DashboardController::class, 'getWorkers']);
+        Route::get('/products', [DashboardController::class, 'getProducts']);
+
+        // Genel istatistikler
+        Route::get('/stats', [DashboardController::class, 'getDashboardStats']);
+
+    });
 });
 
 
