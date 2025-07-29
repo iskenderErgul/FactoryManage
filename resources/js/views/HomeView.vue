@@ -1,141 +1,365 @@
 <template>
-    <div class="card">
-        <Chart type="bar" :data="chartData" :options="chartOptions" />
+    <div class="dashboard-container">
+        <!-- Tab Panel -->
+        <TabView>
+            <!-- Genel Özet Tab -->
+            <TabPanel header="📊 Genel Özet">
+                <OverviewTab
+                    ref="overviewTabRef"
+                    :dashboardData="dashboardData"
+                    :chartOptions="chartOptions" />
+            </TabPanel>
+
+            <!-- Üretim Analizi Tab -->
+            <TabPanel header="🏭 Üretim Analizi">
+                <ProductionTab
+                    ref="productionTabRef"
+                    :chartOptions="chartOptions"
+                    :doughnutOptions="doughnutOptions"
+                    :machines="machines"
+                    :workers="workers"
+                    @filter="handleProductionFilter" />
+            </TabPanel>
+
+            <!-- Satış Performansı Tab -->
+            <TabPanel header="💰 Satış Performansı">
+                <SalesTab
+                    ref="salesTabRef"
+                    :chartOptions="chartOptions"
+                    :doughnutOptions="doughnutOptions"
+                    :salesData="salesData"
+                    :customers="customers"
+                    @filter="handleSalesFilter" />
+            </TabPanel>
+
+            <!-- Stok Yönetimi Tab -->
+            <TabPanel header="📦 Stok Yönetimi">
+                <StockTab
+                    ref="stockTabRef"
+                    :chartOptions="chartOptions"
+                    :stockData="stockData"
+                    :products="products"
+                    @filter="handleStockFilter" />
+            </TabPanel>
+        </TabView>
     </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
-import Chart from 'primevue/chart';
+import { ref, onMounted, nextTick } from "vue";
+import TabView from 'primevue/tabview';
+import TabPanel from 'primevue/tabpanel';
 import axios from "axios";
 
-const products = ref([]);
-const chartData = ref();
-const chartOptions = ref();
+// Component imports
+import OverviewTab from '@/components/dashboard/OverviewTab.vue';
+import ProductionTab from '@/components/dashboard/ProductionTab.vue';
+import SalesTab from '@/components/dashboard/SalesTab.vue';
+import StockTab from '@/components/dashboard/StockTab.vue';
 
-onMounted(() => {
-    getAllProducts();
+// Component refs
+const overviewTabRef = ref(null);
+const productionTabRef = ref(null);
+const salesTabRef = ref(null);
+const stockTabRef = ref(null);
+
+// Data References
+const dashboardData = ref({
+    dailyProduction: 1247,
+    dailySales: 18450,
+    activeWorkers: 12,
+    activeMachines: 8,
+    totalMachines: 10
 });
 
-// Ürünleri API'den al
-const getAllProducts = () => {
-    axios.get('/api/products')
-        .then(response => {
-            products.value = response.data;
-            chartData.value = setChartData();
-            chartOptions.value = setChartOptions();
-        })
-        .catch(error => {
-            console.error('Error fetching products:', error);
-        });
+const salesData = ref({
+    monthlySales: 145000,
+    activeCustomers: 45,
+    totalOrders: 128
+});
+
+const stockData = ref({
+    criticalStock: 3,
+    lowStock: 7
+});
+
+// Master Data
+const machines = ref([
+    { id: 1, machine_name: 'Makine A' },
+    { id: 2, machine_name: 'Makine B' },
+    { id: 3, machine_name: 'Makine C' }
+]);
+
+const workers = ref([
+    { id: 1, name: 'Ahmet Yılmaz' },
+    { id: 2, name: 'Mehmet Özkan' },
+    { id: 3, name: 'Ali Kaya' }
+]);
+
+const customers = ref([]);
+const products = ref([]);
+
+// Chart Options
+const chartOptions = ref();
+const doughnutOptions = ref();
+
+// Lifecycle
+onMounted(async () => {
+    await nextTick();
+
+    try {
+        initializeChartOptions();
+        await loadMasterData();
+        updateAllTabs();
+        console.log('Dashboard yüklendi');
+    } catch (error) {
+        console.error('Dashboard yüklenirken hata:', error);
+    }
+});
+
+// API Functions
+const loadMasterData = async () => {
+    try {
+        // Paralel olarak master dataları yükle
+        const [productsRes, machinesRes, workersRes, customersRes] = await Promise.all([
+            axios.get('/api/products').catch(() => ({ data: [] })),
+            axios.get('/api/machines').catch(() => ({ data: machines.value })),
+            axios.get('/api/users?role=worker').catch(() => ({ data: workers.value })),
+            axios.get('/api/customers').catch(() => ({ data: [] }))
+        ]);
+
+        products.value = productsRes.data;
+        machines.value = machinesRes.data.length > 0 ? machinesRes.data : machines.value;
+        workers.value = workersRes.data.length > 0 ? workersRes.data : workers.value;
+        customers.value = customersRes.data;
+
+        console.log('Master data loaded');
+    } catch (error) {
+        console.warn('Master data loading error:', error);
+    }
 };
 
-
-const setChartData = () => {
-
-    const stockQuantities = products.value.map(product => product.stock_quantity);
-    const productNames = products.value.map(product => product.product_name);
-
-    return {
-        labels: productNames,
-        datasets: [
-            {
-                label: 'Ürünler',
-                data: stockQuantities,
-                backgroundColor: [
-                    'rgba(249, 115, 22, 0.4)',
-                    'rgba(6, 182, 212, 0.4)',
-                    'rgba(107, 114, 128, 0.4)',
-                    'rgba(139, 92, 246, 0.4)',
-                    'rgba(34, 197, 94, 0.4)',
-                    'rgba(251, 146, 60, 0.4)',
-                    'rgba(236, 72, 153, 0.4)',
-                    'rgba(16, 185, 129, 0.4)',
-                    'rgba(96, 165, 250, 0.4)',
-                    'rgba(52, 211, 153, 0.4)',
-                    'rgba(250, 204, 21, 0.4)',
-                    'rgba(192, 38, 211, 0.4)',
-                    'rgba(59, 130, 246, 0.4)',
-                    'rgba(239, 68, 68, 0.4)',
-                    'rgba(156, 163, 175, 0.4)',
-                    'rgba(217, 70, 239, 0.4)',
-                    'rgba(24, 78, 119, 0.4)',
-                    'rgba(245, 158, 11, 0.4)',
-                    'rgba(168, 85, 247, 0.4)',
-                    'rgba(51, 65, 85, 0.4)'
-                ],
-                borderColor: [
-                    'rgb(249, 115, 22)',
-                    'rgb(6, 182, 212)',
-                    'rgb(107, 114, 128)',
-                    'rgb(139, 92, 246)',
-                    'rgb(34, 197, 94)',
-                    'rgb(251, 146, 60)',
-                    'rgb(236, 72, 153)',
-                    'rgb(16, 185, 129)',
-                    'rgb(96, 165, 250)',
-                    'rgb(52, 211, 153)',
-                    'rgb(250, 204, 21)',
-                    'rgb(192, 38, 211)',
-                    'rgb(59, 130, 246)',
-                    'rgb(239, 68, 68)',
-                    'rgb(156, 163, 175)',
-                    'rgb(217, 70, 239)',
-                    'rgb(24, 78, 119)',
-                    'rgb(245, 158, 11)',
-                    'rgb(168, 85, 247)',
-                    'rgb(51, 65, 85)'
-                ],
-
-                borderWidth: 1
-            }
-
-        ]
-    };
+const loadDashboardData = async () => {
+    try {
+        // Dashboard KPI verilerini yükle
+        const response = await axios.get('/api/dashboard/summary');
+        dashboardData.value = { ...dashboardData.value, ...response.data };
+    } catch (error) {
+        console.warn('Dashboard data loading error:', error);
+    }
 };
 
+// Chart Options Initialization
+const initializeChartOptions = () => {
+    const textColor = '#F1F5F9';
+    const textColorSecondary = '#CBD5E1';
+    const surfaceBorder = 'rgba(203, 213, 225, 0.2)';
 
-const setChartOptions = () => {
-    const documentStyle = getComputedStyle(document.documentElement);
-    const textColor = documentStyle.getPropertyValue('--p-text-color'); // Koyu metin rengi
-    const textColorSecondary = '#FFFFFF'; // Açık renk, eksen metni için beyaz
-    const surfaceBorder = documentStyle.getPropertyValue('--p-content-border-color');
-
-    return {
+    chartOptions.value = {
+        responsive: true,
+        maintainAspectRatio: false,
         plugins: {
             legend: {
                 labels: {
-                    color: '#FFFFFF'
+                    color: textColor,
+                    font: {
+                        size: 13,
+                        weight: '500'
+                    }
                 }
+            },
+            tooltip: {
+                backgroundColor: 'rgba(15, 23, 42, 0.95)',
+                titleColor: '#F1F5F9',
+                bodyColor: '#CBD5E1',
+                borderColor: 'rgba(59, 130, 246, 0.3)',
+                borderWidth: 1,
+                cornerRadius: 8
             }
         },
         scales: {
             x: {
                 ticks: {
-                    color: textColorSecondary
+                    color: textColorSecondary,
+                    font: {
+                        size: 12,
+                        weight: '500'
+                    }
                 },
                 grid: {
+                    color: surfaceBorder,
+                    drawBorder: false,
+                    lineWidth: 1
+                },
+                border: {
                     color: surfaceBorder
                 }
             },
             y: {
                 beginAtZero: true,
                 ticks: {
-                    color: textColorSecondary
+                    color: textColorSecondary,
+                    font: {
+                        size: 12,
+                        weight: '500'
+                    }
                 },
                 grid: {
+                    color: surfaceBorder,
+                    drawBorder: false,
+                    lineWidth: 1
+                },
+                border: {
                     color: surfaceBorder
                 }
             }
+        },
+        interaction: {
+            intersect: false,
+            mode: 'index'
         }
     };
-}
+
+    doughnutOptions.value = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                labels: {
+                    color: textColor,
+                    font: {
+                        size: 13,
+                        weight: '500'
+                    },
+                    padding: 20,
+                    usePointStyle: true,
+                    pointStyle: 'circle'
+                },
+                position: 'bottom'
+            },
+            tooltip: {
+                backgroundColor: 'rgba(15, 23, 42, 0.95)',
+                titleColor: '#F1F5F9',
+                bodyColor: '#CBD5E1',
+                borderColor: 'rgba(59, 130, 246, 0.3)',
+                borderWidth: 1,
+                cornerRadius: 8
+            }
+        },
+        cutout: '50%'
+    };
+};
+
+// Event Handlers
+const handleProductionFilter = async (filters) => {
+    try {
+        console.log('Production filter:', filters);
+        const response = await axios.get('/api/productions/filtered', { params: filters });
+        // Update production data in ProductionTab
+        if (productionTabRef.value) {
+            productionTabRef.value.updateWithFilteredData(response.data);
+        }
+    } catch (error) {
+        console.error('Production filter error:', error);
+    }
+};
+
+const handleSalesFilter = async (filters) => {
+    try {
+        console.log('Sales filter:', filters);
+        const response = await axios.get('/api/sales/filtered', { params: filters });
+        // Update sales data in SalesTab
+        if (salesTabRef.value) {
+            salesTabRef.value.updateWithFilteredData(response.data);
+        }
+    } catch (error) {
+        console.error('Sales filter error:', error);
+    }
+};
+
+const handleStockFilter = async (filters) => {
+    try {
+        console.log('Stock filter:', filters);
+        const response = await axios.get('/api/stock/filtered', { params: filters });
+        // Update stock data in StockTab
+        if (stockTabRef.value) {
+            stockTabRef.value.updateWithFilteredData(response.data);
+        }
+    } catch (error) {
+        console.error('Stock filter error:', error);
+    }
+};
+
+// Update all tabs
+const updateAllTabs = () => {
+    if (overviewTabRef.value) overviewTabRef.value.updateCharts();
+    if (productionTabRef.value) productionTabRef.value.updateCharts();
+    if (salesTabRef.value) salesTabRef.value.updateCharts();
+    if (stockTabRef.value) stockTabRef.value.updateCharts();
+};
+
+// Utility Functions
+const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleDateString('tr-TR');
+};
 </script>
 
-<style>
-.chart-container {
-    width: 50vw; /* Genişliğin yarısı */
-    height: 50vh; /* Yüksekliğin yarısı */
-    margin: auto; /* Ortalanması için */
+<style scoped>
+.dashboard-container {
+    padding: 20px;
+    max-width: 1400px;
+    margin: 0 auto;
+    background: transparent;
+}
+
+.dashboard-header {
+    text-align: center;
+    margin-bottom: 30px;
+    padding: 30px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 15px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+}
+
+.dashboard-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.dashboard-subtitle {
+    font-size: 1.1rem;
+    opacity: 0.9;
+}
+
+/* PrimeVue Override - Koyu tema için */
+:deep(.p-tabview .p-tabview-nav) {
+    background: rgba(30, 41, 59, 0.95) !important;
+    border-bottom: 1px solid rgba(71, 85, 105, 0.3) !important;
+}
+
+:deep(.p-tabview .p-tabview-nav li .p-tabview-nav-link) {
+    color: #94A3B8 !important;
+    background: transparent !important;
+    border: none !important;
+}
+
+:deep(.p-tabview .p-tabview-nav li.p-highlight .p-tabview-nav-link) {
+    color: #F1F5F9 !important;
+    background: rgba(59, 130, 246, 0.2) !important;
+    border-bottom: 2px solid #3B82F6 !important;
+}
+
+:deep(.p-tabview .p-tabview-panels) {
+    background: transparent !important;
+    border: none !important;
+}
+
+@media (max-width: 768px) {
+    .dashboard-title {
+        font-size: 2rem;
+    }
 }
 </style>
