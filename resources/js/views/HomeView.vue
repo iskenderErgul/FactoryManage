@@ -2,16 +2,6 @@
     <div class="dashboard-container">
         <!-- Tab Panel -->
         <TabView>
-            <!-- Genel Özet Tab -->
-            <TabPanel header="📊 Genel Özet">
-                <OverviewTab
-                    ref="overviewTabRef"
-                    :dashboardData="dashboardData"
-                    :chartOptions="chartOptions"
-                    class="mt-4"
-                />
-            </TabPanel>
-
             <!-- Üretim Analizi Tab -->
             <TabPanel header="🏭 Üretim Analizi">
                 <ProductionTab
@@ -102,7 +92,6 @@ onMounted(async () => {
         initializeChartOptions();
         await loadMasterData();
         updateAllTabs();
-        console.log('Dashboard yüklendi');
     } catch (error) {
         console.error('Dashboard yüklenirken hata:', error);
     }
@@ -125,6 +114,7 @@ const loadMasterData = async () => {
         customers.value = customersRes.data;
 
         console.log('Master data loaded');
+        
     } catch (error) {
         console.warn('Master data loading error:', error);
     }
@@ -143,7 +133,7 @@ const loadDashboardData = async () => {
 // Chart Options Initialization
 const initializeChartOptions = () => {
     const textColor = '#F1F5F9';
-    const textColorSecondary = '#CBD5E1';
+    const textColorSecondary = '#FFFFFF'; // Açık renk, eksen metni için beyaz
     const surfaceBorder = 'rgba(203, 213, 225, 0.2)';
 
     chartOptions.value = {
@@ -152,11 +142,7 @@ const initializeChartOptions = () => {
         plugins: {
             legend: {
                 labels: {
-                    color: textColor,
-                    font: {
-                        size: 13,
-                        weight: '500'
-                    }
+                    color: '#FFFFFF'
                 }
             },
             tooltip: {
@@ -204,10 +190,6 @@ const initializeChartOptions = () => {
                     color: surfaceBorder
                 }
             }
-        },
-        interaction: {
-            intersect: false,
-            mode: 'index'
         }
     };
 

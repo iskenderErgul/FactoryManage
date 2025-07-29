@@ -158,6 +158,9 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/production/workers/filtered', [DashboardController::class, 'getFilteredWorkerProduction']);
         Route::get('/production/workers/detail', [DashboardController::class, 'getWorkerDetailProduction']);
 
+        // YENİ - İşçi üretim matrisi
+        Route::get('/production/workers/matrix', [DashboardController::class, 'getWorkerProductionMatrix']);
+
         // Filtreleme için listeler
         Route::get('/machines', [DashboardController::class, 'getMachines']);
         Route::get('/workers', [DashboardController::class, 'getWorkers']);

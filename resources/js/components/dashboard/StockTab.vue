@@ -8,12 +8,13 @@
             :chartOptions="chartOptions"
             :tableData="currentStockData"
             :tableColumns="currentStockColumns"
+            :tableRows="50"
             chartType="bar" />
     </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import ChartCard from './shared/ChartCard.vue';
 
 // Props
@@ -43,13 +44,8 @@ const stockViewMode = ref({
 // Chart Data
 const currentStockChart = ref();
 
-// Table Data
-const currentStockData = ref([
-    { product_name: 'Öz Ergül Plastik Büyük Boy', product_type: 'Ara kalite', stock_quantity: 99999949, status: 'Normal', last_updated: '2025-07-29' },
-    { product_name: 'M&R Orta Boy Kiloluk', product_type: '2.Kalite', stock_quantity: 99999999, status: 'Normal', last_updated: '2025-07-29' },
-    { product_name: 'Lüx Öz Ergül Küçük Boy', product_type: '1.Kalite', stock_quantity: 8500, status: 'Düşük', last_updated: '2025-07-29' },
-    { product_name: 'New Plast Büyük Boy', product_type: '3.Kalite', stock_quantity: 650, status: 'Kritik', last_updated: '2025-07-29' }
-]);
+// Table Data - Artık props'tan gelen products kullanılacak
+const currentStockData = ref([]);
 
 // Table Columns
 const currentStockColumns = ref([
@@ -72,28 +68,176 @@ const currentStockColumns = ref([
     { field: 'last_updated', header: 'Son Güncelleme', sortable: true, type: 'date' }
 ]);
 
+// Stok durumu hesaplama fonksiyonu
+const calculateStockStatus = (quantity) => {
+    if (quantity < 1000) return 'Kritik';
+    if (quantity < 10000) return 'Düşük';
+    return 'Normal';
+};
+
 // Chart Functions
 const updateCurrentStockChart = () => {
-    const stockDataValues = [99999949, 99999999, 8500, 650];
-    const statusColors = ['#10B981', '#10B981', '#F59E0B', '#EF4444']; // Normal, Normal, Düşük, Kritik
+    if (!currentStockData.value.length) return;
+
+    // Tüm ürünleri chart'ta göster
+    const chartProducts = currentStockData.value;
+    
+    const labels = chartProducts.map(product => {
+        // Ürün adını kısalt
+        const name = product.product_name;
+        if (name.includes('Öz Ergül')) {
+            if (name.includes('Büyük')) return 'Öz Ergül Büyük';
+            if (name.includes('Orta')) return 'Öz Ergül Orta';
+            if (name.includes('Küçük')) return 'Öz Ergül Küçük';
+            if (name.includes('Mini')) return 'Öz Ergül Mini';
+        }
+        if (name.includes('M&R')) {
+            if (name.includes('Büyük')) return 'M&R Büyük';
+            if (name.includes('Orta')) return 'M&R Orta';
+            if (name.includes('Küçük')) return 'M&R Küçük';
+            if (name.includes('Mini')) return 'M&R Mini';
+        }
+        if (name.includes('Lüx')) {
+            if (name.includes('Büyük')) return 'Lüx Büyük';
+            if (name.includes('Orta')) return 'Lüx Orta';
+            if (name.includes('Küçük')) return 'Lüx Küçük';
+            if (name.includes('Mini')) return 'Lüx Mini';
+        }
+        if (name.includes('New Plast')) {
+            if (name.includes('Büyük')) return 'New Plast Büyük';
+            if (name.includes('Orta')) return 'New Plast Orta';
+            if (name.includes('Küçük')) return 'New Plast Küçük';
+        }
+        if (name.includes('Kelebek')) {
+            if (name.includes('Büyük')) return 'Kelebek Büyük';
+            if (name.includes('Orta')) return 'Kelebek Orta';
+            if (name.includes('Küçük')) return 'Kelebek Küçük';
+        }
+        return name.substring(0, 15) + '...';
+    });
+
+    const data = chartProducts.map(product => product.stock_quantity);
+
+    // Güzel renk paleti
+    const backgroundColor = [
+        'rgba(249, 115, 22, 0.4)',
+        'rgba(6, 182, 212, 0.4)',
+        'rgba(107, 114, 128, 0.4)',
+        'rgba(139, 92, 246, 0.4)',
+        'rgba(34, 197, 94, 0.4)',
+        'rgba(251, 146, 60, 0.4)',
+        'rgba(236, 72, 153, 0.4)',
+        'rgba(16, 185, 129, 0.4)',
+        'rgba(96, 165, 250, 0.4)',
+        'rgba(52, 211, 153, 0.4)',
+        'rgba(250, 204, 21, 0.4)',
+        'rgba(192, 38, 211, 0.4)',
+        'rgba(59, 130, 246, 0.4)',
+        'rgba(239, 68, 68, 0.4)',
+        'rgba(156, 163, 175, 0.4)',
+        'rgba(217, 70, 239, 0.4)',
+        'rgba(24, 78, 119, 0.4)',
+        'rgba(245, 158, 11, 0.4)',
+        'rgba(168, 85, 247, 0.4)',
+        'rgba(51, 65, 85, 0.4)',
+        'rgba(34, 197, 94, 0.4)',
+        'rgba(251, 146, 60, 0.4)',
+        'rgba(236, 72, 153, 0.4)',
+        'rgba(16, 185, 129, 0.4)',
+        'rgba(96, 165, 250, 0.4)',
+        'rgba(52, 211, 153, 0.4)',
+        'rgba(250, 204, 21, 0.4)',
+        'rgba(192, 38, 211, 0.4)',
+        'rgba(59, 130, 246, 0.4)',
+        'rgba(239, 68, 68, 0.4)',
+        'rgba(156, 163, 175, 0.4)',
+        'rgba(217, 70, 239, 0.4)',
+        'rgba(24, 78, 119, 0.4)',
+        'rgba(245, 158, 11, 0.4)',
+        'rgba(168, 85, 247, 0.4)',
+        'rgba(51, 65, 85, 0.4)'
+    ];
+
+    const borderColor = [
+        'rgb(249, 115, 22)',
+        'rgb(6, 182, 212)',
+        'rgb(107, 114, 128)',
+        'rgb(139, 92, 246)',
+        'rgb(34, 197, 94)',
+        'rgb(251, 146, 60)',
+        'rgb(236, 72, 153)',
+        'rgb(16, 185, 129)',
+        'rgb(96, 165, 250)',
+        'rgb(52, 211, 153)',
+        'rgb(250, 204, 21)',
+        'rgb(192, 38, 211)',
+        'rgb(59, 130, 246)',
+        'rgb(239, 68, 68)',
+        'rgb(156, 163, 175)',
+        'rgb(217, 70, 239)',
+        'rgb(24, 78, 119)',
+        'rgb(245, 158, 11)',
+        'rgb(168, 85, 247)',
+        'rgb(51, 65, 85)',
+        'rgb(34, 197, 94)',
+        'rgb(251, 146, 60)',
+        'rgb(236, 72, 153)',
+        'rgb(16, 185, 129)',
+        'rgb(96, 165, 250)',
+        'rgb(52, 211, 153)',
+        'rgb(250, 204, 21)',
+        'rgb(192, 38, 211)',
+        'rgb(59, 130, 246)',
+        'rgb(239, 68, 68)',
+        'rgb(156, 163, 175)',
+        'rgb(217, 70, 239)',
+        'rgb(24, 78, 119)',
+        'rgb(245, 158, 11)',
+        'rgb(168, 85, 247)',
+        'rgb(51, 65, 85)'
+    ];
 
     currentStockChart.value = {
-        labels: ['Öz Ergül Büyük', 'M&R Orta Boy', 'Lüx Öz Ergül', 'New Plast'],
+        labels: labels,
         datasets: [{
             label: 'Stok Miktarı',
-            data: stockDataValues,
-            backgroundColor: statusColors.map(color => color + '80'), // 50% opacity
-            borderColor: statusColors,
-            borderWidth: 2,
+            data: data,
+            backgroundColor: backgroundColor.slice(0, data.length),
+            borderColor: borderColor.slice(0, data.length),
+            borderWidth: 1,
             borderRadius: 6,
             borderSkipped: false
         }]
     };
 };
 
+// Props'tan gelen products'ı işle
+const processProductsData = () => {
+    if (!props.products || !props.products.length) {
+        return;
+    }
+
+    currentStockData.value = props.products.map(product => ({
+        product_name: product.product_name,
+        product_type: product.product_type,
+        stock_quantity: product.stock_quantity,
+        status: calculateStockStatus(product.stock_quantity),
+        last_updated: product.updated_at || new Date().toISOString().split('T')[0]
+    }));
+
+    updateCurrentStockChart();
+};
+
+// Props değiştiğinde data'yı güncelle
+watch(() => props.products, processProductsData, { immediate: true });
+
 // Initialize
 onMounted(() => {
-    updateCurrentStockChart();
+    // Eğer products verisi zaten yüklenmişse hemen işle
+    if (props.products && props.products.length > 0) {
+        processProductsData();
+    }
+    // Aksi takdirde watch zaten products değiştiğinde işleyecek
 });
 
 const updateAllCharts = () => {
@@ -105,7 +249,6 @@ defineExpose({
     updateCharts: updateAllCharts,
     updateWithFilteredData: (data) => {
         // API'den gelen filtrelenmiş data ile güncelle
-        console.log('Updating stock with filtered data:', data);
         updateAllCharts();
     }
 });

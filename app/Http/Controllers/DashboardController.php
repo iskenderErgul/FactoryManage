@@ -208,14 +208,123 @@ class DashboardController extends Controller
     }
 
     /**
+     * YENİ - İşçi üretim matrisi (tarih x işçi tablosu)
+     */
+    public function getWorkerProductionMatrix(Request $request)
+    {
+        try {
+            $period = $request->get('period', 'weekly');
+            $startDate = $this->getStartDateByPeriod($period);
+            $endDate = Carbon::now();
+
+            // Tarih aralığındaki tüm tarihleri al
+            $dates = [];
+            $currentDate = $startDate->copy();
+            while ($currentDate->lte($endDate)) {
+                $dates[] = $currentDate->format('Y-m-d');
+                $currentDate->addDay();
+            }
+
+            // Bu tarih aralığında üretim yapan tüm işçileri al
+            $workerIds = Production::whereBetween('production_date', [$startDate, $endDate])
+                ->distinct('user_id')
+                ->pluck('user_id')
+                ->toArray();
+
+            $workers = User::whereIn('id', $workerIds)
+                ->orderBy('name')
+                ->get();
+
+            // İşçi ve tarih bazlı üretim verilerini al
+            $productions = Production::whereBetween('production_date', [$startDate, $endDate])
+                ->whereIn('user_id', $workerIds)
+                ->select(
+                    'user_id',
+                    'production_date',
+                    DB::raw('SUM(quantity) as total_quantity')
+                )
+                ->groupBy('user_id', 'production_date')
+                ->get();
+
+            // Veriyi matrix formatına dönüştür
+            $matrixData = [];
+            $dailyTotals = [];
+            $grandTotal = 0;
+
+            foreach ($workers as $worker) {
+                $workerData = [
+                    'id' => $worker->id,
+                    'name' => $worker->name,
+                    'productions' => [],
+                    'total' => 0
+                ];
+
+                foreach ($dates as $date) {
+                    $production = $productions->where('user_id', $worker->id)
+                        ->where('production_date', $date)
+                        ->first();
+
+                    $quantity = $production ? $production->total_quantity : 0;
+                    $workerData['productions'][$date] = $quantity;
+                    $workerData['total'] += $quantity;
+
+                    // Günlük toplam hesapla
+                    if (!isset($dailyTotals[$date])) {
+                        $dailyTotals[$date] = 0;
+                    }
+                    $dailyTotals[$date] += $quantity;
+                }
+
+                $grandTotal += $workerData['total'];
+                $matrixData[] = $workerData;
+            }
+
+            // Tarihleri frontend için formatla
+            $formattedDates = collect($dates)->map(function($date) {
+                $carbonDate = Carbon::parse($date);
+                return [
+                    'formatted' => $date,
+                    'display' => $carbonDate->format('d.m'),
+                    'full' => $carbonDate->format('d.m.Y'),
+                ];
+            })->values();
+
+            return response()->json([
+                'dates' => $formattedDates,
+                'workers' => $matrixData,
+                'dailyTotals' => $dailyTotals,
+                'grandTotal' => $grandTotal,
+                'period' => $period,
+                'dateRange' => [
+                    'start' => $startDate->format('d.m.Y'),
+                    'end' => $endDate->format('d.m.Y')
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'dates' => [],
+                'workers' => [],
+                'dailyTotals' => [],
+                'grandTotal' => 0,
+                'period' => $request->get('period', 'weekly'),
+                'dateRange' => [
+                    'start' => Carbon::now()->subWeek()->format('d.m.Y'),
+                    'end' => Carbon::now()->format('d.m.Y')
+                ]
+            ], 200);
+        }
+    }
+
+    /**
      * Filtreleme için makine listesi
      */
     public function getMachines()
     {
         try {
-            $machines = Machine::select('id', 'machine_name') // Eğer farklı alan adı varsa buraya yazın (örn: 'name as machine_name')
-            ->where('status', 'active') // Eğer status alanı yoksa bu satırı kaldırın
-            ->orderBy('machine_name')
+            $machines = Machine::select('id', 'machine_name')
+                ->where('status', 'active')
+                ->orderBy('machine_name')
                 ->get();
 
             return response()->json($machines);

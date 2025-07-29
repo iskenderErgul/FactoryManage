@@ -83,106 +83,154 @@
                 </div>
             </TabPanel>
 
-            <!-- İşçi Üretimi Tab -->
-            <TabPanel header="👷 İşçi Üretimi">
-                <div class="tab-content-wrapper">
-                    <!-- İşçi Seçimi -->
-                    <div class="worker-selection-section mb-4">
-                        <div class="worker-selector">
-                            <label for="worker-select">İşçi Seçin:</label>
-                            <div v-if="workersLoading" class="loading-indicator">
-                                <ProgressSpinner strokeWidth="2" />
-                                <span>İşçiler yükleniyor...</span>
-                            </div>
-                            <Dropdown
-                                v-else
-                                id="worker-select"
-                                v-model="selectedWorkerId"
-                                :options="workers || []"
-                                optionLabel="name"
-                                optionValue="id"
-                                placeholder="İşçi seçin"
-                                @change="onWorkerChange"
-                                class="w-full"
-                                filter
-                                showClear
-                                :disabled="!workers || workers.length === 0" />
-                        </div>
 
+
+            <!-- İşçi Genel Üretim Tab (YENİ) -->
+            <TabPanel header="📋 İşçi Genel Üretim">
+                <div class="tab-content-wrapper">
                     <!-- Periyot Filtreleme -->
-                        <div class="period-filter-section mb-4" v-if="selectedWorkerId">
+                    <div class="period-filter-section mb-4 mt-4" >
                         <div class="period-buttons">
                             <Button
                                 v-for="period in periodOptions"
                                 :key="period.value"
                                 :label="period.label"
                                 :icon="period.icon"
-                                    :severity="selectedWorkerDetailPeriod === period.value ? 'primary' : 'secondary'"
-                                    :outlined="selectedWorkerDetailPeriod !== period.value"
-                                    @click="changeWorkerDetailPeriod(period.value)"
+                                :severity="selectedWorkerMatrixPeriod === period.value ? 'primary' : 'secondary'"
+                                :outlined="selectedWorkerMatrixPeriod !== period.value"
+                                @click="changeWorkerMatrixPeriod(period.value)"
                                 size="small"
                                 class="period-btn" />
-                            </div>
                         </div>
-                    </div>
-
-                    <!-- İşçi Seçilmedi Durumu -->
-                    <div v-if="!selectedWorkerId" class="no-worker-selected">
-                        <i class="pi pi-users" style="font-size: 3rem; color: #64748b;"></i>
-                        <h3>İşçi Seçin</h3>
-                        <p>Detaylı üretim verilerini görmek için bir işçi seçin.</p>
                     </div>
 
                     <!-- Loading -->
-                    <div v-else-if="workerDetailLoading" class="loading-container">
+                    <div v-if="workerMatrixLoading" class="loading-container">
                         <ProgressSpinner strokeWidth="3" />
-                        <span>İşçi detay verileri yükleniyor...</span>
+                        <span>İşçi üretim matrisi yükleniyor...</span>
                     </div>
 
                     <!-- No Data State -->
-                    <div v-else-if="!workerDetailData || !workerDetailData.productTableData || !workerDetailData.productTableData.length" class="no-data-container">
-                        <i class="pi pi-chart-bar" style="font-size: 3rem; color: #64748b;"></i>
+                    <div v-else-if="!workerMatrixData || !workerMatrixData.dates || !workerMatrixData.dates.length" class="no-data-container">
+                        <i class="pi pi-table" style="font-size: 3rem; color: #64748b;"></i>
                         <h3>Üretim verisi bulunmuyor</h3>
-                        <p>Seçilen işçi için üretim verisi bulunamadı.</p>
+                        <p>Seçilen periyot için işçi üretim verisi bulunamadı.</p>
                         <Button
                             label="Yeniden Yükle"
                             icon="pi pi-refresh"
-                            @click="fetchWorkerDetailData(selectedWorkerId, selectedWorkerDetailPeriod)"
+                            @click="fetchWorkerMatrix(selectedWorkerMatrixPeriod)"
                             severity="secondary" />
                     </div>
 
-                    <!-- İşçi Detay Verileri -->
-                    <div v-else-if="workerDetailData" class="worker-detail-content">
-
-
-                                                <!-- Ürün Bazlı Üretim -->
-                        <div class="detail-section mb-4">
-                            <ChartCard
-                                title="Ürün Bazlı Üretim Dağılımı"
-                                v-model:viewMode="workerDetailViewMode.product"
-                                :chartData="workerDetailData.productChartData"
-                                :chartOptions="chartOptions"
-                                :tableData="workerDetailData.productTableData"
-                                :tableColumns="workerDetailProductColumns"
-                                chartType="bar"
-                                sortField="total_produced"
-                                :sortOrder="sortOrderDesc">
-                            </ChartCard>
+                    <!-- Worker Matrix Table -->
+                    <div v-else class="worker-matrix-container">
+                        <div class="matrix-header mb-4">
+                            <h3>İşçi Üretim Matrisi</h3>
+                            <small class="text-muted">
+                                <i class="pi pi-calendar"></i>
+                                {{ workerMatrixData.dateRange?.start }} - {{ workerMatrixData.dateRange?.end }}
+                            </small>
                         </div>
 
-                        <!-- Günlük Üretim -->
-                        <div class="detail-section">
-                            <ChartCard
-                                title="Günlük Üretim Miktarları"
-                                v-model:viewMode="workerDetailViewMode.daily"
-                                :chartData="workerDetailData.dailyChartData"
-                                :chartOptions="chartOptions"
-                                :tableData="workerDetailData.dailyTableData"
-                                :tableColumns="workerDetailDailyColumns"
-                                chartType="bar"
-                                sortField="production_date"
-                                :sortOrder="sortOrderDesc">
-                            </ChartCard>
+                        <!-- Responsive Table Wrapper -->
+                        <div class="table-responsive">
+                            <table class="worker-matrix-table">
+                                <thead>
+                                <tr>
+                                    <th class="worker-name-col">İşçi Adı</th>
+                                    <th
+                                        v-for="date in workerMatrixData.dates"
+                                        :key="date.formatted"
+                                        class="date-col"
+                                        :title="date.full">
+                                        {{ date.display }}
+                                    </th>
+                                    <th class="total-col">Toplam</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr
+                                    v-for="worker in workerMatrixData.workers"
+                                    :key="worker.id"
+                                    class="worker-row">
+                                    <td class="worker-name">
+                                        <div class="worker-info">
+                                            <i class="pi pi-user"></i>
+                                            <span>{{ worker.name }}</span>
+                                        </div>
+                                    </td>
+                                    <td
+                                        v-for="date in workerMatrixData.dates"
+                                        :key="`${worker.id}-${date.formatted}`"
+                                        class="production-cell"
+                                        :class="getProductionCellClass(worker.productions[date.formatted])">
+                                            <span v-if="worker.productions[date.formatted]">
+                                                {{ worker.productions[date.formatted] }}
+                                            </span>
+                                        <span v-else class="no-production">-</span>
+                                    </td>
+                                    <td class="total-cell">
+                                        <span class="total-badge">{{ worker.total }}</span>
+                                    </td>
+                                </tr>
+                                </tbody>
+                                <tfoot>
+                                <tr class="totals-row">
+                                    <td class="total-label">Günlük Toplam</td>
+                                    <td
+                                        v-for="date in workerMatrixData.dates"
+                                        :key="`total-${date.formatted}`"
+                                        class="daily-total">
+                                        {{ workerMatrixData.dailyTotals[date.formatted] || 0 }}
+                                    </td>
+                                    <td class="grand-total">
+                                        {{ workerMatrixData.grandTotal }}
+                                    </td>
+                                </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+
+                        <!-- Summary Stats -->
+                        <div class="matrix-summary mt-4">
+                            <div class="summary-cards">
+                                <div class="summary-card">
+                                    <div class="summary-icon">
+                                        <i class="pi pi-users"></i>
+                                    </div>
+                                    <div class="summary-content">
+                                        <div class="summary-label">Toplam İşçi</div>
+                                        <div class="summary-value">{{ workerMatrixData.workers?.length || 0 }}</div>
+                                    </div>
+                                </div>
+                                <div class="summary-card">
+                                    <div class="summary-icon">
+                                        <i class="pi pi-calendar"></i>
+                                    </div>
+                                    <div class="summary-content">
+                                        <div class="summary-label">Çalışılan Gün</div>
+                                        <div class="summary-value">{{ workerMatrixData.dates?.length || 0 }}</div>
+                                    </div>
+                                </div>
+                                <div class="summary-card">
+                                    <div class="summary-icon">
+                                        <i class="pi pi-chart-bar"></i>
+                                    </div>
+                                    <div class="summary-content">
+                                        <div class="summary-label">Toplam Üretim</div>
+                                        <div class="summary-value">{{ workerMatrixData.grandTotal || 0 }}</div>
+                                    </div>
+                                </div>
+                                <div class="summary-card">
+                                    <div class="summary-icon">
+                                        <i class="pi pi-chart-line"></i>
+                                    </div>
+                                    <div class="summary-content">
+                                        <div class="summary-label">Günlük Ortalama</div>
+                                        <div class="summary-value">{{ Math.round((workerMatrixData.grandTotal || 0) / (workerMatrixData.dates?.length || 1)) }}</div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -253,86 +301,6 @@
                 </div>
             </template>
         </Dialog>
-
-
-
-        <!-- İşçi Detay Dialog -->
-        <Dialog
-            v-model:visible="showWorkerDetailDialog"
-            modal
-            :header="`${selectedWorkerName} - Detaylı Üretim Raporu`"
-            :style="{ width: '90vw', maxWidth: '1200px' }"
-            :closable="true">
-
-            <div class="worker-detail-content">
-                <!-- Periyot Seçimi -->
-                <div class="period-filter-section mb-4">
-                    <div class="period-buttons">
-                        <Button
-                            v-for="period in periodOptions"
-                            :key="period.value"
-                            :label="period.label"
-                            :icon="period.icon"
-                            :severity="selectedWorkerDetailPeriod === period.value ? 'primary' : 'secondary'"
-                            :outlined="selectedWorkerDetailPeriod !== period.value"
-                            @click="changeWorkerDetailPeriod(period.value)"
-                            size="small"
-                            class="period-btn" />
-                    </div>
-                </div>
-
-                <!-- Loading -->
-                <div v-if="workerDetailLoading" class="loading-container">
-                    <ProgressSpinner strokeWidth="3" />
-                    <span>İşçi detay verileri yükleniyor...</span>
-                </div>
-
-                <!-- Content -->
-                <div v-else-if="workerDetailData" class="worker-detail-data">
-                    <!-- Ürün Bazlı Üretim -->
-                    <div class="detail-section mb-4">
-                        <h4>📦 Ürün Bazlı Üretim</h4>
-                        <ChartCard
-                            title="Ürün Bazlı Üretim Dağılımı"
-                            v-model:viewMode="workerDetailViewMode.product"
-                            :chartData="workerDetailData.productChartData"
-                            :chartOptions="chartOptions"
-                            :tableData="workerDetailData.productTableData"
-                            :tableColumns="workerDetailProductColumns"
-                            chartType="bar"
-                            sortField="total_produced"
-                            :sortOrder="sortOrderDesc">
-                        </ChartCard>
-                    </div>
-
-                    <!-- Günlük Üretim -->
-                    <div class="detail-section">
-                        <h4>📊 Günlük Üretim Trendi</h4>
-                        <ChartCard
-                            title="Günlük Üretim Miktarları"
-                            v-model:viewMode="workerDetailViewMode.daily"
-                            :chartData="workerDetailData.dailyChartData"
-                            :chartOptions="chartOptions"
-                            :tableData="workerDetailData.dailyTableData"
-                            :tableColumns="workerDetailDailyColumns"
-                            chartType="bar"
-                            sortField="production_date"
-                            :sortOrder="sortOrderDesc">
-                        </ChartCard>
-                    </div>
-                </div>
-            </div>
-
-            <template #footer>
-                <div class="dialog-footer">
-                    <Button
-                        label="Kapat"
-                        icon="pi pi-times"
-                        @click="showWorkerDetailDialog = false"
-                        severity="secondary" />
-                </div>
-            </template>
-        </Dialog>
     </div>
 </template>
 
@@ -373,6 +341,7 @@ const productLoading = ref(false);
 const filterLoading = ref(false);
 const workerDetailLoading = ref(false);
 const workersLoading = ref(false);
+const workerMatrixLoading = ref(false); // YENİ
 
 // Dialog State
 const showFilterDialog = ref(false);
@@ -382,6 +351,7 @@ const showWorkerDetailDialog = ref(false);
 const selectedPeriod = ref('weekly');
 const selectedProductPeriod = ref('monthly');
 const selectedWorkerDetailPeriod = ref('monthly');
+const selectedWorkerMatrixPeriod = ref('weekly'); // YENİ
 
 // Period Options
 const periodOptions = ref([
@@ -420,6 +390,7 @@ const workerDetailViewMode = ref({
 const dailyProductionChart = ref(null);
 const productDistributionChart = ref(null);
 const workerDetailData = ref(null);
+const workerMatrixData = ref(null); // YENİ
 
 // Worker Detail Data
 const selectedWorkerName = ref('');
@@ -447,8 +418,6 @@ const productDistributionColumns = ref([
     { field: 'percentage', header: 'Yüzde %', sortable: true, type: 'progress' }
 ]);
 
-
-
 const workerDetailProductColumns = ref([
     { field: 'product_name', header: 'Ürün Adı', sortable: true },
     { field: 'total_produced', header: 'Toplam Üretilen', sortable: true, type: 'badge', severity: 'info' },
@@ -468,17 +437,24 @@ const hasActiveFilters = computed(() => {
     return filterData.value.dateRange || filterData.value.machine || filterData.value.worker;
 });
 
-
-
 const sortOrderDesc = computed(() => -1);
 
+// YENİ - Production cell class helper
+const getProductionCellClass = (value) => {
+    if (!value || value === 0) return 'no-production';
+    if (value >= 100) return 'high-production';
+    if (value >= 50) return 'medium-production';
+    return 'low-production';
+};
+
 // API Functions
+
+// Mevcut API fonksiyonları... (dailyProduction, productDistribution, vb.)
 const fetchDailyProduction = async (period) => {
     try {
         loading.value = true;
         const response = await axios.get(`/api/dashboard/production/daily?period=${period}`);
 
-        // Null check for response data
         if (response.data && response.data.chartData && response.data.tableData) {
             dailyProductionChart.value = response.data.chartData;
             dailyProductionData.value = response.data.tableData || [];
@@ -526,88 +502,6 @@ const fetchDailyProduction = async (period) => {
     }
 };
 
-const fetchProductDistribution = async (period) => {
-    try {
-        productLoading.value = true;
-        const response = await axios.get(`/api/dashboard/production/products?period=${period}`);
-
-        // Null check for response data
-        if (response.data && response.data.chartData && response.data.tableData) {
-            productDistributionChart.value = response.data.chartData;
-            productDistributionData.value = response.data.tableData || [];
-        } else {
-            productDistributionChart.value = {
-                labels: [],
-                datasets: [{
-                    data: [],
-                    backgroundColor: [
-                        'rgba(59, 130, 246, 0.8)',
-                        'rgba(16, 185, 129, 0.8)',
-                        'rgba(245, 158, 11, 0.8)',
-                        'rgba(139, 92, 246, 0.8)',
-                        'rgba(236, 72, 153, 0.8)',
-                        'rgba(239, 68, 68, 0.8)',
-                        'rgba(34, 197, 94, 0.8)',
-                        'rgba(168, 85, 247, 0.8)',
-                    ],
-                    borderColor: [
-                        '#3B82F6',
-                        '#10B981',
-                        '#F59E0B',
-                        '#8B5CF6',
-                        '#EC4899',
-                        '#EF4444',
-                        '#22C55E',
-                        '#A855F7',
-                    ],
-                    borderWidth: 2
-                }]
-            };
-            productDistributionData.value = [];
-        }
-    } catch (error) {
-        console.error('Error fetching product distribution:', error);
-        productDistributionChart.value = {
-            labels: [],
-            datasets: [{
-                data: [],
-                backgroundColor: [
-                    'rgba(59, 130, 246, 0.8)',
-                    'rgba(16, 185, 129, 0.8)',
-                    'rgba(245, 158, 11, 0.8)',
-                    'rgba(139, 92, 246, 0.8)',
-                    'rgba(236, 72, 153, 0.8)',
-                    'rgba(239, 68, 68, 0.8)',
-                    'rgba(34, 197, 94, 0.8)',
-                    'rgba(168, 85, 247, 0.8)',
-                ],
-                borderColor: [
-                    '#3B82F6',
-                    '#10B981',
-                    '#F59E0B',
-                    '#8B5CF6',
-                    '#EC4899',
-                    '#EF4444',
-                    '#22C55E',
-                    '#A855F7',
-                ],
-                borderWidth: 2
-            }]
-        };
-        productDistributionData.value = [];
-        toast.add({
-            severity: 'error',
-            summary: 'Hata',
-            detail: 'Ürün dağılım verileri yüklenirken hata oluştu',
-            life: 3000
-        });
-    } finally {
-        productLoading.value = false;
-    }
-};
-
-
-
 const fetchWorkerDetailData = async (workerId, period) => {
     try {
         workerDetailLoading.value = true;
@@ -624,27 +518,6 @@ const fetchWorkerDetailData = async (workerId, period) => {
         });
     } finally {
         workerDetailLoading.value = false;
-    }
-};
-
-const openWorkerDetail = async (workerId, workerName) => {
-    selectedWorkerId.value = workerId;
-    selectedWorkerName.value = workerName;
-    showWorkerDetailDialog.value = true;
-    await fetchWorkerDetailData(workerId, selectedWorkerDetailPeriod.value);
-};
-
-const onWorkerChange = async () => {
-    if (selectedWorkerId.value && workers.value && workers.value.length > 0) {
-        // Seçilen işçinin adını bul
-        const selectedWorker = workers.value.find(w => w.id === selectedWorkerId.value);
-        selectedWorkerName.value = selectedWorker ? selectedWorker.name : 'Bilinmeyen İşçi';
-
-        // İşçi detay verilerini yükle
-        await fetchWorkerDetailData(selectedWorkerId.value, selectedWorkerDetailPeriod.value);
-    } else {
-        selectedWorkerName.value = '';
-        workerDetailData.value = null;
     }
 };
 
@@ -681,6 +554,26 @@ const fetchProducts = async () => {
     }
 };
 
+// YENİ - Worker Matrix API fonksiyonu
+const fetchWorkerMatrix = async (period) => {
+    try {
+        workerMatrixLoading.value = true;
+        const response = await axios.get(`/api/dashboard/production/workers/matrix?period=${period}`);
+        workerMatrixData.value = response.data;
+    } catch (error) {
+        console.error('Error fetching worker matrix:', error);
+        workerMatrixData.value = null;
+        toast.add({
+            severity: 'error',
+            summary: 'Hata',
+            detail: 'İşçi üretim matrisi yüklenirken hata oluştu',
+            life: 3000
+        });
+    } finally {
+        workerMatrixLoading.value = false;
+    }
+};
+
 const applyAdvancedFilter = async () => {
     try {
         filterLoading.value = true;
@@ -694,42 +587,40 @@ const applyAdvancedFilter = async () => {
             payload.end_date = filterData.value.dateRange[1];
         }
 
-if (filterData.value.machine) {
-    payload.machine_id = filterData.value.machine;
-}
+        if (filterData.value.machine) {
+            payload.machine_id = filterData.value.machine;
+        }
 
-if (filterData.value.worker) {
-    payload.user_id = filterData.value.worker;
-}
+        if (filterData.value.worker) {
+            payload.user_id = filterData.value.worker;
+        }
 
         const response = await axios.post('/api/dashboard/production/filtered', payload);
 
         dailyProductionChart.value = response.data.chartData;
         dailyProductionData.value = response.data.tableData;
 
-toast.add({
-    severity: 'success',
-    summary: 'Başarılı',
-    detail: 'Filtreler uygulandı',
-    life: 3000
-});
+        toast.add({
+            severity: 'success',
+            summary: 'Başarılı',
+            detail: 'Filtreler uygulandı',
+            life: 3000
+        });
 
-showFilterDialog.value = false;
+        showFilterDialog.value = false;
 
-} catch (error) {
-    console.error('Error applying filters:', error);
-    toast.add({
-        severity: 'error',
-        summary: 'Hata',
-        detail: 'Filtreler uygulanırken bir hata oluştu',
-        life: 3000
-    });
-} finally {
-    filterLoading.value = false;
-}
+    } catch (error) {
+        console.error('Error applying filters:', error);
+        toast.add({
+            severity: 'error',
+            summary: 'Hata',
+            detail: 'Filtreler uygulanırken bir hata oluştu',
+            life: 3000
+        });
+    } finally {
+        filterLoading.value = false;
+    }
 };
-
-
 
 // Event Handlers
 const changePeriod = async (period) => {
@@ -737,17 +628,27 @@ const changePeriod = async (period) => {
     await fetchDailyProduction(period);
 };
 
-const changeProductPeriod = async (period) => {
-    selectedProductPeriod.value = period;
-    await fetchProductDistribution(period);
-};
-
-
-
 const changeWorkerDetailPeriod = async (period) => {
     selectedWorkerDetailPeriod.value = period;
     if (selectedWorkerId.value) {
         await fetchWorkerDetailData(selectedWorkerId.value, period);
+    }
+};
+
+// YENİ - Worker Matrix period change
+const changeWorkerMatrixPeriod = async (period) => {
+    selectedWorkerMatrixPeriod.value = period;
+    await fetchWorkerMatrix(period);
+};
+
+const onWorkerChange = async () => {
+    if (selectedWorkerId.value && workers.value && workers.value.length > 0) {
+        const selectedWorker = workers.value.find(w => w.id === selectedWorkerId.value);
+        selectedWorkerName.value = selectedWorker ? selectedWorker.name : 'Bilinmeyen İşçi';
+        await fetchWorkerDetailData(selectedWorkerId.value, selectedWorkerDetailPeriod.value);
+    } else {
+        selectedWorkerName.value = '';
+        workerDetailData.value = null;
     }
 };
 
@@ -779,10 +680,9 @@ const clearFilters = async () => {
 // Initialize
 onMounted(async () => {
     try {
-        // Paralel olarak tüm verileri yükle
         await Promise.allSettled([
             fetchDailyProduction(selectedPeriod.value),
-            fetchProductDistribution(selectedProductPeriod.value),
+            fetchWorkerMatrix(selectedWorkerMatrixPeriod.value), // YENİ
             fetchMachines(),
             fetchWorkers(),
             fetchProducts()
@@ -809,11 +709,12 @@ onMounted(async () => {
 // Watch for tab changes to refresh data if needed
 const refreshCurrentTab = async () => {
     if (activeTabIndex.value === 0) {
-        // Günlük Üretim Tab
         await fetchDailyProduction(selectedPeriod.value);
     } else if (activeTabIndex.value === 1) {
-        // Ürün Dağılımı Tab
-        await fetchProductDistribution(selectedProductPeriod.value);
+        // İşçi Üretimi Tab - no auto refresh
+    } else if (activeTabIndex.value === 2) {
+        // YENİ - İşçi Genel Üretim Tab
+        await fetchWorkerMatrix(selectedWorkerMatrixPeriod.value);
     }
 };
 
@@ -825,24 +726,22 @@ defineExpose({
     refreshData: async () => {
         await Promise.allSettled([
             fetchDailyProduction(selectedPeriod.value),
-            fetchProductDistribution(selectedProductPeriod.value)
+            fetchWorkerMatrix(selectedWorkerMatrixPeriod.value) // YENİ
         ]);
     },
     refreshCurrentTab,
     changePeriod,
-    changeProductPeriod,
+    changeWorkerMatrixPeriod, // YENİ
     clearFilters,
-    // Data getters
     getCurrentData: () => ({
         dailyProduction: {
             chart: dailyProductionChart.value,
             table: dailyProductionData.value,
             period: selectedPeriod.value
         },
-        productDistribution: {
-            chart: productDistributionChart.value,
-            table: productDistributionData.value,
-            period: selectedProductPeriod.value
+        workerMatrix: { // YENİ
+            data: workerMatrixData.value,
+            period: selectedWorkerMatrixPeriod.value
         },
         dateRange: currentDateRange.value
     })
@@ -971,6 +870,311 @@ defineExpose({
     gap: 10px;
 }
 
+/* Worker Selection Styles */
+.worker-selection-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+    padding: 20px;
+    background: rgba(248, 250, 252, 0.05);
+    border-radius: 12px;
+    border: 1px solid rgba(226, 232, 240, 0.1);
+}
+
+.worker-selector {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 250px;
+}
+
+.worker-selector label {
+    font-weight: 600;
+    color: #F1F5F9;
+    margin-bottom: 5px;
+}
+
+.loading-indicator {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    background: rgba(248, 250, 252, 0.05);
+    border-radius: 8px;
+    color: #64748b;
+}
+
+.no-worker-selected {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    padding: 60px 40px;
+    text-align: center;
+    color: #64748b;
+}
+
+.no-worker-selected h3 {
+    margin: 0;
+    color: #475569;
+}
+
+.no-worker-selected p {
+    margin: 0;
+    color: #64748b;
+}
+
+.worker-detail-content {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.detail-section {
+    margin-bottom: 30px;
+}
+
+.detail-section h4 {
+    margin: 0 0 15px 0;
+    color: #F1F5F9;
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+/* YENİ - Worker Matrix Styles */
+.worker-matrix-container {
+    background: rgba(248, 250, 252, 0.02);
+    border-radius: 12px;
+    padding: 20px;
+    border: 1px solid rgba(226, 232, 240, 0.1);
+}
+
+.matrix-header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.matrix-header h3 {
+    margin: 0 0 5px 0;
+    color: #F1F5F9;
+    font-weight: 600;
+}
+
+.matrix-header .text-muted {
+    color: #94a3b8;
+}
+
+.table-responsive {
+    overflow-x: auto;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.worker-matrix-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: rgba(255, 255, 255, 0.02);
+    font-size: 13px;
+}
+
+.worker-matrix-table th,
+.worker-matrix-table td {
+    padding: 12px 8px;
+    text-align: center;
+    border: 1px solid rgba(226, 232, 240, 0.2);
+    position: relative;
+}
+
+.worker-matrix-table thead th {
+    background: rgba(59, 130, 246, 0.1);
+    color: #3B82F6;
+    font-weight: 600;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.worker-name-col {
+    min-width: 150px;
+    text-align: left !important;
+    background: rgba(59, 130, 246, 0.15) !important;
+}
+
+.date-col {
+    min-width: 80px;
+    writing-mode: horizontal-tb;
+}
+
+.total-col {
+    min-width: 80px;
+    background: rgba(16, 185, 129, 0.1) !important;
+    color: #10B981 !important;
+}
+
+.worker-row:nth-child(even) {
+    background: rgba(248, 250, 252, 0.02);
+}
+
+.worker-row:hover {
+    background: rgba(59, 130, 246, 0.05);
+}
+
+.worker-name {
+    text-align: left !important;
+    font-weight: 500;
+    background: rgba(248, 250, 252, 0.05);
+}
+
+.worker-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #F1F5F9;
+}
+
+.worker-info i {
+    color: #3B82F6;
+    font-size: 14px;
+}
+
+.production-cell {
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.production-cell:hover {
+    background: rgba(59, 130, 246, 0.1);
+    transform: scale(1.05);
+}
+
+.production-cell.high-production {
+    background: rgba(16, 185, 129, 0.2);
+    color: #10B981;
+}
+
+.production-cell.medium-production {
+    background: rgba(245, 158, 11, 0.2);
+    color: #F59E0B;
+}
+
+.production-cell.low-production {
+    background: rgba(99, 102, 241, 0.2);
+    color: #6366F1;
+}
+
+.production-cell.no-production {
+    background: rgba(107, 114, 128, 0.1);
+    color: #6B7280;
+}
+
+.no-production {
+    font-style: italic;
+    opacity: 0.6;
+}
+
+.total-cell {
+    font-weight: 700;
+    background: rgba(16, 185, 129, 0.1);
+}
+
+.total-badge {
+    background: #10B981;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.totals-row {
+    background: rgba(16, 185, 129, 0.1);
+    font-weight: 600;
+    border-top: 2px solid #10B981;
+}
+
+.total-label {
+    text-align: left !important;
+    color: #10B981;
+    font-weight: 700;
+}
+
+.daily-total {
+    color: #10B981;
+    font-weight: 600;
+}
+
+.grand-total {
+    background: #10B981;
+    color: white;
+    font-weight: 700;
+    font-size: 14px;
+}
+
+.matrix-summary {
+    margin-top: 20px;
+}
+
+.summary-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+}
+
+.summary-card {
+    background: rgba(248, 250, 252, 0.05);
+    border: 1px solid rgba(226, 232, 240, 0.1);
+    border-radius: 8px;
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: all 0.3s ease;
+}
+
+.summary-card:hover {
+    background: rgba(248, 250, 252, 0.08);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.summary-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(59, 130, 246, 0.1);
+    color: #3B82F6;
+    font-size: 18px;
+}
+
+.summary-content {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.summary-label {
+    font-size: 12px;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.summary-value {
+    font-size: 20px;
+    font-weight: 700;
+    color: #F1F5F9;
+}
+
 /* Tab genişlik ayarları */
 :deep(.p-tabview) {
     width: 100% !important;
@@ -1061,6 +1265,43 @@ defineExpose({
         flex-direction: column;
         gap: 15px;
     }
+
+    /* Worker Matrix Responsive */
+    .worker-matrix-table {
+        font-size: 11px;
+    }
+
+    .worker-matrix-table th,
+    .worker-matrix-table td {
+        padding: 8px 6px;
+    }
+
+    .worker-name-col {
+        min-width: 120px;
+    }
+
+    .date-col {
+        min-width: 60px;
+    }
+
+    .summary-cards {
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 10px;
+    }
+
+    .summary-card {
+        padding: 12px;
+    }
+
+    .summary-icon {
+        width: 35px;
+        height: 35px;
+        font-size: 16px;
+    }
+
+    .summary-value {
+        font-size: 18px;
+    }
 }
 
 @media (max-width: 480px) {
@@ -1076,92 +1317,17 @@ defineExpose({
     .additional-filters {
         flex-direction: column;
     }
-}
 
-/* Worker Selection Styles */
-.worker-selection-section {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 15px;
-    padding: 20px;
-    background: rgba(248, 250, 252, 0.05);
-    border-radius: 12px;
-    border: 1px solid rgba(226, 232, 240, 0.1);
-}
+    .summary-cards {
+        grid-template-columns: 1fr;
+    }
 
-.worker-selector {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    min-width: 250px;
-}
+    .worker-matrix-table {
+        font-size: 10px;
+    }
 
-.worker-selector label {
-    font-weight: 600;
-    color: #F1F5F9;
-    margin-bottom: 5px;
-}
-
-.loading-indicator {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 10px;
-    background: rgba(248, 250, 252, 0.05);
-    border-radius: 8px;
-    color: #64748b;
-}
-
-.no-worker-selected {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 15px;
-    padding: 60px 40px;
-    text-align: center;
-    color: #64748b;
-}
-
-.no-worker-selected h3 {
-    margin: 0;
-    color: #475569;
-}
-
-.no-worker-selected p {
-    margin: 0;
-    color: #64748b;
-}
-
-.worker-info {
-    background: rgba(59, 130, 246, 0.1);
-    border: 1px solid rgba(59, 130, 246, 0.2);
-    border-radius: 8px;
-    padding: 15px;
-    margin-bottom: 20px;
-}
-
-.worker-info h3 {
-    margin: 0 0 10px 0;
-    color: #3B82F6;
-    font-weight: 600;
-}
-
-.worker-info p {
-    margin: 0;
-    color: #64748b;
-}
-
-.detail-section {
-    margin-bottom: 30px;
-}
-
-.detail-section h4 {
-    margin: 0 0 15px 0;
-    color: #F1F5F9;
-    font-weight: 600;
-    font-size: 1.1rem;
+    .date-col {
+        min-width: 50px;
+    }
 }
 </style>

@@ -24,7 +24,10 @@
                 paginator
                 :rows="tableRows"
                 :sortField="sortField"
-                :sortOrder="sortOrder">
+                :sortOrder="sortOrder"
+                paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+                :rowsPerPageOptions="[10, 25, 50, 100]"
+                currentPageReportTemplate="Mevcut {first} ile {last} arasında, toplam {totalRecords} kayıt">
 
                 <Column
                     v-for="col in tableColumns"
