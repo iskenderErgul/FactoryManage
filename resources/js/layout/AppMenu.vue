@@ -179,10 +179,12 @@ if (userRole.value !== 'admin') {
         if (menu.items) {
             menu.items = menu.items.filter(subMenu =>
                 subMenu.label !== 'Kullanıcı Yönetimi' &&
+                subMenu.label !== 'Ana Sayfa' &&
                 subMenu.label !== 'Üretim Yönetimi' &&
                 subMenu.label !== 'Stok Yönetimi' &&
                 subMenu.label !== 'Satış Yönetimi' &&
                 subMenu.label !== 'Geri Dönüşüm Kayıtları' &&
+                subMenu.label !== 'Müşteri İşlemleri' &&
                 subMenu.label !== 'Hammadde Tedarik Kayıtları'
 
             );
