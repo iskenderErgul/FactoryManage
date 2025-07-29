@@ -33,6 +33,11 @@ class Production extends Model
         return $this->belongsTo(Shift::class);
     }
 
+    public function shiftTemplate(): BelongsTo
+    {
+        return $this->belongsTo(ShiftTemplate::class, 'shift_id', 'id');
+    }
+
     public function logs()
     {
         return $this->hasMany(ProductionLog::class);

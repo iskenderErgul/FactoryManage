@@ -181,6 +181,18 @@ class ShiftRepository implements ShiftRepositoryInterface
 
     }
 
+    /**
+     * Kullanıcının atanmış olduğu vardiya template'lerini getirir.
+     */
+    public function getUserShiftTemplates($userId): JsonResponse
+    {
+        $shiftTemplates = ShiftTemplate::whereHas('shifts.shiftAssignments', function ($query) use ($userId) {
+            $query->where('user_id', $userId);
+        })->get();
+        
+        return response()->json($shiftTemplates);
+    }
+
     private function getShiftTemplate($shiftTemplateId): ShiftTemplate
     {
         $shiftTemplate = ShiftTemplate::find($shiftTemplateId);

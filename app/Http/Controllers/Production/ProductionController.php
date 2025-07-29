@@ -7,6 +7,7 @@ use App\DTOs\Production\StoreProductionDTO;
 use App\DTOs\Production\UpdateProductionDTO;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Production\StoreByAdminProductionRequest;
+use App\Http\Requests\Production\StoreByWorkerProductionRequest;
 use App\Http\Requests\Production\UpdateProductionRequest;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -43,10 +44,10 @@ class ProductionController extends Controller
         /**
          * İşçi tarafından yeni bir üretim kaydeder.
          *
-         * @param Request $request
+         * @param StoreByWorkerProductionRequest $request
          * @return JsonResponse
          */
-        public function storeByWorker(Request $request): JsonResponse
+        public function storeByWorker(StoreByWorkerProductionRequest $request): JsonResponse
         {
             return $this->productionRepository->storeByWorker($request);
         }

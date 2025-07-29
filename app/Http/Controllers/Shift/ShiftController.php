@@ -40,4 +40,9 @@ class ShiftController extends Controller
     {
         return $this->shiftRepository->getAllShifts();
     }
+
+    public function getUserShiftTemplates($userId): JsonResponse
+    {
+        return $this->shiftRepository->getUserShiftTemplates($userId);
+    }
 }

@@ -4,6 +4,7 @@ namespace App\Domains\Production\Interfaces;
 
 use App\DTOs\Production\StoreProductionDTO;
 use App\DTOs\Production\UpdateProductionDTO;
+use App\Http\Requests\Production\StoreByWorkerProductionRequest;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -26,10 +27,10 @@ interface ProductionRepositoryInterface
     /**
      * Çalışan tarafından yeni bir üretim kaydı oluşturur.
      *
-     * @param Request $request
+     * @param StoreByWorkerProductionRequest $request
      * @return JsonResponse
      */
-    public function storeByWorker(Request $request): JsonResponse;
+    public function storeByWorker(StoreByWorkerProductionRequest $request): JsonResponse;
 
     /**
      * Yönetici tarafından yeni bir üretim kaydı oluşturur.

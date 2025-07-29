@@ -18,6 +18,12 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             CustomerSeeder::class,
             ProductSeeder::class,
+            ShiftSeeder::class,
+            ShiftAssignmentSeeder::class,
+            ShiftTemplateSeeder::class,
+            MachineSeeder::class,
+
+
         ]);
 
         echo "\n📊 Üretim ve satış verileri oluşturuluyor...\n";

@@ -10,6 +10,7 @@ use App\Domains\Production\Models\Production;
 use App\Domains\Production\Models\ProductionLog;
 use App\DTOs\Production\StoreProductionDTO;
 use App\DTOs\Production\UpdateProductionDTO;
+use App\Http\Requests\Production\StoreByWorkerProductionRequest;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -51,17 +52,31 @@ class ProductionRepository implements ProductionRepositoryInterface
     /**
      * İşçi tarafından yeni bir üretim kaydı oluşturur.
      *
-     * @param Request $request  Üretim kaydı oluşturmak için gerekli bilgiler
+     * @param StoreByWorkerProductionRequest $request  Üretim kaydı oluşturmak için gerekli bilgiler
      * @return JsonResponse
      */
-    public function storeByWorker(Request $request): JsonResponse
+    public function storeByWorker(StoreByWorkerProductionRequest $request): JsonResponse
     {
 
+        // Shift template ID'sinden shift ID'sini bul
+        $shift = \App\Domains\Shift\Models\Shift::where('template_id', $request->shift_template_id)->first();
+        
+        if (!$shift) {
+            return response()->json(['message' => 'Seçilen vardiya bulunamadı.'], 404);
+        }
 
+        // Kullanıcının bu vardiyaya atanmış olup olmadığını kontrol et
+        $shiftAssignment = \App\Domains\Shift\Models\ShiftAssignment::where('user_id', $request->user_id)
+            ->where('shift_id', $shift->id)
+            ->first();
+
+        if (!$shiftAssignment) {
+            return response()->json(['message' => 'Bu vardiyaya atanmamışsınız.'], 403);
+        }
 
         $production = Production::create([
             'user_id' => $request->user_id,
-            'shift_id' => $request->shift_id,
+            'shift_id' => $shift->id,
             'machine_id' => $request->machine_id,
             'product_id' => $request->product_id,
             'quantity' => $request->quantity,

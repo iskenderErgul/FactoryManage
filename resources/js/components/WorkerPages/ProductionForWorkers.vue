@@ -4,6 +4,10 @@
         <h2 class="text-center">Üretim Ekle</h2>
         <div class="form-grid">
             <div class="form-group">
+                <label for="shift">Vardiya Seçin:</label>
+                <Dropdown id="shift" v-model="production.shift" :options="shiftTemplates" optionLabel="name" placeholder="Vardiya Seçin" />
+            </div>
+            <div class="form-group">
                 <label for="machine">Üretildiği Makineyi Seçin:</label>
                 <Dropdown id="machine" v-model="production.machine" :options="machines" optionLabel="machine_name" placeholder="Makine Seçin" />
             </div>
@@ -51,6 +55,7 @@ const store = useStore();
 const shifts = ref([]);
 const machines = ref([]);
 const products = ref([]);
+const shiftTemplates = ref([]); // Yeni eklenen vardiya şablonları
 
 const currentUser = computed(() => store.state.user);
 
@@ -72,7 +77,7 @@ const filteredProductions = computed(() => {
 const fetchProductions = () =>  {
     axios.get('/api/productions')
         .then(response => {
-            productions.value = response.data;
+            productions.value = response.data.reverse();
         })
         .catch(error => {
             console.error("Üretimler alınırken hata:", error);
@@ -82,6 +87,7 @@ const fetchProductions = () =>  {
 
 // Form verileri
 const production = reactive({
+    shift: null, // Vardiya şablonu
     machine: null,
     product: null,
     quantity: null
@@ -103,50 +109,29 @@ const fetchProducts = async () => {
         toast.add({ severity: 'error', summary: 'Hata', detail: 'Ürün verileri alınırken bir hata oluştu.', life: 3000 });
     }
 };
-const fetchShifts = async () => {
+const fetchShiftTemplates = async () => {
     try {
-        const response = await axios.get('/api/shift/shifts');
-        shifts.value = response.data;
+        const response = await axios.get(`/api/shift/user-shift-templates/${currentUser.value.id}`);
+        shiftTemplates.value = response.data;
     } catch (error) {
-        toast.value.add({ severity: 'error', summary: 'Hata', detail: 'Şablonlar yüklenemedi', life: 3000 });
+        toast.value.add({ severity: 'error', summary: 'Hata', detail: 'Vardiya şablonları yüklenemedi', life: 3000 });
     }
 }
 
-
-// Sayfa yüklendiğinde makineleri ve ürünleri çek
+// Sayfa yüklendiğinde makineleri, ürünleri ve vardiya şablonlarını çek
 onMounted(async () => {
     await fetchMachines();
     await fetchProducts();
     await fetchProductions();
-    await fetchShifts();
+    await fetchShiftTemplates();
 });
-
-const currentShift = computed(() => {
-    return shifts.value.find(shift =>
-        shift.shift_assignments.some(assignment => assignment.user_id === currentUser.value.id)
-    );
-});
-
-
-const currentShiftId = computed(() => {
-    return currentShift.value?.id || null;
-});
-
 
 const saveProduction = async () => {
-    if (production.machine && production.product && production.quantity) {
+    if (production.shift && production.machine && production.product && production.quantity) {
         try {
-
-            const shiftId = currentShiftId.value;
-
-            if (!shiftId) {
-                toast.value.add({ severity: 'warn', summary: 'Uyarı', detail: 'Mevcut vardiya bulunamadı.', life: 3000 });
-                return;
-            }
-
             const response = await axios.post('/api/productions/worker', {
                 user_id: currentUser.value.id,
-                shift_id: shiftId,
+                shift_template_id: production.shift.id,
                 machine_id: production.machine.id,
                 product_id: production.product.id,
                 quantity: production.quantity
@@ -157,6 +142,7 @@ const saveProduction = async () => {
 
             toast.value.add({ severity: 'success', summary: 'Başarılı', detail: 'Üretim kaydedildi.', life: 3000 });
 
+            production.shift = null;
             production.machine = null;
             production.product = null;
             production.quantity = null;
@@ -180,7 +166,7 @@ const saveProduction = async () => {
 
 .form-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
     gap: 1rem;
 }
 
