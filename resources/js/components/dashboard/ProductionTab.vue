@@ -125,7 +125,7 @@
                     <!-- Worker Matrix Table -->
                     <div v-else class="worker-matrix-container">
                         <div class="matrix-header mb-4">
-                            <h3>İşçi Üretim Matrisi</h3>
+                            <h3>İşçi Üretim Tablosu</h3>
                             <small class="text-muted">
                                 <i class="pi pi-calendar"></i>
                                 {{ workerMatrixData.dateRange?.start }} - {{ workerMatrixData.dateRange?.end }}
@@ -143,7 +143,7 @@
                                         :key="date.formatted"
                                         class="date-col"
                                         :title="date.full">
-                                        {{ date.display }}
+                                        {{ formatDateForDisplay(date.formatted) }}
                                     </th>
                                     <th class="total-col">Toplam</th>
                                 </tr>
@@ -209,7 +209,7 @@
                                     </div>
                                     <div class="summary-content">
                                         <div class="summary-label">Çalışılan Gün</div>
-                                        <div class="summary-value">{{ workerMatrixData.dates?.length || 0 }}</div>
+                                        <div class="summary-value">{{ workerMatrixData.dates?.length-1 || 0 }}</div>
                                     </div>
                                 </div>
                                 <div class="summary-card">
@@ -217,7 +217,7 @@
                                         <i class="pi pi-chart-bar"></i>
                                     </div>
                                     <div class="summary-content">
-                                        <div class="summary-label">Toplam Üretim</div>
+                                        <div class="summary-label">Toplam Üretim( KOLİ )</div>
                                         <div class="summary-value">{{ workerMatrixData.grandTotal || 0 }}</div>
                                     </div>
                                 </div>
@@ -226,7 +226,7 @@
                                         <i class="pi pi-chart-line"></i>
                                     </div>
                                     <div class="summary-content">
-                                        <div class="summary-label">Günlük Ortalama</div>
+                                        <div class="summary-label">Günlük Ortalama ( KOLİ )</div>
                                         <div class="summary-value">{{ Math.round((workerMatrixData.grandTotal || 0) / (workerMatrixData.dates?.length || 1)) }}</div>
                                     </div>
                                 </div>
@@ -445,6 +445,23 @@ const getProductionCellClass = (value) => {
     if (value >= 100) return 'high-production';
     if (value >= 50) return 'medium-production';
     return 'low-production';
+};
+
+// Tarih formatı için yardımcı fonksiyon
+const formatDateForDisplay = (dateString) => {
+    if (!dateString) return '';
+
+    try {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('tr-TR', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric'
+        });
+    } catch (error) {
+        // Eğer tarih parse edilemezse, orijinal string'i döndür
+        return dateString;
+    }
 };
 
 // API Functions

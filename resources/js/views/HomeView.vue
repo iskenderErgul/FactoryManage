@@ -1,33 +1,50 @@
 <template>
     <div class="dashboard-container">
-        <!-- Tab Panel -->
-        <TabView>
-            <!-- Üretim Analizi Tab -->
-            <TabPanel header="🏭 Üretim Analizi">
-                <ProductionTab
-                    ref="productionTabRef"
-                    :chartOptions="chartOptions"
-                    :doughnutOptions="doughnutOptions"
-                    :machines="machines"
-                    :workers="workers"
-                    @filter="handleProductionFilter" />
-            </TabPanel>
+        <!-- Admin Dashboard -->
+        <div v-if="isAdmin">
+            <TabView>
+                <!-- Üretim Analizi Tab -->
+                <TabPanel header="🏭 Üretim Analizi">
+                    <ProductionTab
+                        ref="productionTabRef"
+                        :chartOptions="chartOptions"
+                        :doughnutOptions="doughnutOptions"
+                        :machines="machines"
+                        :workers="workers"
+                        @filter="handleProductionFilter" />
+                </TabPanel>
 
-            <!-- Stok Yönetimi Tab -->
-            <TabPanel header="📦 Stok Yönetimi">
-                <StockTab
-                    ref="stockTabRef"
-                    :chartOptions="chartOptions"
-                    :stockData="stockData"
-                    :products="products"
-                    @filter="handleStockFilter" />
-            </TabPanel>
-        </TabView>
+                <!-- Stok Yönetimi Tab -->
+                <TabPanel header="📦 Stok Yönetimi">
+                    <StockTab
+                        ref="stockTabRef"
+                        :chartOptions="chartOptions"
+                        :stockData="stockData"
+                        :products="products"
+                        @filter="handleStockFilter" />
+                </TabPanel>
+            </TabView>
+        </div>
+
+        <!-- Worker View -->
+        <div v-else-if="isWorker" class="worker-view">
+            <div class="company-logo">
+                <h1 class="company-name">Özergül Plastik</h1>
+                <p class="company-subtitle">Hoş Geldiniz</p>
+            </div>
+        </div>
+
+        <!-- Loading or Unauthorized -->
+        <div v-else class="loading-view">
+            <div class="loading-spinner"></div>
+            <p>Yükleniyor...</p>
+        </div>
     </div>
 </template>
 
 <script setup>
-import { ref, onMounted, nextTick } from "vue";
+import { ref, onMounted, nextTick, computed } from "vue";
+import { useStore } from "vuex";
 import TabView from 'primevue/tabview';
 import TabPanel from 'primevue/tabpanel';
 import axios from "axios";
@@ -37,6 +54,18 @@ import OverviewTab from '@/components/dashboard/OverviewTab.vue';
 import ProductionTab from '@/components/dashboard/ProductionTab.vue';
 import SalesTab from '@/components/dashboard/SalesTab.vue';
 import StockTab from '@/components/dashboard/StockTab.vue';
+
+// Store
+const store = useStore();
+
+// Computed properties for user role checking
+const isAdmin = computed(() => {
+    return store.getters.user && store.getters.user.role === 'admin';
+});
+
+const isWorker = computed(() => {
+    return store.getters.user && store.getters.user.role === 'worker';
+});
 
 // Component refs
 const overviewTabRef = ref(null);
@@ -89,9 +118,12 @@ onMounted(async () => {
     await nextTick();
 
     try {
-        initializeChartOptions();
-        await loadMasterData();
-        updateAllTabs();
+        // Only initialize dashboard for admin users
+        if (isAdmin.value) {
+            initializeChartOptions();
+            await loadMasterData();
+            updateAllTabs();
+        }
     } catch (error) {
         console.error('Dashboard yüklenirken hata:', error);
     }
@@ -305,6 +337,63 @@ const formatDate = (dateString) => {
     opacity: 0.9;
 }
 
+/* Worker View Styles */
+.worker-view {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 60vh;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 15px;
+    margin: 20px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+}
+
+.company-logo {
+    text-align: center;
+    color: white;
+    padding: 40px;
+}
+
+.company-name {
+    font-size: 3.5rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+    text-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    letter-spacing: 2px;
+}
+
+.company-subtitle {
+    font-size: 1.5rem;
+    opacity: 0.9;
+    font-weight: 300;
+}
+
+/* Loading View Styles */
+.loading-view {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 60vh;
+    color: #94A3B8;
+}
+
+.loading-spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid rgba(59, 130, 246, 0.2);
+    border-top: 4px solid #3B82F6;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 20px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
 /* PrimeVue Override - Koyu tema için */
 :deep(.p-tabview .p-tabview-nav) {
     background: rgba(30, 41, 59, 0.95) !important;
@@ -347,6 +436,14 @@ const formatDate = (dateString) => {
 @media (max-width: 768px) {
     .dashboard-title {
         font-size: 2rem;
+    }
+    
+    .company-name {
+        font-size: 2.5rem;
+    }
+    
+    .company-subtitle {
+        font-size: 1.2rem;
     }
 }
 </style>
