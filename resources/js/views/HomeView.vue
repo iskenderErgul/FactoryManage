@@ -32,6 +32,21 @@
                 <h1 class="company-name">Özergül Plastik</h1>
                 <p class="company-subtitle">Hoş Geldiniz</p>
             </div>
+            <div class="worker-shift-info">
+                <template v-if="loadingShift">
+                    <span>Vardiya bilgisi yükleniyor...</span>
+                </template>
+                <template v-else-if="currentShift">
+                    <div class="shift-card">
+                        <h3>Mevcut Vardiyanız</h3>
+                        <p><b>{{ currentShift.name }}</b></p>
+                        <p>{{ currentShift.start_time }} - {{ currentShift.end_time }}</p>
+                    </div>
+                </template>
+                <template v-else>
+                    <span>Bugün için atanmış vardiyanız yok.</span>
+                </template>
+            </div>
         </div>
 
         <!-- Loading or Unauthorized -->
@@ -113,6 +128,25 @@ const products = ref([]);
 const chartOptions = ref();
 const doughnutOptions = ref();
 
+const currentShift = ref(null);
+const loadingShift = ref(false);
+
+const fetchCurrentShift = async () => {
+    loadingShift.value = true;
+    try {
+        const response = await axios.get('/api/current-shift');
+        if (response.data && response.data.today_shifts && response.data.today_shifts.length > 0) {
+            currentShift.value = response.data.today_shifts[0];
+        } else {
+            currentShift.value = null;
+        }
+    } catch (error) {
+        currentShift.value = null;
+    } finally {
+        loadingShift.value = false;
+    }
+};
+
 // Lifecycle
 onMounted(async () => {
     await nextTick();
@@ -123,6 +157,9 @@ onMounted(async () => {
             initializeChartOptions();
             await loadMasterData();
             updateAllTabs();
+        }
+        if (isWorker.value) {
+            await fetchCurrentShift();
         }
     } catch (error) {
         console.error('Dashboard yüklenirken hata:', error);
@@ -367,6 +404,53 @@ const formatDate = (dateString) => {
     font-size: 1.5rem;
     opacity: 0.9;
     font-weight: 300;
+}
+
+.worker-shift-info {
+    margin-top: 30px;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 250px;
+}
+
+.shift-card {
+    background: rgba(30, 41, 59, 0.75);
+    border: 2px solid #3B82F6;
+    border-radius: 18px;
+    padding: 32px 48px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 10px;
+    color: #F1F5F9;
+    box-shadow: 0 8px 32px rgba(59,130,246,0.18);
+    font-size: 1.25rem;
+    min-width: 320px;
+}
+
+.shift-card h3 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 18px;
+    color: #60A5FA;
+    letter-spacing: 1px;
+    text-shadow: 0 2px 8px rgba(59,130,246,0.18);
+}
+
+.shift-card b {
+    font-size: 1.5rem;
+    color: #FBBF24;
+    margin-bottom: 10px;
+    display: block;
+}
+
+.shift-card p {
+    margin: 0;
+    font-size: 1.15rem;
+    font-weight: 500;
+    letter-spacing: 0.5px;
 }
 
 /* Loading View Styles */
