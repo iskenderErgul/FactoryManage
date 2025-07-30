@@ -86,4 +86,9 @@ class ProductionController extends Controller
             return $this->productionRepository->destroy($id);
         }
 
+        public function getCurrentShift(Request $request): JsonResponse
+        {
+            return $this->productionRepository->getCurrentShift($request);
+        }
+
 }

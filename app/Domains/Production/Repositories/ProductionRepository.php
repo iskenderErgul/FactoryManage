@@ -57,23 +57,51 @@ class ProductionRepository implements ProductionRepositoryInterface
      */
     public function storeByWorker(StoreByWorkerProductionRequest $request): JsonResponse
     {
+        $today = now()->format('Y-m-d');
+        $currentTime = now()->format('H:i:s');
 
-        // Shift template ID'sinden shift ID'sini bul
-        $shift = \App\Domains\Shift\Models\Shift::where('template_id', $request->shift_template_id)->first();
-        
-        if (!$shift) {
-            return response()->json(['message' => 'Seçilen vardiya bulunamadı.'], 404);
+        // Bugünkü vardiyaları getir
+        $todayShifts = \App\Domains\Shift\Models\ShiftAssignment::with(['shift.template'])
+            ->where('user_id', $request->user_id)
+            ->whereHas('shift', function($query) use ($today) {
+                $query->where('date', $today);
+            })
+            ->get();
+
+        // Bugünkü vardiyalar arasından aktif olanı bul
+        $currentShiftAssignment = null;
+        foreach ($todayShifts as $shiftAssignment) {
+            $startTime = $shiftAssignment->shift->template->start_time;
+            $endTime = $shiftAssignment->shift->template->end_time;
+            
+            // Vardiya saatleri arasında mı kontrol et
+            if ($startTime <= $currentTime && $endTime >= $currentTime) {
+                $currentShiftAssignment = $shiftAssignment;
+                break;
+            }
         }
 
-        // Kullanıcının bu vardiyaya atanmış olup olmadığını kontrol et
-        $shiftAssignment = \App\Domains\Shift\Models\ShiftAssignment::where('user_id', $request->user_id)
-            ->where('shift_id', $shift->id)
-            ->first();
-
-        if (!$shiftAssignment) {
-            return response()->json(['message' => 'Bu vardiyaya atanmamışsınız.'], 403);
+        // Eğer aktif vardiya bulunamadıysa, bugünün ilk vardiyasını al
+        if (!$currentShiftAssignment) {
+            $currentShiftAssignment = \App\Domains\Shift\Models\ShiftAssignment::with(['shift.template'])
+                ->where('user_id', $request->user_id)
+                ->whereHas('shift', function($query) use ($today) {
+                    $query->where('date', $today);
+                })
+                ->orderBy('id') // İlk vardiyayı al
+                ->first();
         }
 
+        if (!$currentShiftAssignment) {
+            return response()->json([
+                'message' => 'Bugün herhangi bir vardiyaya atanmamışsınız.',
+                'error_code' => 'NO_SHIFT_TODAY'
+            ], 403);
+        }
+
+        $shift = $currentShiftAssignment->shift;
+
+        // Production oluştur
         $production = Production::create([
             'user_id' => $request->user_id,
             'shift_id' => $shift->id,
@@ -83,6 +111,7 @@ class ProductionRepository implements ProductionRepositoryInterface
             'production_date' => now(),
         ]);
 
+        // Stok işlemleri
         $this->stockMovementService->createStockMovement(
             $request->product_id,
             $request->quantity,
@@ -97,10 +126,16 @@ class ProductionRepository implements ProductionRepositoryInterface
         $product->stock_quantity += $request->quantity;
         $product->save();
 
-
-
-
-        return response()->json($production, 201);
+        return response()->json([
+            'success' => true,
+            'production' => $production,
+            'shift_info' => [
+                'name' => $shift->template->name,
+                'start_time' => $shift->template->start_time,
+                'end_time' => $shift->template->end_time
+            ],
+            'message' => "Üretim '{$shift->template->name}' vardiyasına kaydedildi."
+        ], 201);
     }
 
     /**
@@ -109,6 +144,31 @@ class ProductionRepository implements ProductionRepositoryInterface
      * @param StoreProductionDTO $request  Üretim kaydı oluşturmak için gerekli bilgiler
      * @return JsonResponse
      */
+
+    // Kullanıcının bugünkü vardiya listesini döner
+    public function getCurrentShift(Request $request)
+    {
+        $userId = $request->user()->id;
+        $today = now()->format('Y-m-d');
+
+        $todayShifts = \App\Domains\Shift\Models\ShiftAssignment::with(['shift.template'])
+            ->where('user_id', $userId)
+            ->whereHas('shift', function($query) use ($today) {
+                $query->where('date', $today);
+            })
+            ->get();
+
+        return response()->json([
+            'today_shifts' => $todayShifts->map(function($assignment) {
+                return [
+                    'id' => $assignment->shift->id,
+                    'name' => $assignment->shift->template->name,
+                    'start_time' => $assignment->shift->template->start_time,
+                    'end_time' => $assignment->shift->template->end_time,
+                ];
+            })
+        ]);
+    }
     public function storeByAdmin(StoreProductionDTO $request): JsonResponse
     {
 

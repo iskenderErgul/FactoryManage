@@ -40,21 +40,21 @@ const model = ref([
     //         }
     //     ]
     // },
-    // {
-    //
-    //     items: [
-    //         {
-    //             label: 'Vardiya Yönetimi',
-    //             icon: 'pi pi-calendar-times',
-    //             items: [
-    //                 { label: 'Vardiya Şablonları', icon: 'pi pi-calendar-plus', to: '/sys/shift-templates' },
-    //                 { label: 'Vardiya Kaydı Atamaları', icon: 'pi pi-calendar-times', to: '/sys/shift-assignments' },
-    //                 { label: 'Vardiya Kayıtları', icon: 'pi pi-table', to: '/sys/shifts' },
-    //
-    //             ]
-    //         }
-    //     ]
-    // },
+    {
+
+        items: [
+            {
+                label: 'Vardiya Yönetimi',
+                icon: 'pi pi-calendar-times',
+                items: [
+                    { label: 'Vardiya Şablonları', icon: 'pi pi-calendar-plus', to: '/sys/shift-templates' },
+                    { label: 'Vardiya Kaydı Atamaları', icon: 'pi pi-calendar-times', to: '/sys/shift-assignments' },
+                    { label: 'Vardiya Kayıtları', icon: 'pi pi-table', to: '/sys/shifts' },
+
+                ]
+            }
+        ]
+    },
     {
 
         items: [
@@ -185,6 +185,7 @@ if (userRole.value !== 'admin') {
                 subMenu.label !== 'Satış Yönetimi' &&
                 subMenu.label !== 'Geri Dönüşüm Kayıtları' &&
                 subMenu.label !== 'Müşteri İşlemleri' &&
+                subMenu.label !== 'Vardiya Yönetimi' &&
                 subMenu.label !== 'Hammadde Tedarik Kayıtları'
 
             );

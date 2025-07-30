@@ -14,9 +14,9 @@ class SalesSeeder extends Seeder
      */
     public function run()
     {
-        // Tarih aralığı: 1 ay önce - 1 ay sonra
-        $startDate = Carbon::now()->subMonth();
-        $endDate = Carbon::now()->addMonth();
+        // Tarih aralığı: 1 hafta önce - bugün
+        $startDate = Carbon::now()->subWeek();
+        $endDate = Carbon::now();
 
         // Müşteri ID'leri (CustomerSeeder'dan)
         $customerIds = [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 27, 28, 29, 33, 34, 35];
@@ -58,7 +58,7 @@ class SalesSeeder extends Seeder
         for ($date = $startDate->copy(); $date->lte($endDate); $date->addDay()) {
             // Hafta sonu daha az satış
             $isWeekend = $date->isWeekend();
-            $dailySalesCount = $isWeekend ? rand(2, 5) : rand(6, 12);
+            $dailySalesCount = $isWeekend ? rand(1, 2) : rand(2, 4);
 
             for ($i = 0; $i < $dailySalesCount; $i++) {
                 $customerId = $customerIds[array_rand($customerIds)];

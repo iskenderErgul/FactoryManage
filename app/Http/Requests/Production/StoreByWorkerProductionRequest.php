@@ -23,7 +23,6 @@ class StoreByWorkerProductionRequest extends FormRequest
     {
         return [
             'user_id' => 'required|integer|exists:users,id',
-            'shift_template_id' => 'required|integer|exists:shift_templates,id',
             'machine_id' => 'required|integer|exists:machines,id',
             'product_id' => 'required|integer|exists:products,id',
             'quantity' => 'required|numeric|min:0',
@@ -40,8 +39,6 @@ class StoreByWorkerProductionRequest extends FormRequest
         return [
             'user_id.required' => 'Kullanıcı ID gereklidir.',
             'user_id.exists' => 'Geçersiz kullanıcı.',
-            'shift_template_id.required' => 'Vardiya seçimi gereklidir.',
-            'shift_template_id.exists' => 'Geçersiz vardiya.',
             'machine_id.required' => 'Makine seçimi gereklidir.',
             'machine_id.exists' => 'Geçersiz makine.',
             'product_id.required' => 'Ürün seçimi gereklidir.',
@@ -51,4 +48,4 @@ class StoreByWorkerProductionRequest extends FormRequest
             'quantity.min' => 'Miktar 0\'dan büyük olmalıdır.',
         ];
     }
-} 
+}

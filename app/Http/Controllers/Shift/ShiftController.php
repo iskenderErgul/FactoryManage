@@ -45,4 +45,26 @@ class ShiftController extends Controller
     {
         return $this->shiftRepository->getUserShiftTemplates($userId);
     }
+    public function getFourWeekView($centerDate = null)
+    {
+        return $this->shiftRepository->getFourWeekView($centerDate);
+    }
+
+    public function getShiftsByDateRange($startDate, $endDate)
+    {
+        return $this->shiftRepository->getShiftsByDateRange($startDate, $endDate);
+    }
+
+    public function assignAllUsersToWeek($weekStartDate)
+    {
+        return $this->shiftRepository->assignAllUsersToWeek($weekStartDate);
+    }
+
+    /**
+     * Mevcut vardiya atamalarını tersine çevir
+     */
+    public function rotateCurrentAssignments()
+    {
+        return $this->shiftRepository->rotateCurrentAssignments();
+    }
 }

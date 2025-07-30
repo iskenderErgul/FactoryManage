@@ -137,6 +137,15 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/shift/shift-assignments/{id}',[ShiftAssignmentController::class, 'destroyShiftAssignments']);
     Route::put('/shift/shift-assignments/{id}',[ShiftAssignmentController::class, 'updateShiftAssignments']);
 
+    Route::get('/shift/four-week-view/{centerDate?}', [ShiftController::class, 'getFourWeekView']);
+    Route::get('/shift/shifts/{startDate}/{endDate}', [ShiftController::class, 'getShiftsByDateRange']);
+    Route::post('/shift/auto-assign-week/{weekStartDate}', [ShiftController::class, 'assignAllUsersToWeek']);
+    Route::post('/shift/rotate-current', [ShiftController::class, 'rotateCurrentAssignments']);
+
+    Route::get('/current-shift', [ProductionController::class, 'getCurrentShift']);
+
+
+
     Route::get('/orders',[OrderController::class, 'index']);
     Route::post('/orders', [OrderController::class, 'store']);
     Route::put('/orders/{id}', [OrderController::class, 'update']);
