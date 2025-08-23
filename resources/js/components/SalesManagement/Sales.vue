@@ -60,8 +60,9 @@
                 <!-- Ödeme Bilgileri -->
                 <h3>Ödeme Bilgileri</h3>
                 <div class="p-field">
-                    <label for="paymentType">Ödeme Türü:</label>
-                    <Dropdown id="paymentType" option-label="label" v-model="selectedPymentType" :options="paymentOptions" placeholder="Ödeme Türü Seçin"  optionValue="value" />
+                    <label for="paymentType">Ödeme Türü: <span class="text-red-500">*</span></label>
+                    <Dropdown id="paymentType" option-label="label" v-model="selectedPymentType" :options="paymentOptions" placeholder="Ödeme Türü Seçin" optionValue="value" :class="{ 'p-invalid': !selectedPymentType }" />
+                    <small v-if="!selectedPymentType" class="p-error">Ödeme türü seçimi zorunludur.</small>
                 </div>
 
                 <div v-if="selectedPymentType === 'kismi'" class="p-field mt-2">
@@ -128,12 +129,8 @@
 
                     <div class="p-fluid">
                         <div class="p-field">
-                            <label for="product_name">Ürün Adı</label>
-                            <InputText v-model="editingProduct.product_name" />
-                        </div>
-                        <div class="p-field">
-                            <label for="product_type">Ürün Türü</label>
-                            <InputText v-model="editingProduct.product_type" />
+                            <label for="editProductSelect">Ürün Seç:</label>
+                            <Dropdown id="editProductSelect" v-model="editingSelectedProduct" :options="groupedProducts" optionLabel="label" optionGroupLabel="label" optionGroupChildren="items" placeholder="Ürün Seçin" filter filterPlaceholder="Ürün ara..." />
                         </div>
                         <div class="p-field">
                             <label for="quantity">Miktar</label>
@@ -218,17 +215,18 @@
                         <div class="formgrid grid">
                             <!-- Ödeme Türü Seçimi -->
                             <div class="field col-12">
-                                <label class="font-bold text-lg">Ödeme Türü:</label>
-                                <div class="flex align-items-center gap-3 mt-2">
-                                    <RadioButton id="pesin" v-model="paymentType" name="paymentType" value="pesin" />
+                                <label class="font-bold text-lg">Ödeme Türü: <span class="text-red-500">*</span></label>
+                                <div class="flex align-items-center gap-3 mt-2" :class="{ 'p-invalid': submitted && !paymentType }">
+                                    <RadioButton id="pesin" v-model="paymentType" name="paymentType" value="pesin" :class="{ 'p-invalid': submitted && !paymentType }" />
                                     <label for="pesin" class="mr-4 cursor-pointer">Peşin</label>
 
-                                    <RadioButton id="borc" v-model="paymentType" name="paymentType" value="borc" />
+                                    <RadioButton id="borc" v-model="paymentType" name="paymentType" value="borc" :class="{ 'p-invalid': submitted && !paymentType }" />
                                     <label for="borc" class="mr-4 cursor-pointer">Borç</label>
 
-                                    <RadioButton id="kismi" v-model="paymentType" name="paymentType" value="kismi" />
+                                    <RadioButton id="kismi" v-model="paymentType" name="paymentType" value="kismi" :class="{ 'p-invalid': submitted && !paymentType }" />
                                     <label for="kismi" class="cursor-pointer">Kısmi Ödeme</label>
                                 </div>
+                                <small v-if="submitted && !paymentType" class="p-error">Ödeme türü seçimi zorunludur.</small>
                             </div>
 
                             <!-- Kısmi Ödeme Tutarı (Sadece Kısmi Ödeme seçildiğinde görünür) -->
@@ -432,6 +430,7 @@ const selectedSales = ref([]);
 const submitted = ref(false);
 const isEditDialogVisible = ref(false);
 const editingProduct = ref({});
+const editingSelectedProduct = ref(null);
 const selectedCustomer = ref(null);
 const selectedProduct = ref(null);
 const selectedPymentType = ref(null);
@@ -541,7 +540,8 @@ const openNew = () => {
     saleProducts.value = [];
     productQuantity.value = 1;
     productPrice.value = '';
-
+    paymentType.value = null;
+    partialPayment.value = null;
 
     submitted.value = false;
     saleDialog.value = true;
@@ -557,7 +557,13 @@ const openSaleDetailDialog = (data) => {
 const openUpdateSaleDialog = (data) => {
     selectedSales.value = data;
     saleDate.value = data.sale_date;
-    selectedCustomer.value = data.customer;
+    
+    // Müşteriyi customers listesinden bul
+    const customerInList = customers.value.find(customer => customer.id === data.customer_id);
+    
+    selectedCustomer.value = customerInList || data.customer;
+    selectedPymentType.value = data.payment_type;
+    selectedPartialPayment.value = data.paid_amount || null;
     saleProducts.value = data.products.map(product => ({
         ...product,
         total_price: product.pivot.price * product.pivot.quantity,
@@ -569,20 +575,35 @@ const openUpdateSaleDialog = (data) => {
 const openEditDialog = (product) => {
     editingProduct.value = { ...product };
     editingProduct.value.price = parseFloat(editingProduct.value.price);
+    
+    // Ürünü dropdown'da seçili hale getir
+    const productInList = products.value.find(p => p.id === product.id);
+    editingSelectedProduct.value = productInList ? { ...productInList, label: productInList.product_name } : null;
+    
     isEditDialogVisible.value = true;
 
 };
 
 const saveEdit = () => {
-    const index = saleProducts.value.findIndex((p) => p.id === editingProduct.value.id);
-    if (index !== -1) {
-        // Düzenlenen ürünü güncelle
-        saleProducts.value[index] = { ...editingProduct.value };
-
-        // Toplam fiyatı güncelle
-        saleProducts.value[index].total_price = saleProducts.value[index].pivot.price * saleProducts.value[index].pivot.quantity;
+    if (editingSelectedProduct.value) {
+        const index = saleProducts.value.findIndex((p) => p.id === editingProduct.value.id);
+        if (index !== -1) {
+            // Yeni seçilen ürün bilgilerini al
+            const updatedProduct = {
+                ...editingSelectedProduct.value,
+                pivot: {
+                    quantity: editingProduct.value.pivot.quantity,
+                    price: editingProduct.value.pivot.price
+                },
+                total_price: editingProduct.value.pivot.price * editingProduct.value.pivot.quantity
+            };
+            
+            // Düzenlenen ürünü güncelle
+            saleProducts.value[index] = updatedProduct;
+        }
     }
     isEditDialogVisible.value = false;
+    editingSelectedProduct.value = null;
 };
 
 const addUpdatingProductToSale = () => {
@@ -642,6 +663,13 @@ const calculateTotalPrice = (rowData) => {
 
 const saveSale = () => {
     submitted.value = true;
+    
+    // Ödeme türü kontrolü
+    if (!paymentType.value) {
+        toast.value.add({ severity: 'error', summary: 'Hata', detail: 'Lütfen ödeme türünü seçiniz.', life: 3000 });
+        return;
+    }
+    
     if (selectedCustomer && saleProducts.value.length > 0) {
 
         //Bunu validasyon yapan bir fonksiyonla yap.Burada değil
@@ -673,6 +701,12 @@ const saveSale = () => {
 };
 
 const updateSale = () => {
+    // Ödeme türü kontrolü
+    if (!selectedPymentType.value) {
+        toast.value.add({ severity: 'error', summary: 'Hata', detail: 'Lütfen ödeme türünü seçiniz.', life: 3000 });
+        return;
+    }
+    
     if (selectedCustomer && saleProducts.value.length > 0) {
         const selectedProductss = selectedSales.value.products;
         const totalAmount = selectedProductss.reduce((sum, product) =>
