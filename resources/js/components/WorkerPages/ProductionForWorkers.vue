@@ -18,22 +18,28 @@
                 <label for="machine">Üretildiği Makineyi Seçin:</label>
                 <Dropdown
                     id="machine"
-                    v-model="production.machine"
+                    v-model="production.machine_id"
                     :options="machines"
                     optionLabel="machine_name"
+                    optionValue="id"
                     placeholder="Makine Seçin"
-                    :disabled="!selectedShift"
+                    :disabled="!selectedShift || loadingData"
+                    showClear
+                    filter
                 />
             </div>
             <div class="form-group">
                 <label for="product">Üretilen Ürün Seçin:</label>
                 <Dropdown
                     id="product"
-                    v-model="production.product"
+                    v-model="production.product_id"
                     :options="products"
                     optionLabel="product_name"
+                    optionValue="id"
                     placeholder="Ürün Seçin"
-                    :disabled="!selectedShift"
+                    :disabled="!selectedShift || loadingData"
+                    showClear
+                    filter
                 />
             </div>
             <div class="form-group">
@@ -43,7 +49,7 @@
                     v-model="production.quantity"
                     mode="decimal"
                     placeholder="Miktar"
-                    :disabled="!selectedShift"
+                    :disabled="!selectedShift || loadingData"
                 />
             </div>
         </div>
@@ -101,6 +107,7 @@ const products = ref([]);
 const todayShifts = ref([]);
 const selectedShift = ref(null);
 const loadingShift = ref(true);
+const loadingData = ref(true);
 
 const currentUser = computed(() => store.state.user);
 
@@ -118,8 +125,8 @@ const filteredProductions = computed(() => {
 
 // Form verileri - shift kaldırıldı
 const production = reactive({
-    machine: null,
-    product: null,
+    machine_id: null,
+    product_id: null,
     quantity: null
 });
 
@@ -189,15 +196,31 @@ const fetchCurrentShift = async () => {
     }
 };
 
+// Form reset fonksiyonu
+const resetForm = () => {
+    production.machine_id = null;
+    production.product_id = null;
+    production.quantity = null;
+};
+
 // Sayfa yüklendiğinde verileri çek
 onMounted(async () => {
-    await fetchMachines();
-    await fetchProducts();
-    await fetchProductions();
-    await fetchCurrentShift();
-
-    // Her 5 dakikada bir mevcut vardiyayı kontrol et
-    setInterval(fetchCurrentShift, 5 * 60 * 1000);
+    try {
+        loadingData.value = true;
+        
+        // Paralel olarak verileri yükle
+        await Promise.all([
+            fetchMachines(),
+            fetchProducts(),
+            fetchProductions(),
+            fetchCurrentShift()
+        ]);
+        
+        // Her 5 dakikada bir mevcut vardiyayı kontrol et
+        setInterval(fetchCurrentShift, 5 * 60 * 1000);
+    } finally {
+        loadingData.value = false;
+    }
 });
 
 const saveProduction = async () => {
@@ -210,12 +233,12 @@ const saveProduction = async () => {
         });
         return;
     }
-    if (production.machine && production.product && production.quantity) {
+    if (production.machine_id && production.product_id && production.quantity) {
         try {
             const response = await axios.post('/api/productions/worker', {
                 user_id: currentUser.value.id,
-                machine_id: production.machine.id,
-                product_id: production.product.id,
+                machine_id: production.machine_id,
+                product_id: production.product_id,
                 quantity: production.quantity,
                 shift_id: selectedShift.value.id // shift_id gönder
             });
@@ -226,9 +249,7 @@ const saveProduction = async () => {
                 detail: response.data.message || 'Üretim kaydedildi.',
                 life: 3000
             });
-            production.machine = null;
-            production.product = null;
-            production.quantity = null;
+            resetForm();
         } catch (error) {
             console.error('Üretim kaydetme hatası:', error);
             const errorMessage = error.response?.data?.message || 'Üretim kaydedilirken bir hata oluştu.';

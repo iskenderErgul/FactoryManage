@@ -34,7 +34,10 @@
             </div>
             <div class="worker-shift-info">
                 <template v-if="loadingShift">
-                    <span>Vardiya bilgisi yükleniyor...</span>
+                    <div class="loading-shift">
+                        <div class="loading-spinner-small"></div>
+                        <span class="loading-text">Vardiya bilgisi yükleniyor...</span>
+                    </div>
                 </template>
                 <template v-else-if="currentShift">
                     <div class="shift-card">
@@ -44,7 +47,10 @@
                     </div>
                 </template>
                 <template v-else>
-                    <span>Bugün için atanmış vardiyanız yok.</span>
+                    <div class="no-shift-message">
+                        <i class="pi pi-info-circle"></i>
+                        <span>Bugün için atanmış vardiyanız yok.</span>
+                    </div>
                 </template>
             </div>
         </div>
@@ -377,80 +383,143 @@ const formatDate = (dateString) => {
 /* Worker View Styles */
 .worker-view {
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
-    min-height: 60vh;
+    min-height: 70vh;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     border-radius: 15px;
-    margin: 20px;
+    margin: 10px;
+    padding: 20px;
     box-shadow: 0 8px 32px rgba(0,0,0,0.3);
 }
 
 .company-logo {
     text-align: center;
     color: white;
-    padding: 40px;
+    padding: 20px;
+    width: 100%;
 }
 
 .company-name {
-    font-size: 3.5rem;
+    font-size: 2.8rem;
     font-weight: 700;
-    margin-bottom: 20px;
+    margin-bottom: 15px;
     text-shadow: 0 4px 8px rgba(0,0,0,0.3);
-    letter-spacing: 2px;
+    letter-spacing: 1px;
+    line-height: 1.2;
 }
 
 .company-subtitle {
-    font-size: 1.5rem;
+    font-size: 1.3rem;
     opacity: 0.9;
     font-weight: 300;
+    margin-bottom: 20px;
 }
 
 .worker-shift-info {
-    margin-top: 30px;
     text-align: center;
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 250px;
+    width: 100%;
+    min-height: 200px;
+    padding: 0 10px;
 }
 
 .shift-card {
-    background: rgba(30, 41, 59, 0.75);
+    background: rgba(30, 41, 59, 0.85);
     border: 2px solid #3B82F6;
     border-radius: 18px;
-    padding: 32px 48px;
+    padding: 24px 20px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin-top: 10px;
     color: #F1F5F9;
     box-shadow: 0 8px 32px rgba(59,130,246,0.18);
-    font-size: 1.25rem;
-    min-width: 320px;
+    font-size: 1.1rem;
+    width: 100%;
+    max-width: 400px;
+    backdrop-filter: blur(10px);
 }
 
 .shift-card h3 {
-    font-size: 2rem;
+    font-size: 1.6rem;
     font-weight: 700;
-    margin-bottom: 18px;
+    margin-bottom: 15px;
     color: #60A5FA;
-    letter-spacing: 1px;
+    letter-spacing: 0.5px;
     text-shadow: 0 2px 8px rgba(59,130,246,0.18);
+    text-align: center;
 }
 
 .shift-card b {
-    font-size: 1.5rem;
+    font-size: 1.3rem;
     color: #FBBF24;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
     display: block;
+    text-align: center;
 }
 
 .shift-card p {
     margin: 0;
-    font-size: 1.15rem;
+    font-size: 1.1rem;
     font-weight: 500;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.3px;
+    text-align: center;
+    line-height: 1.4;
+}
+
+/* Loading Shift Styles */
+.loading-shift {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #F1F5F9;
+    gap: 15px;
+}
+
+.loading-spinner-small {
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(241, 245, 249, 0.2);
+    border-top: 3px solid #F1F5F9;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+.loading-text {
+    font-size: 1.1rem;
+    font-weight: 500;
+    text-align: center;
+}
+
+/* No Shift Message Styles */
+.no-shift-message {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #F1F5F9;
+    background: rgba(30, 41, 59, 0.6);
+    border-radius: 12px;
+    padding: 20px;
+    gap: 12px;
+    max-width: 300px;
+    text-align: center;
+    backdrop-filter: blur(5px);
+}
+
+.no-shift-message i {
+    font-size: 2rem;
+    color: #FBBF24;
+}
+
+.no-shift-message span {
+    font-size: 1.1rem;
+    font-weight: 500;
+    line-height: 1.4;
 }
 
 /* Loading View Styles */
@@ -517,17 +586,199 @@ const formatDate = (dateString) => {
     padding : 0 !important;
 }
 
+/* Mobile Responsive Styles */
 @media (max-width: 768px) {
     .dashboard-title {
         font-size: 2rem;
     }
     
+    .worker-view {
+        margin: 5px;
+        padding: 15px;
+        min-height: 80vh;
+        border-radius: 10px;
+    }
+    
+    .company-logo {
+        padding: 15px 10px;
+    }
+    
     .company-name {
-        font-size: 2.5rem;
+        font-size: 2.2rem;
+        margin-bottom: 12px;
+        letter-spacing: 0.5px;
     }
     
     .company-subtitle {
+        font-size: 1.1rem;
+        margin-bottom: 15px;
+    }
+    
+    .worker-shift-info {
+        min-height: 150px;
+        padding: 0 5px;
+    }
+    
+    .shift-card {
+        padding: 20px 15px;
+        border-radius: 12px;
+        max-width: none;
+        width: 100%;
+    }
+    
+    .shift-card h3 {
+        font-size: 1.4rem;
+        margin-bottom: 12px;
+        line-height: 1.3;
+    }
+    
+    .shift-card b {
         font-size: 1.2rem;
+        margin-bottom: 6px;
+    }
+    
+    .shift-card p {
+        font-size: 1rem;
+        line-height: 1.3;
+    }
+    
+    .loading-text {
+        font-size: 1rem;
+    }
+    
+    .no-shift-message {
+        padding: 16px;
+        max-width: 280px;
+    }
+    
+    .no-shift-message i {
+        font-size: 1.8rem;
+    }
+    
+    .no-shift-message span {
+        font-size: 1rem;
+    }
+}
+
+/* Extra small devices (phones, less than 576px) */
+@media (max-width: 575px) {
+    .worker-view {
+        margin: 2px;
+        padding: 12px;
+        min-height: 85vh;
+    }
+    
+    .company-logo {
+        padding: 12px 8px;
+    }
+    
+    .company-name {
+        font-size: 1.8rem;
+        margin-bottom: 10px;
+        letter-spacing: 0.3px;
+    }
+    
+    .company-subtitle {
+        font-size: 1rem;
+        margin-bottom: 12px;
+    }
+    
+    .worker-shift-info {
+        min-height: 120px;
+        padding: 0;
+    }
+    
+    .shift-card {
+        padding: 16px 12px;
+        border-radius: 10px;
+        font-size: 1rem;
+    }
+    
+    .shift-card h3 {
+        font-size: 1.2rem;
+        margin-bottom: 10px;
+    }
+    
+    .shift-card b {
+        font-size: 1.1rem;
+        margin-bottom: 5px;
+    }
+    
+    .shift-card p {
+        font-size: 0.95rem;
+    }
+    
+    .loading-spinner-small {
+        width: 35px;
+        height: 35px;
+        border-width: 2px;
+    }
+    
+    .loading-text {
+        font-size: 0.95rem;
+    }
+    
+    .no-shift-message {
+        padding: 14px;
+        max-width: 260px;
+        gap: 10px;
+    }
+    
+    .no-shift-message i {
+        font-size: 1.6rem;
+    }
+    
+    .no-shift-message span {
+        font-size: 0.95rem;
+    }
+}
+
+/* Large devices (desktops, 992px and up) */
+@media (min-width: 992px) {
+    .worker-view {
+        flex-direction: row;
+        padding: 40px;
+        margin: 20px;
+    }
+    
+    .company-logo {
+        padding: 40px;
+        margin-right: 30px;
+    }
+    
+    .company-name {
+        font-size: 3.2rem;
+        margin-bottom: 20px;
+        letter-spacing: 1.5px;
+    }
+    
+    .company-subtitle {
+        font-size: 1.4rem;
+        margin-bottom: 0;
+    }
+    
+    .worker-shift-info {
+        margin-top: 0;
+        min-height: 300px;
+    }
+    
+    .shift-card {
+        min-width: 350px;
+        padding: 32px 48px;
+    }
+    
+    .shift-card h3 {
+        font-size: 2rem;
+        margin-bottom: 18px;
+    }
+    
+    .shift-card b {
+        font-size: 1.5rem;
+        margin-bottom: 10px;
+    }
+    
+    .shift-card p {
+        font-size: 1.15rem;
     }
 }
 </style>
