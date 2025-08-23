@@ -217,7 +217,12 @@ const processProductsData = () => {
         return;
     }
 
-    currentStockData.value = props.products.map(product => ({
+    // Sadece stokta olan ürünleri filtrele (stock_quantity > 0)
+    const productsInStock = props.products.filter(product => 
+        product.stock_quantity && product.stock_quantity > 0
+    );
+
+    currentStockData.value = productsInStock.map(product => ({
         product_name: product.product_name,
         product_type: product.product_type,
         stock_quantity: product.stock_quantity,
