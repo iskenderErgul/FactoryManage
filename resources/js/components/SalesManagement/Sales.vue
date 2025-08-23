@@ -7,11 +7,14 @@
                     <Button label="Sil" icon="pi pi-trash" severity="danger" @click="confirmDeleteSelected" :disabled="!selectedSales || !selectedSales.length" />
                 </template>
                 <template #end>
-                    <Button label="Dışa Aktar" icon="pi pi-upload" severity="help" @click="exportCSV" />
+                    <span class="p-input-icon-left">
+                        <i class="pi pi-search" />
+                        <InputText v-model="globalFilterValue" placeholder="Satışlarda ara..." />
+                    </span>
                 </template>
             </Toolbar>
             <DataTable
-                :value="sales"
+                :value="filteredSales"
                 v-model:selection="selectedSales"
                 dataKey="id"
                 :paginator="true"
@@ -42,7 +45,7 @@
                 <h3>Müşteri Bilgileri</h3>
                 <div class="p-field">
                     <label for="customerSelect">Müşteri Seç:</label>
-                    <Dropdown id="customerSelect"  v-model="selectedCustomer" :options="customers" optionLabel="name" placeholder="Müşteri Seçin" />
+                    <Dropdown id="customerSelect" v-model="selectedCustomer" :options="customers" optionLabel="name" placeholder="Müşteri Seçin" filter filterPlaceholder="Müşteri ara..." />
                 </div>
 
                 <div class="p-field">
@@ -72,7 +75,7 @@
                 <div class="product-selection">
                     <div class="p-field">
                         <label for="productSelect">Ürün Seç:</label>
-                        <Dropdown id="productSelect" v-model="selectedProduct" :options="products" optionLabel="product_name" placeholder="Ürün Seçin" />
+                        <Dropdown id="productSelect" v-model="selectedProduct" :options="groupedProducts" optionLabel="label" optionGroupLabel="label" optionGroupChildren="items" placeholder="Ürün Seçin" filter filterPlaceholder="Ürün ara..." />
 
                     </div>
                     <div class="p-field">
@@ -155,7 +158,7 @@
                 <h3>Müşteri Bilgileri</h3>
                 <div class="p-field">
                     <label for="customerSelect">Müşteri Seç:</label>
-                    <Dropdown id="customerSelect" v-model="selectedCustomer" :options="customers" optionLabel="name" placeholder="Müşteri Seçin" />
+                    <Dropdown id="customerSelect" v-model="selectedCustomer" :options="customers" optionLabel="name" placeholder="Müşteri Seçin" filter filterPlaceholder="Müşteri ara..." />
                 </div>
 
                 <div class="p-field">
@@ -174,7 +177,7 @@
                 <div class="product-selection">
                     <div class="p-field">
                         <label for="productSelect">Ürün Seç:</label>
-                        <Dropdown id="productSelect" v-model="selectedProduct" :options="products" optionLabel="product_name" placeholder="Ürün Seçin"/>
+                        <Dropdown id="productSelect" v-model="selectedProduct" :options="groupedProducts" optionLabel="label" optionGroupLabel="label" optionGroupChildren="items" placeholder="Ürün Seçin" filter filterPlaceholder="Ürün ara..." />
 
                     </div>
                     <div class="p-field">
@@ -397,7 +400,7 @@
 </template>
 
 <script setup>
-import {ref, onMounted} from 'vue';
+import {ref, onMounted, computed} from 'vue';
 import axios from 'axios';
 import Button from 'primevue/button';
 import Toolbar from 'primevue/toolbar';
@@ -417,6 +420,7 @@ const customers = ref([]);
 const products = ref([]);
 const toast = ref(null);
 const sales = ref([]);
+const globalFilterValue = ref('');
 const saleDialog = ref(false);
 const addSaleDialog = ref(false);
 const updateSaleDialog = ref(false);
@@ -445,6 +449,44 @@ const paymentOptions = [
     { label: 'Kısmi', value: 'kismi' },
     { label: 'Peşin', value: 'pesin' },
 ];
+
+// Ürünleri türlerine göre gruplandır
+const groupedProducts = computed(() => {
+    const groups = {};
+    
+    products.value.forEach(product => {
+        const type = product.product_type || 'Diğer';
+        if (!groups[type]) {
+            groups[type] = [];
+        }
+        groups[type].push({
+            ...product,
+            label: product.product_name
+        });
+    });
+    
+    return Object.keys(groups).map(type => ({
+        label: type,
+        items: groups[type]
+    }));
+});
+
+// Satışları filtrele
+const filteredSales = computed(() => {
+    if (!globalFilterValue.value) {
+        return sales.value;
+    }
+    
+    const searchTerm = globalFilterValue.value.toLowerCase();
+    
+    return sales.value.filter(sale => {
+        return (
+            sale.id.toString().includes(searchTerm) ||
+            (sale.customer && sale.customer.name && sale.customer.name.toLowerCase().includes(searchTerm)) ||
+            (sale.sale_date && sale.sale_date.toLowerCase().includes(searchTerm))
+        );
+    });
+});
 
 
 
@@ -733,33 +775,7 @@ const deleteSelectedSales = () => {
     selectedSales.value = [];
 };
 
-const exportCSV = () => {
-    axios.get('/api/sales-export', { responseType: 'blob' })
-        .then(response => {
-            const url = window.URL.createObjectURL(new Blob([response.data]));
-            const link = document.createElement('a');
-            link.href = url;
-            link.setAttribute('download', 'sales.xlsx');
-            document.body.appendChild(link);
-            link.click();
-        })
-        .catch(error => {
-            console.error('Export failed:', error);
-        });
 
-    axios.get('/api/sales-product-export', { responseType: 'blob' })
-        .then(response => {
-            const url = window.URL.createObjectURL(new Blob([response.data]));
-            const link = document.createElement('a');
-            link.href = url;
-            link.setAttribute('download', 'sales-product.xlsx');
-            document.body.appendChild(link);
-            link.click();
-        })
-        .catch(error => {
-            console.error('Export failed:', error);
-        });
-};
 
 </script>
 
