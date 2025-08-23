@@ -112,13 +112,17 @@ const loadingData = ref(true);
 const currentUser = computed(() => store.state.user);
 
 const filteredProductions = computed(() => {
+    if (!currentUser.value?.id) {
+        return [];
+    }
+    
     return productions.value
         .filter((prod) => prod.user_id === currentUser.value.id)
         .map((prod) => ({
-            shift_name: prod.shift.template.name,
+            shift_name: prod.shift?.template?.name || 'Vardiya Bulunamadı',
             production_date: prod.production_date,
-            machine_name: prod.machine.machine_name,
-            product_name: prod.product.product_name,
+            machine_name: prod.machine?.machine_name || 'Makine Bulunamadı',
+            product_name: prod.product?.product_name || 'Ürün Bulunamadı',
             quantity: prod.quantity,
         }));
 });

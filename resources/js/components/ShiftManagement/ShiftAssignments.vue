@@ -33,6 +33,7 @@
                 <Column field="shift.template.name" header="Vardiya Adı" sortable style="min-width:16rem"></Column>
                 <Column field="shift.template.start_time" header="Başlangıç Saati" sortable style="min-width:16rem"></Column>
                 <Column field="shift.template.end_time" header="Bitiş Saati" sortable style="min-width:16rem"></Column>
+                <Column field="shift.date" header="Tarih" sortable style="min-width:12rem"></Column>
 
                 <Column :exportable="false" style="min-width:8rem">
                     <template #body="slotProps">

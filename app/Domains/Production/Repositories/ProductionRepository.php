@@ -68,6 +68,27 @@ class ProductionRepository implements ProductionRepositoryInterface
             })
             ->get();
 
+        // Eğer bugün hiç vardiya yoksa, rotasyon sistemine göre doğru vardiyayı belirle ve oluştur
+        if ($todayShifts->isEmpty()) {
+            $correctTemplate = $this->determineCorrectShiftTemplateForUser($request->user_id, $today);
+            
+            if ($correctTemplate) {
+                // Bugün için shift oluştur
+                $todayShift = \App\Domains\Shift\Models\Shift::firstOrCreate([
+                    'template_id' => $correctTemplate->id,
+                    'date' => $today,
+                ]);
+
+                // Bugün için atama oluştur
+                $todayAssignment = \App\Domains\Shift\Models\ShiftAssignment::create([
+                    'user_id' => $request->user_id,
+                    'shift_id' => $todayShift->id,
+                ]);
+
+                $todayShifts = collect([$todayAssignment->load(['shift.template'])]);
+            }
+        }
+
         // Bugünkü vardiyalar arasından aktif olanı bul
         $currentShiftAssignment = null;
         foreach ($todayShifts as $shiftAssignment) {
@@ -82,20 +103,14 @@ class ProductionRepository implements ProductionRepositoryInterface
         }
 
         // Eğer aktif vardiya bulunamadıysa, bugünün ilk vardiyasını al
-        if (!$currentShiftAssignment) {
-            $currentShiftAssignment = \App\Domains\Shift\Models\ShiftAssignment::with(['shift.template'])
-                ->where('user_id', $request->user_id)
-                ->whereHas('shift', function($query) use ($today) {
-                    $query->where('date', $today);
-                })
-                ->orderBy('id') // İlk vardiyayı al
-                ->first();
+        if (!$currentShiftAssignment && !$todayShifts->isEmpty()) {
+            $currentShiftAssignment = $todayShifts->first();
         }
 
         if (!$currentShiftAssignment) {
             return response()->json([
-                'message' => 'Bugün herhangi bir vardiyaya atanmamışsınız.',
-                'error_code' => 'NO_SHIFT_TODAY'
+                'message' => 'Size atanmış herhangi bir vardiya bulunamadı. Lütfen yöneticinize başvurun.',
+                'error_code' => 'NO_SHIFT_ASSIGNED'
             ], 403);
         }
 
@@ -289,5 +304,57 @@ class ProductionRepository implements ProductionRepositoryInterface
         $production->delete();
 
         return response()->json(null, 204);
+    }
+
+    /**
+     * Kullanıcı için rotasyon sistemine göre doğru vardiya template'ini belirler
+     */
+    private function determineCorrectShiftTemplateForUser($userId, $date)
+    {
+        // Tüm vardiya template'lerini al (sıralı olarak)
+        $templates = \App\Domains\Shift\Models\ShiftTemplate::orderBy('id')->get();
+        
+        if ($templates->isEmpty()) {
+            return null;
+        }
+
+        // Tek template varsa onu döndür
+        if ($templates->count() === 1) {
+            return $templates->first();
+        }
+
+        // Kullanıcının en son vardiya atamasını bul
+        $lastAssignment = \App\Domains\Shift\Models\ShiftAssignment::with(['shift.template'])
+            ->where('user_id', $userId)
+            ->whereHas('shift', function($query) use ($date) {
+                $query->where('date', '<', $date);
+            })
+            ->orderByDesc('id')
+            ->first();
+
+        if (!$lastAssignment) {
+            // Hiç atama yoksa ilk template'i döndür
+            return $templates->first();
+        }
+
+        // Son template'in index'ini bul
+        $lastTemplate = $lastAssignment->shift->template;
+        $lastTemplateIndex = $templates->search(function($template) use ($lastTemplate) {
+            return $template->id === $lastTemplate->id;
+        });
+
+        // Verilen tarih ile son atama tarihi arasındaki hafta farkını hesapla
+        $lastAssignmentDate = Carbon::parse($lastAssignment->shift->date);
+        $targetDate = Carbon::parse($date);
+        
+        // Haftaları hesapla (Pazartesi bazlı)
+        $lastWeekStart = $lastAssignmentDate->copy()->startOfWeek();
+        $targetWeekStart = $targetDate->copy()->startOfWeek();
+        $weeksDiff = $lastWeekStart->diffInWeeks($targetWeekStart);
+
+        // Rotasyon mantığı: Her hafta bir sonraki template'e geç
+        $targetTemplateIndex = ($lastTemplateIndex + $weeksDiff) % $templates->count();
+        
+        return $templates[$targetTemplateIndex];
     }
 }

@@ -202,10 +202,11 @@ const rotateShifts = async () => {
             console.log('Rotasyon Detayları:', response.data.rotation_details);
             console.log('Toplam Vardiya Sayısı:', response.data.total_templates);
             console.log('Vardiya İsimleri:', response.data.template_names);
+            console.log('Gelecek Atamalar:', response.data.future_assignments_count);
 
             // Kullanıcıya detayları da göster
             setTimeout(() => {
-                const detailMessage = `Değiştirilen: ${response.data.rotated_count} atama\nToplam ${response.data.total_templates} vardiya: ${response.data.template_names.join(', ')}`;
+                const detailMessage = `Değiştirilen: ${response.data.rotated_count} atama\nGelecek hafta atamaları: ${response.data.future_assignments_count}\nToplam ${response.data.total_templates} vardiya: ${response.data.template_names.join(', ')}`;
                 
                 toast.value.add({
                     severity: 'info',

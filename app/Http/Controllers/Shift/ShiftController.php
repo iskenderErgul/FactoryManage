@@ -67,4 +67,12 @@ class ShiftController extends Controller
     {
         return $this->shiftRepository->rotateCurrentAssignments();
     }
+
+    /**
+     * Kullanıcının bugünkü vardiyasını getirir
+     */
+    public function getUserTodayShift($userId): JsonResponse
+    {
+        return $this->shiftRepository->getUserTodayShift($userId);
+    }
 }

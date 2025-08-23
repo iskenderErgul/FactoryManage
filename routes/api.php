@@ -143,6 +143,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/shift/rotate-current', [ShiftController::class, 'rotateCurrentAssignments']);
 
     Route::get('/current-shift', [ProductionController::class, 'getCurrentShift']);
+    Route::get('/user-today-shift/{userId}', [ShiftController::class, 'getUserTodayShift']);
 
 
 

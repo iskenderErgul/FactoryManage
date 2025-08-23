@@ -135,7 +135,7 @@ class ShiftRepository implements ShiftRepositoryInterface
      * Vardiya ataması yapar (güncellenmiş)
      */
     /**
-     * Vardiya ataması yapar (template ID ile)
+     * Vardiya ataması yapar (haftalık sistem - tüm hafta için aynı vardiya)
      */
     public function addShiftAssignments(AddShiftAssignmentRequest $request): JsonResponse
     {
@@ -145,23 +145,21 @@ class ShiftRepository implements ShiftRepositoryInterface
         // Template'i kontrol et
         $template = ShiftTemplate::findOrFail($templateId);
 
-        // Bu hafta için bu template'e ait shift'leri bul veya oluştur
+        // Bu haftanın başlangıcı ve bitişi
         $today = Carbon::now();
-        $weekStart = $today->copy()->startOfWeek();
-        $weekEnd = $today->copy()->endOfWeek();
+        $weekStart = $today->copy()->startOfWeek(); // Pazartesi
+        $weekEnd = $today->copy()->endOfWeek(); // Pazar
 
-        // Bu haftanın shift'lerini oluştur (yoksa)
-        $this->ensureShiftsExistForWeek($weekStart);
-
-        // Bu haftanın tüm günleri için atama yap
         $assignedShifts = [];
-        $conflictDays = [];
+        $updatedCount = 0;
+        $createdCount = 0;
 
+        // Haftanın her günü için atama yap
         for ($i = 0; $i < 7; $i++) {
             $date = $weekStart->copy()->addDays($i);
             $dateStr = $date->format('Y-m-d');
 
-            // Bu tarih için template'e ait shift'i bul
+            // Bu tarih için bu template'e ait shift'i bul veya oluştur
             $shift = Shift::where('template_id', $templateId)
                 ->where('date', $dateStr)
                 ->first();
@@ -181,9 +179,10 @@ class ShiftRepository implements ShiftRepositoryInterface
                 ->first();
 
             if ($existingAssignment) {
-                // Mevcut atamayı güncelle
+                // Mevcut atamayı güncelle (başka vardiyadan bu vardiyaya geçir)
                 $existingAssignment->update(['shift_id' => $shift->id]);
                 $assignedShifts[] = $existingAssignment;
+                $updatedCount++;
             } else {
                 // Yeni atama oluştur
                 $assignment = ShiftAssignment::create([
@@ -191,21 +190,35 @@ class ShiftRepository implements ShiftRepositoryInterface
                     'shift_id' => $shift->id,
                 ]);
                 $assignedShifts[] = $assignment;
+                $createdCount++;
             }
         }
 
+        $message = "Kullanıcı bu hafta ({$weekStart->format('d.m.Y')} - {$weekEnd->format('d.m.Y')}) {$template->name} vardiyasına atandı.";
+        if ($updatedCount > 0) {
+            $message .= " ({$updatedCount} güncellendi, {$createdCount} yeni oluşturuldu)";
+        }
+
         return response()->json([
-            'message' => 'Kullanıcı bu hafta ' . $template->name . ' vardiyasına atandı.',
+            'message' => $message,
             'assignment_count' => count($assignedShifts),
+            'updated_count' => $updatedCount,
+            'created_count' => $createdCount,
             'template' => $template,
             'week_start' => $weekStart->format('Y-m-d'),
-            'week_end' => $weekEnd->format('Y-m-d')
+            'week_end' => $weekEnd->format('Y-m-d'),
+            'assignments' => collect($assignedShifts)->map(function($assignment) {
+                return [
+                    'id' => $assignment->id,
+                    'date' => $assignment->shift->date,
+                    'shift_name' => $assignment->shift->template->name
+                ];
+            })
         ]);
     }
 
     /**
-     * Mevcut vardiya atamalarını dinamik olarak sıralı şekilde değiştir
-     * Örnek: 4 vardiya varsa: 1->2->3->4->1 şeklinde döner
+     * Haftalık vardiya değiştirme sistemi - tüm hafta için rotasyon ve gelecek atamalar
      */
     public function rotateCurrentAssignments(): JsonResponse
     {
@@ -215,21 +228,21 @@ class ShiftRepository implements ShiftRepositoryInterface
             $weekEnd = $today->copy()->endOfWeek();
 
             // Bu haftanın tüm atamalarını al
-            $currentAssignments = ShiftAssignment::whereHas('shift', function($query) use ($weekStart, $weekEnd) {
+            $weekAssignments = ShiftAssignment::whereHas('shift', function($query) use ($weekStart, $weekEnd) {
                 $query->whereBetween('date', [
                     $weekStart->format('Y-m-d'),
                     $weekEnd->format('Y-m-d')
                 ]);
             })->with(['shift.template', 'user'])->get();
 
-            if ($currentAssignments->isEmpty()) {
+            if ($weekAssignments->isEmpty()) {
                 return response()->json([
                     'message' => 'Bu hafta için atama bulunamadı.',
                     'rotated_count' => 0
                 ]);
             }
 
-            // Vardiya template'lerini al (dinamik sayıda olabilir)
+            // Vardiya template'lerini al
             $templates = ShiftTemplate::orderBy('id')->get();
 
             if ($templates->count() < 2) {
@@ -240,14 +253,17 @@ class ShiftRepository implements ShiftRepositoryInterface
             }
 
             $rotatedCount = 0;
+            $futureAssignmentsCount = 0;
             $rotationLog = [];
 
-            // Her kullanıcının bu haftki atamalarını sıralı şekilde değiştir
-            $userAssignments = $currentAssignments->groupBy('user_id');
+            // Her kullanıcının bu haftaki atamalarını sıralı şekilde değiştir
+            $userAssignments = $weekAssignments->groupBy('user_id');
 
             foreach ($userAssignments as $userId => $assignments) {
-                $user = $assignments->first()->user;
-                $currentTemplate = $assignments->first()->shift->template;
+                // İlk atamadan mevcut template'i al
+                $firstAssignment = $assignments->first();
+                $user = $firstAssignment->user;
+                $currentTemplate = $firstAssignment->shift->template;
 
                 // Mevcut template'in index'ini bul
                 $currentTemplateIndex = $templates->search(function($template) use ($currentTemplate) {
@@ -258,17 +274,16 @@ class ShiftRepository implements ShiftRepositoryInterface
                 $nextTemplateIndex = ($currentTemplateIndex + 1) % $templates->count();
                 $newTemplate = $templates[$nextTemplateIndex];
 
-                // Bu haftanın her günü için yeni vardiyaya ata
+                // Bu kullanıcının tüm haftalık atamalarını yeni vardiyaya geçir
                 foreach ($assignments as $assignment) {
                     $currentDate = $assignment->shift->date;
 
-                    // Yeni template'e ait shift'i bul
+                    // Yeni template'e ait shift'i bul veya oluştur
                     $newShift = Shift::where('template_id', $newTemplate->id)
                         ->where('date', $currentDate)
                         ->first();
 
                     if (!$newShift) {
-                        // Eğer yeni shift yoksa oluştur
                         $newShift = Shift::create([
                             'template_id' => $newTemplate->id,
                             'date' => $currentDate,
@@ -280,18 +295,23 @@ class ShiftRepository implements ShiftRepositoryInterface
                     $rotatedCount++;
                 }
 
+                // GELECEKTEKİ HAFTALAR İÇİN OTOMATIK ATAMA OLUŞTUR
+                $futureAssignmentsCount += $this->createFutureAssignmentsForUser($userId, $newTemplate, $templates);
+
                 $rotationLog[] = [
                     'user' => $user->name,
                     'from' => $currentTemplate->name,
                     'to' => $newTemplate->name,
                     'from_index' => $currentTemplateIndex + 1,
-                    'to_index' => $nextTemplateIndex + 1
+                    'to_index' => $nextTemplateIndex + 1,
+                    'days_rotated' => $assignments->count()
                 ];
             }
 
             return response()->json([
-                'message' => 'Vardiya rotasyonu başarıyla tamamlandı.',
+                'message' => 'Vardiya rotasyonu başarıyla tamamlandı ve gelecek atamalar oluşturuldu.',
                 'rotated_count' => $rotatedCount,
+                'future_assignments_count' => $futureAssignmentsCount,
                 'week_start' => $weekStart->format('Y-m-d'),
                 'week_end' => $weekEnd->format('Y-m-d'),
                 'rotation_details' => $rotationLog,
@@ -304,6 +324,40 @@ class ShiftRepository implements ShiftRepositoryInterface
                 'message' => 'Rotasyon sırasında hata oluştu: ' . $e->getMessage()
             ], 500);
         }
+    }
+
+    /**
+     * Kullanıcının bugünkü vardiyasını getirir
+     */
+    public function getUserTodayShift($userId): JsonResponse
+    {
+        $today = now()->format('Y-m-d');
+
+        $todayShift = ShiftAssignment::with(['shift.template', 'user'])
+            ->where('user_id', $userId)
+            ->whereHas('shift', function($query) use ($today) {
+                $query->where('date', $today);
+            })
+            ->first();
+
+        if (!$todayShift) {
+            return response()->json([
+                'message' => 'Bugün için vardiya ataması bulunamadı.',
+                'has_shift' => false
+            ]);
+        }
+
+        return response()->json([
+            'has_shift' => true,
+            'shift' => [
+                'id' => $todayShift->shift->id,
+                'name' => $todayShift->shift->template->name,
+                'start_time' => $todayShift->shift->template->start_time,
+                'end_time' => $todayShift->shift->template->end_time,
+                'date' => $todayShift->shift->date,
+                'user' => $todayShift->user->name
+            ]
+        ]);
     }
 
     // ... diğer metodlar (güncellenmiş çakışma kontrolü ile)
@@ -477,5 +531,75 @@ class ShiftRepository implements ShiftRepositoryInterface
                 }
             }
         }
+    }
+
+    /**
+     * Kullanıcı için gelecek haftalar için otomatik atama oluşturur (rotasyon ile)
+     */
+    private function createFutureAssignmentsForUser($userId, $currentTemplate, $allTemplates): int
+    {
+        $assignmentsCreated = 0;
+        $weeksToCreate = 4; // Gelecek 4 hafta için atama oluştur
+
+        // Mevcut template'in index'ini bul
+        $currentTemplateIndex = $allTemplates->search(function($template) use ($currentTemplate) {
+            return $template->id === $currentTemplate->id;
+        });
+
+        $today = Carbon::now();
+        
+        for ($weekOffset = 1; $weekOffset <= $weeksToCreate; $weekOffset++) {
+            $weekStart = $today->copy()->addWeeks($weekOffset)->startOfWeek();
+            
+            // Bu hafta için hangi template kullanılacak (rotasyon mantığı)
+            $templateIndex = ($currentTemplateIndex + $weekOffset) % $allTemplates->count();
+            $templateForWeek = $allTemplates[$templateIndex];
+
+            // Bu kullanıcının bu hafta için zaten ataması var mı kontrol et
+            $existingAssignments = ShiftAssignment::whereHas('shift', function($query) use ($weekStart) {
+                $weekEnd = $weekStart->copy()->endOfWeek();
+                $query->whereBetween('date', [
+                    $weekStart->format('Y-m-d'),
+                    $weekEnd->format('Y-m-d')
+                ]);
+            })->where('user_id', $userId)->exists();
+
+            // Eğer bu hafta için atama yoksa oluştur
+            if (!$existingAssignments) {
+                for ($dayOffset = 0; $dayOffset < 7; $dayOffset++) {
+                    $date = $weekStart->copy()->addDays($dayOffset);
+                    $dateStr = $date->format('Y-m-d');
+
+                    // Bu tarih için shift oluştur veya bul
+                    $shift = Shift::where('template_id', $templateForWeek->id)
+                        ->where('date', $dateStr)
+                        ->first();
+
+                    if (!$shift) {
+                        $shift = Shift::create([
+                            'template_id' => $templateForWeek->id,
+                            'date' => $dateStr,
+                        ]);
+                    }
+
+                    // Bu kullanıcının bu tarihte başka ataması var mı kontrol et
+                    $existingDayAssignment = ShiftAssignment::where('user_id', $userId)
+                        ->whereHas('shift', function($query) use ($dateStr) {
+                            $query->where('date', $dateStr);
+                        })
+                        ->first();
+
+                    if (!$existingDayAssignment) {
+                        ShiftAssignment::create([
+                            'user_id' => $userId,
+                            'shift_id' => $shift->id,
+                        ]);
+                        $assignmentsCreated++;
+                    }
+                }
+            }
+        }
+
+        return $assignmentsCreated;
     }
 }
