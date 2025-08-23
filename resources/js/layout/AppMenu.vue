@@ -111,6 +111,21 @@ const model = ref([
         ]
     },
     {
+
+        items: [
+            {
+                label: 'Tedarikçi Yönetimi',
+                icon: 'pi pi-users',
+                items: [
+                    { label: 'Tedarikçiler', icon: 'pi pi-users', to: '/sys/suppliers' },
+                    { label: 'Tedarik Ekle', icon: 'pi pi-plus-circle', to: '/sys/supplies' },
+                    { label: 'Tedarikçi Hesap İşlemleri', icon: 'pi pi-credit-card', to: '/sys/suppliers/transactions' },
+
+                ]
+            }
+        ]
+    },
+    {
         items: [
             {
                 label: 'Geri Dönüşüm Kayıtları',
@@ -120,26 +135,7 @@ const model = ref([
         ]
 
     },
-    {
-        label: 'Tedarikçi Yönetimi',
-        items: [
-            {
-                label: 'Tedarikçiler',
-                icon: 'pi pi-users',
-                to: '/sys/suppliers'
-            },
-            {
-                label: 'Tedarik Ekle',
-                icon: 'pi pi-plus-circle',
-                to: '/sys/supplies'
-            },
-            {
-                label: 'Hesap İşlemleri',
-                icon: 'pi pi-credit-card',
-                to: '/sys/suppliers/transactions'
-            }
-        ]
-    },
+
     // {
     //
     //     items: [
