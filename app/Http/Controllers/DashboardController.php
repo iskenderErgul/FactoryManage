@@ -235,8 +235,15 @@ class DashboardController extends Controller
                 ->orderBy('name')
                 ->get();
 
-            // İşçi ve tarih bazlı üretim verilerini al
-            $productions = Production::whereBetween('production_date', [$startDate, $endDate])
+            // İşçi ve tarih bazlı üretim verilerini al (ürün detayları ile)
+            $productions = Production::with('product:id,product_name')
+                ->whereBetween('production_date', [$startDate, $endDate])
+                ->whereIn('user_id', $workerIds)
+                ->select('user_id', 'production_date', 'product_id', 'quantity')
+                ->get();
+
+            // Toplam üretim verilerini hesapla
+            $productionTotals = Production::whereBetween('production_date', [$startDate, $endDate])
                 ->whereIn('user_id', $workerIds)
                 ->select(
                     'user_id',
@@ -256,17 +263,34 @@ class DashboardController extends Controller
                     'id' => $worker->id,
                     'name' => $worker->name,
                     'productions' => [],
+                    'productDetails' => [], // Ürün detayları için yeni alan
                     'total' => 0
                 ];
 
                 foreach ($dates as $date) {
-                    $production = $productions->where('user_id', $worker->id)
+                    // Toplam üretim miktarını al
+                    $totalProduction = $productionTotals->where('user_id', $worker->id)
                         ->where('production_date', $date)
                         ->first();
 
-                    $quantity = $production ? $production->total_quantity : 0;
+                    $quantity = $totalProduction ? $totalProduction->total_quantity : 0;
                     $workerData['productions'][$date] = $quantity;
                     $workerData['total'] += $quantity;
+
+                    // Bu tarihteki ürün detaylarını al
+                    $dailyProducts = $productions->where('user_id', $worker->id)
+                        ->where('production_date', $date)
+                        ->groupBy('product_id')
+                        ->map(function($productGroup) {
+                            $totalQuantity = $productGroup->sum('quantity');
+                            $product = $productGroup->first()->product;
+                            return [
+                                'product_name' => $product ? $product->product_name : 'Bilinmeyen Ürün',
+                                'quantity' => $totalQuantity
+                            ];
+                        })->values()->toArray();
+
+                    $workerData['productDetails'][$date] = $dailyProducts;
 
                     // Günlük toplam hesapla
                     if (!isset($dailyTotals[$date])) {

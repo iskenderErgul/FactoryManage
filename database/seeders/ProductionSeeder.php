@@ -13,9 +13,9 @@ class ProductionSeeder extends Seeder
      */
     public function run()
     {
-        // Tarih aralığı: 1 hafta önce - bugün
-        $startDate = Carbon::now()->subWeek();
-        $endDate = Carbon::now();
+        // Tarih aralığı: 2 hafta önce - 2 hafta sonra (toplam 4 hafta)
+        $startDate = Carbon::now()->subWeeks(2);
+        $endDate = Carbon::now()->addWeeks(2);
 
         // Ürün ID'leri (SQL'den aldığım)
         $productIds = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25];
@@ -30,9 +30,18 @@ class ProductionSeeder extends Seeder
 
         // Her gün için üretim verileri oluştur
         for ($date = $startDate->copy(); $date->lte($endDate); $date->addDay()) {
-            // Hafta sonu daha az üretim
+            $today = Carbon::now()->startOfDay();
+            $isFuture = $date->gt($today);
             $isWeekend = $date->isWeekend();
-            $dailyProductionCount = $isWeekend ? rand(1, 2) : rand(2, 4);
+            
+            // Hafta sonu daha az üretim, gelecek için planlı üretim
+            if ($isFuture) {
+                // Gelecek için planlı üretim (hafta içi daha fazla)
+                $dailyProductionCount = $isWeekend ? rand(1, 2) : rand(3, 5);
+            } else {
+                // Geçmiş için gerçekleşen üretim
+                $dailyProductionCount = $isWeekend ? rand(1, 2) : rand(2, 4);
+            }
 
             for ($i = 0; $i < $dailyProductionCount; $i++) {
                 // Rastgele değerler seç
@@ -41,7 +50,16 @@ class ProductionSeeder extends Seeder
                 $userId = $userIds[array_rand($userIds)];
 
                 // Ürün tipine göre üretim miktarları
-                $quantity = $this->getProductionQuantity($productId);
+                $quantity = $this->getProductionQuantity($productId, $isFuture);
+
+                // Gelecek tarihler için created_at ve updated_at'i bugün yap
+                if ($isFuture) {
+                    $createdAt = $today->copy()->addHours(rand(8, 17))->addMinutes(rand(0, 59));
+                    $updatedAt = $createdAt->copy();
+                } else {
+                    $createdAt = $date->copy()->addHours(rand(8, 17))->addMinutes(rand(0, 59));
+                    $updatedAt = $date->copy()->addHours(rand(8, 17))->addMinutes(rand(0, 59));
+                }
 
                 $productions[] = [
                     'user_id' => $userId,
@@ -50,8 +68,8 @@ class ProductionSeeder extends Seeder
                     'quantity' => $quantity,
                     'shift_id' => 1, // Şimdilik default 1
                     'production_date' => $date->toDateString(),
-                    'created_at' => $date->copy()->addHours(rand(8, 17))->addMinutes(rand(0, 59)),
-                    'updated_at' => $date->copy()->addHours(rand(8, 17))->addMinutes(rand(0, 59)),
+                    'created_at' => $createdAt,
+                    'updated_at' => $updatedAt,
                 ];
             }
         }
@@ -67,52 +85,64 @@ class ProductionSeeder extends Seeder
     /**
      * Ürün ID'sine göre gerçekçi üretim miktarı döndür
      */
-    private function getProductionQuantity($productId)
+    private function getProductionQuantity($productId, $isFuture = false)
     {
+        // Gelecek planlama için %10-20 daha yüksek miktarlar
+        $multiplier = $isFuture ? rand(110, 120) / 100 : 1;
+        
         // Ürün tipine göre farklı üretim miktarları
         switch ($productId) {
             case 2: // Öz Ergül Plastik Büyük Boy
             case 6: // M&R Büyük Boy
             case 12: // Lüx Öz Ergül Büyük Boy
             case 20: // New Plast Büyük Boy
-                return rand(800, 1500); // Büyük boy ürünler
+                $base = rand(800, 1500); // Büyük boy ürünler
+                return (int)($base * $multiplier);
 
             case 3: // Öz Ergül Plastik Orta Boy
             case 7: // M&R Orta Boy
             case 11: // Lüx Öz Ergül Orta Boy
             case 21: // New Plast Orta Boy
-                return rand(1000, 1800); // Orta boy ürünler
+                $base = rand(1000, 1800); // Orta boy ürünler
+                return (int)($base * $multiplier);
 
             case 4: // Öz Ergül Plastik Küçük Boy
             case 8: // M&R Küçük Boy
             case 10: // Lüx Öz Ergül Küçük Boy
             case 22: // New Plast Küçük Boy
-                return rand(1200, 2000); // Küçük boy ürünler
+                $base = rand(1200, 2000); // Küçük boy ürünler
+                return (int)($base * $multiplier);
 
             case 5: // Mini boy ürünler
             case 9:
             case 13:
-                return rand(1500, 2500);
+                $base = rand(1500, 2500);
+                return (int)($base * $multiplier);
 
             case 14: // Adetli ürünler (300 adet)
             case 17:
-                return rand(50, 150); // Paket bazında
+                $base = rand(50, 150); // Paket bazında
+                return (int)($base * $multiplier);
 
             case 15: // Adetli ürünler (200 adet)
             case 18:
-                return rand(80, 200);
+                $base = rand(80, 200);
+                return (int)($base * $multiplier);
 
             case 16: // Adetli ürünler (150 adet)
             case 19:
-                return rand(100, 250);
+                $base = rand(100, 250);
+                return (int)($base * $multiplier);
 
             case 23: // Kelebek serisi (500gr)
             case 24:
             case 25:
-                return rand(300, 800);
+                $base = rand(300, 800);
+                return (int)($base * $multiplier);
 
             default:
-                return rand(500, 1200);
+                $base = rand(500, 1200);
+                return (int)($base * $multiplier);
         }
     }
 }

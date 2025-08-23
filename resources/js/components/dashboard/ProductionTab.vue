@@ -163,7 +163,9 @@
                                         v-for="date in workerMatrixData.dates"
                                         :key="`${worker.id}-${date.formatted}`"
                                         class="production-cell"
-                                        :class="getProductionCellClass(worker.productions[date.formatted])">
+                                        :class="getProductionCellClass(worker.productions[date.formatted])"
+                                        @mouseenter="showProductTooltip($event, worker, date.formatted)"
+                                        @mouseleave="hideProductTooltip">
                                             <span v-if="worker.productions[date.formatted]">
                                                 {{ worker.productions[date.formatted] }}
                                             </span>
@@ -301,6 +303,26 @@
                 </div>
             </template>
         </Dialog>
+
+        <!-- Product Tooltip -->
+        <div
+            v-if="productTooltip.visible"
+            class="product-tooltip"
+            :style="{
+                left: productTooltip.x + 'px',
+                top: productTooltip.y + 'px'
+            }">
+            <div class="tooltip-header">
+                <strong>{{ productTooltip.workerName }}</strong>
+                <span class="tooltip-date">{{ productTooltip.date }}</span>
+            </div>
+            <div class="tooltip-content">
+                <div v-for="product in productTooltip.products" :key="product.product_name" class="product-item">
+                    <span class="product-name">{{ product.product_name }}</span>
+                    <span class="product-quantity">{{ product.quantity }}</span>
+                </div>
+            </div>
+        </div>
     </div>
 </template>
 
@@ -403,6 +425,16 @@ const productDistributionData = ref([]);
 // Date Range Info
 const currentDateRange = ref(null);
 
+// Tooltip için state
+const productTooltip = ref({
+    visible: false,
+    x: 0,
+    y: 0,
+    products: [],
+    workerName: '',
+    date: ''
+});
+
 // Table Columns
 const dailyProductionColumns = ref([
     { field: 'production_date', header: 'Tarih', sortable: true, type: 'date' },
@@ -445,6 +477,27 @@ const getProductionCellClass = (value) => {
     if (value >= 100) return 'high-production';
     if (value >= 50) return 'medium-production';
     return 'low-production';
+};
+
+// Tooltip fonksiyonları
+const showProductTooltip = (event, worker, date) => {
+    if (!worker.productDetails || !worker.productDetails[date] || worker.productDetails[date].length === 0) {
+        return;
+    }
+
+    const rect = event.target.getBoundingClientRect();
+    productTooltip.value = {
+        visible: true,
+        x: rect.left + rect.width / 2,
+        y: rect.top - 10,
+        products: worker.productDetails[date],
+        workerName: worker.name,
+        date: formatDateForDisplay(date)
+    };
+};
+
+const hideProductTooltip = () => {
+    productTooltip.value.visible = false;
 };
 
 // Tarih formatı için yardımcı fonksiyon
@@ -1346,5 +1399,92 @@ defineExpose({
     .date-col {
         min-width: 50px;
     }
+
+    .product-tooltip {
+        min-width: 150px;
+        max-width: 250px;
+        padding: 8px;
+    }
+
+    .tooltip-header strong {
+        font-size: 12px;
+    }
+
+    .product-name,
+    .product-quantity {
+        font-size: 11px;
+    }
+}
+
+/* Product Tooltip Styles */
+.product-tooltip {
+    position: fixed;
+    background: rgba(15, 23, 42, 0.95);
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    border-radius: 8px;
+    padding: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    z-index: 9999;
+    transform: translateX(-50%) translateY(-100%);
+    min-width: 200px;
+    max-width: 300px;
+    backdrop-filter: blur(8px);
+}
+
+.tooltip-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+.tooltip-header strong {
+    color: #F1F5F9;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.tooltip-date {
+    color: #94A3B8;
+    font-size: 12px;
+}
+
+.tooltip-content {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.product-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px 0;
+    border-bottom: 1px solid rgba(71, 85, 105, 0.2);
+}
+
+.product-item:last-child {
+    border-bottom: none;
+}
+
+.product-name {
+    color: #CBD5E1;
+    font-size: 13px;
+    flex: 1;
+    margin-right: 8px;
+    word-break: break-word;
+}
+
+.product-quantity {
+    color: #3B82F6;
+    font-weight: 600;
+    font-size: 13px;
+    background: rgba(59, 130, 246, 0.1);
+    padding: 2px 6px;
+    border-radius: 4px;
+    min-width: 40px;
+    text-align: center;
 }
 </style>
