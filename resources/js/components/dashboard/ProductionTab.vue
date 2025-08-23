@@ -65,12 +65,22 @@
                         title="📊 Üretim Miktarları"
                         v-model:viewMode="productionViewMode.daily"
                         :chartData="dailyProductionChart"
-                        :chartOptions="chartOptions"
+                        :chartOptions="enhancedChartOptions"
                         :tableData="dailyProductionData"
                         :tableColumns="dailyProductionColumns"
                         chartType="bar"
                         sortField="production_date"
                         :sortOrder="sortOrderDesc">
+                        
+                        <!-- Custom cell for total_quantity with hover -->
+                        <template #cell-total_quantity="{ data, value }">
+                            <Badge
+                                :value="value"
+                                severity="success"
+                                @mouseenter="showDailyProductTooltip($event, data)"
+                                @mouseleave="hideDailyProductTooltip"
+                                class="hoverable-badge" />
+                        </template>
                     </ChartCard>
 
                     <!-- Periyot Bilgisi -->
@@ -304,14 +314,16 @@
             </template>
         </Dialog>
 
-        <!-- Product Tooltip -->
+        <!-- Worker Matrix Product Tooltip -->
         <div
             v-if="productTooltip.visible"
             class="product-tooltip"
             :style="{
                 left: productTooltip.x + 'px',
                 top: productTooltip.y + 'px'
-            }">
+            }"
+            @mouseenter="clearTimeout(tooltipTimeout)"
+            @mouseleave="hideProductTooltip">
             <div class="tooltip-header">
                 <strong>{{ productTooltip.workerName }}</strong>
                 <span class="tooltip-date">{{ productTooltip.date }}</span>
@@ -323,11 +335,39 @@
                 </div>
             </div>
         </div>
+
+        <!-- Daily Production Product Tooltip -->
+        <div
+            v-if="dailyProductionTooltip.visible"
+            class="product-tooltip daily-tooltip"
+            :style="{
+                left: dailyProductionTooltip.x + 'px',
+                top: dailyProductionTooltip.y + 'px'
+            }"
+            @mouseenter="clearTimeout(tooltipTimeout)"
+            @mouseleave="hideDailyProductTooltip">
+            <div class="tooltip-header">
+                <strong>Günlük Üretim Detayı</strong>
+                <span class="tooltip-date">{{ dailyProductionTooltip.date }}</span>
+            </div>
+            <div class="tooltip-content">
+                <div class="total-info">
+                    <span class="total-label">Toplam Üretim:</span>
+                    <span class="total-value">{{ dailyProductionTooltip.totalQuantity }}</span>
+                </div>
+                <div class="products-list">
+                    <div v-for="product in dailyProductionTooltip.products" :key="product.product_name" class="product-item">
+                        <span class="product-name">{{ product.product_name }}</span>
+                        <span class="product-quantity">{{ product.quantity }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, onUnmounted, computed } from 'vue';
 import { useToast } from 'primevue/usetoast';
 import axios from 'axios';
 import ChartCard from './shared/ChartCard.vue';
@@ -337,6 +377,7 @@ import Button from 'primevue/button';
 import Dialog from 'primevue/dialog';
 import Calendar from 'primevue/calendar';
 import Dropdown from 'primevue/dropdown';
+import Badge from 'primevue/badge';
 import ProgressSpinner from 'primevue/progressspinner';
 
 // Props
@@ -435,6 +476,19 @@ const productTooltip = ref({
     date: ''
 });
 
+// Günlük üretim tooltip için state
+const dailyProductionTooltip = ref({
+    visible: false,
+    x: 0,
+    y: 0,
+    products: [],
+    date: '',
+    totalQuantity: 0
+});
+
+// Tooltip timing control
+let tooltipTimeout = null;
+
 // Table Columns
 const dailyProductionColumns = ref([
     { field: 'production_date', header: 'Tarih', sortable: true, type: 'date' },
@@ -471,6 +525,58 @@ const hasActiveFilters = computed(() => {
 
 const sortOrderDesc = computed(() => -1);
 
+// Enhanced chart options with custom tooltip
+const enhancedChartOptions = computed(() => {
+    if (!props.chartOptions) return {};
+    
+    return {
+        ...props.chartOptions,
+        plugins: {
+            ...props.chartOptions.plugins,
+            tooltip: {
+                enabled: false, // Chart.js default tooltip'ini tamamen kapat
+                external: (context) => {
+                    const tooltipEl = context.tooltip;
+                    
+                    // Tooltip gizleniyorsa custom tooltip'i de gizle
+                    if (tooltipEl.opacity === 0) {
+                        hideDailyProductTooltip();
+                        return;
+                    }
+
+                    // Tooltip gösterilecek veri
+                    const dataIndex = tooltipEl.dataPoints?.[0]?.dataIndex;
+                    if (dataIndex !== undefined && dailyProductionData.value[dataIndex]) {
+                        const data = dailyProductionData.value[dataIndex];
+                        
+                        // Mouse pozisyonunu al
+                        const position = context.chart.canvas.getBoundingClientRect();
+                        
+                        // Sadece ürün detayları varsa tooltip göster
+                        if (data.product_details && data.product_details.length > 0) {
+                            dailyProductionTooltip.value = {
+                                visible: true,
+                                x: position.left + tooltipEl.caretX,
+                                y: position.top + tooltipEl.caretY - 10,
+                                products: data.product_details,
+                                date: data.production_date,
+                                totalQuantity: data.total_quantity
+                            };
+                        }
+                    }
+                }
+            }
+        },
+        // Chart'tan mouse çıktığında tooltip'i gizle
+        onHover: (event, activeElements, chart) => {
+            if (activeElements.length === 0) {
+                // Mouse chart'tan çıktı, tooltip'i gizle
+                hideDailyProductTooltip();
+            }
+        }
+    };
+});
+
 // YENİ - Production cell class helper
 const getProductionCellClass = (value) => {
     if (!value || value === 0) return 'no-production';
@@ -485,6 +591,15 @@ const showProductTooltip = (event, worker, date) => {
         return;
     }
 
+    // Önceki timeout'u temizle
+    if (tooltipTimeout) {
+        clearTimeout(tooltipTimeout);
+        tooltipTimeout = null;
+    }
+
+    // Diğer tooltip'leri hemen gizle
+    dailyProductionTooltip.value.visible = false;
+
     const rect = event.target.getBoundingClientRect();
     productTooltip.value = {
         visible: true,
@@ -497,7 +612,54 @@ const showProductTooltip = (event, worker, date) => {
 };
 
 const hideProductTooltip = () => {
+    // Timeout ile gizle - hover geçişlerinde flicker önlemek için
+    tooltipTimeout = setTimeout(() => {
+        productTooltip.value.visible = false;
+    }, 50);
+};
+
+// Günlük üretim tooltip fonksiyonları
+const showDailyProductTooltip = (event, dailyData) => {
+    if (!dailyData.product_details || dailyData.product_details.length === 0) {
+        return;
+    }
+
+    // Önceki timeout'u temizle
+    if (tooltipTimeout) {
+        clearTimeout(tooltipTimeout);
+        tooltipTimeout = null;
+    }
+
+    // Diğer tooltip'leri hemen gizle
     productTooltip.value.visible = false;
+
+    const rect = event.target.getBoundingClientRect();
+    dailyProductionTooltip.value = {
+        visible: true,
+        x: rect.left + rect.width / 2,
+        y: rect.top - 10,
+        products: dailyData.product_details,
+        date: dailyData.production_date,
+        totalQuantity: dailyData.total_quantity
+    };
+};
+
+const hideDailyProductTooltip = () => {
+    // Timeout ile gizle - hover geçişlerinde flicker önlemek için
+    tooltipTimeout = setTimeout(() => {
+        dailyProductionTooltip.value.visible = false;
+    }, 50);
+};
+
+// Global tooltip hide function
+const hideAllTooltips = () => {
+    // Timeout'u temizle ve hemen gizle
+    if (tooltipTimeout) {
+        clearTimeout(tooltipTimeout);
+        tooltipTimeout = null;
+    }
+    productTooltip.value.visible = false;
+    dailyProductionTooltip.value.visible = false;
 };
 
 // Tarih formatı için yardımcı fonksiyon
@@ -528,6 +690,11 @@ const fetchDailyProduction = async (period) => {
         if (response.data && response.data.chartData && response.data.tableData) {
             dailyProductionChart.value = response.data.chartData;
             dailyProductionData.value = response.data.tableData || [];
+            
+            // Debug için veriyi console'a yazdır
+            console.log('Daily Production Data:', response.data.tableData);
+            console.log('First item product details:', response.data.tableData[0]?.product_details);
+            
             currentDateRange.value = response.data.dateRange;
         } else {
             dailyProductionChart.value = {
@@ -758,6 +925,24 @@ onMounted(async () => {
             fetchProducts()
         ]);
 
+        // Global click listener - tooltip'leri gizlemek için
+        const globalClickHandler = (event) => {
+            // Eğer tıklanan element tooltip veya tooltip içindeki bir element değilse tooltip'leri gizle
+            const target = event.target;
+            if (!target.closest('.product-tooltip') && 
+                !target.closest('.production-cell') && 
+                !target.closest('.hoverable-badge')) {
+                hideAllTooltips();
+            }
+        };
+        
+        document.addEventListener('click', globalClickHandler);
+        
+        // Event listener'ı component unmount'da temizle
+        onUnmounted(() => {
+            document.removeEventListener('click', globalClickHandler);
+        });
+
         toast.add({
             severity: 'success',
             summary: 'Yüklendi',
@@ -793,6 +978,10 @@ const emit = defineEmits(['filter', 'dataUpdate', 'tabChange']);
 
 // Expose functions
 defineExpose({
+    updateCharts: () => {
+        // Chart'ları güncelle - gerekli işlemler
+        console.log('Charts updated');
+    },
     refreshData: async () => {
         await Promise.allSettled([
             fetchDailyProduction(selectedPeriod.value),
@@ -1486,5 +1675,56 @@ defineExpose({
     border-radius: 4px;
     min-width: 40px;
     text-align: center;
+}
+
+/* Daily Production Tooltip Specific Styles */
+.daily-tooltip {
+    min-width: 250px;
+    max-width: 350px;
+}
+
+.daily-tooltip .tooltip-header strong {
+    color: #10B981;
+}
+
+.total-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    margin-bottom: 8px;
+    border-bottom: 1px solid rgba(16, 185, 129, 0.2);
+    background: rgba(16, 185, 129, 0.05);
+    border-radius: 6px;
+    padding: 8px 12px;
+}
+
+.total-label {
+    color: #CBD5E1;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.total-value {
+    color: #10B981;
+    font-weight: 700;
+    font-size: 14px;
+    background: rgba(16, 185, 129, 0.1);
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
+.products-list {
+    margin-top: 8px;
+}
+
+.hoverable-badge {
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.hoverable-badge:hover {
+    transform: scale(1.05);
+    box-shadow: 0 2px 8px rgba(34, 197, 94, 0.3);
 }
 </style>

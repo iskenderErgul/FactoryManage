@@ -36,10 +36,17 @@
                     :header="col.header"
                     :sortable="col.sortable">
 
-                    <template #body="slotProps" v-if="col.type">
+                    <template #body="slotProps" v-if="col.type || $slots['cell-' + col.field]">
+                        <!-- Custom cell slot -->
+                        <slot 
+                            v-if="$slots['cell-' + col.field]" 
+                            :name="'cell-' + col.field" 
+                            :data="slotProps.data" 
+                            :value="slotProps.data[col.field]">
+                        </slot>
                         <!-- Badge -->
                         <Badge
-                            v-if="col.type === 'badge'"
+                            v-else-if="col.type === 'badge'"
                             :value="slotProps.data[col.field]"
                             :severity="col.severity || 'success'" />
 

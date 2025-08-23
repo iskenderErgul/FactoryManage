@@ -22,6 +22,7 @@ class DashboardController extends Controller
             $startDate = $this->getStartDateByPeriod($period);
             $endDate = Carbon::now();
 
+            // Günlük toplam üretim verileri
             $productions = Production::with(['machine', 'user', 'product'])
                 ->whereBetween('production_date', [$startDate, $endDate])
                 ->select(
@@ -33,6 +34,22 @@ class DashboardController extends Controller
                 ->groupBy('production_date')
                 ->orderBy('production_date', 'desc')
                 ->get();
+
+            // Ürün detayları için ayrı sorgu
+            $productDetails = Production::with('product:id,product_name')
+                ->whereBetween('production_date', [$startDate, $endDate])
+                ->select('production_date', 'product_id', 'quantity')
+                ->get()
+                ->groupBy('production_date')
+                ->map(function($dailyProductions) {
+                    return $dailyProductions->groupBy('product_id')->map(function($productGroup) {
+                        $product = $productGroup->first()->product;
+                        return [
+                            'product_name' => $product ? $product->product_name : 'Bilinmeyen Ürün',
+                            'quantity' => $productGroup->sum('quantity')
+                        ];
+                    })->values()->toArray();
+                });
 
             // Chart data için formatla
             $chartData = [
@@ -53,12 +70,14 @@ class DashboardController extends Controller
             ];
 
             // Table data için formatla
-            $tableData = $productions->map(function($production) {
+            $tableData = $productions->map(function($production) use ($productDetails) {
                 return [
                     'production_date' => Carbon::parse($production->production_date)->format('d.m.Y'),
+                    'production_date_raw' => $production->production_date, // Tooltip için ham tarih
                     'total_quantity' => $production->total_quantity,
                     'active_machines' => $production->active_machines,
-                    'active_workers' => $production->active_workers
+                    'active_workers' => $production->active_workers,
+                    'product_details' => $productDetails[$production->production_date] ?? []
                 ];
             });
 
