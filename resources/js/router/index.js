@@ -28,7 +28,9 @@ import ProductionForWorkers from "@/components/WorkerPages/ProductionForWorkers.
 import Orders from "@/components/SalesManagement/Orders.vue";
 import Recyclings from "@/components/Recycle/Recyclings.vue";
 import Suppliers from "@/components/Suppliers/Suppliers.vue";
+import Supplies from "@/components/Suppliers/Supplies.vue";
 import Transactions from "@/components/Customers/Transactions.vue";
+import SupplierTransactions from "@/components/Suppliers/SupplierTransactions.vue";
 
 
 const routes = [
@@ -184,6 +186,16 @@ const routes = [
                 path: '/sys/suppliers',
                 name: 'suppliers',
                 component: Suppliers
+            },
+            {
+                path: '/sys/supplies',
+                name: 'supplies',
+                component: Supplies
+            },
+            {
+                path: '/sys/suppliers/transactions',
+                name: 'supplierTransactions',
+                component: SupplierTransactions
             },
 
 //Worker Pages

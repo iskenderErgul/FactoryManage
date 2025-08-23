@@ -2,18 +2,29 @@
 
 namespace App\Domains\Suppliers\Models;
 
-use App\Domains\Customer\Models\Customer;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Supplier extends Model
 {
     use HasFactory;
 
-    protected $guarded = [ ];
+    protected $fillable = [
+        'supplier_name',
+        'supplier_email',
+        'supplier_phone',
+        'supplier_address',
+        'debt',
+    ];
 
-    public function customer()
+    public function transactions(): HasMany
     {
-        return $this->belongsTo(Customer::class); // Her tedarikçi bir müşteriyle ilişkilidir
+        return $this->hasMany(SupplierTransaction::class);
+    }
+
+    public function supplies(): HasMany
+    {
+        return $this->hasMany(Supply::class);
     }
 }

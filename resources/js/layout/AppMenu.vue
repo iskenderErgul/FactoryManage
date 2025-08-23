@@ -121,14 +121,24 @@ const model = ref([
 
     },
     {
+        label: 'Tedarikçi Yönetimi',
         items: [
             {
-                label: 'Hammadde Tedarik Kayıtları',
-                icon: 'pi pi-truck',
+                label: 'Tedarikçiler',
+                icon: 'pi pi-users',
                 to: '/sys/suppliers'
+            },
+            {
+                label: 'Tedarik Ekle',
+                icon: 'pi pi-plus-circle',
+                to: '/sys/supplies'
+            },
+            {
+                label: 'Hesap İşlemleri',
+                icon: 'pi pi-credit-card',
+                to: '/sys/suppliers/transactions'
             }
         ]
-
     },
     // {
     //
@@ -186,7 +196,7 @@ if (userRole.value !== 'admin') {
                 subMenu.label !== 'Geri Dönüşüm Kayıtları' &&
                 subMenu.label !== 'Müşteri İşlemleri' &&
                 subMenu.label !== 'Vardiya Yönetimi' &&
-                subMenu.label !== 'Hammadde Tedarik Kayıtları'
+                subMenu.label !== 'Tedarikçi Yönetimi'
 
             );
         }

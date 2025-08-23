@@ -17,6 +17,7 @@ use App\Http\Controllers\Shift\ShiftController;
 use App\Http\Controllers\ShiftAssignment\ShiftAssignmentController;
 use App\Http\Controllers\Stock\StockController;
 use App\Http\Controllers\Suppliers\SuppliersController;
+use App\Http\Controllers\Suppliers\SuppliesController;
 use App\Http\Controllers\Users\UsersController;
 use App\Http\Controllers\Worker\WorkerController;
 use Illuminate\Http\Request;
@@ -60,12 +61,23 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/recyclings/{id}', [RecyclingsController::class, 'destroy']);
     Route::post('/recyclings/delete', [RecyclingsController::class, 'destroySelected']);
 
+    // Suppliers (Tedarikçiler)
     Route::get('/suppliers', [SuppliersController::class, 'index']);
     Route::post('/suppliers', [SuppliersController::class, 'store']);
     Route::get('/suppliers/{id}', [SuppliersController::class, 'show']);
     Route::put('/suppliers/{id}', [SuppliersController::class, 'update']);
     Route::delete('/suppliers/{id}', [SuppliersController::class, 'destroy']);
     Route::post('/suppliers/delete', [SuppliersController::class, 'destroySelected']);
+    Route::post('/suppliers/transactions', [SuppliersController::class, 'addTransaction']);
+    Route::put('/suppliers/transactions/bulk', [SuppliersController::class, 'bulkUpdateTransactions']);
+
+    // Supplies (Tedarikler)
+    Route::get('/supplies', [SuppliesController::class, 'index']);
+    Route::post('/supplies', [SuppliesController::class, 'store']);
+    Route::get('/supplies/{id}', [SuppliesController::class, 'show']);
+    Route::put('/supplies/{id}', [SuppliesController::class, 'update']);
+    Route::delete('/supplies/{id}', [SuppliesController::class, 'destroy']);
+    Route::post('/supplies/delete', [SuppliesController::class, 'destroySelected']);
 
     Route::get('/products', [ProductController::class, 'index']);
     Route::post('/products', [ProductController::class, 'store']);

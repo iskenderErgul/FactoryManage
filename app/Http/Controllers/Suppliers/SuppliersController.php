@@ -16,33 +16,91 @@ class SuppliersController extends Controller
         $this->suppliersRepository = $suppliersRepository;
     }
 
+    /**
+     * Tüm tedarikçileri döner.
+     *
+     * @return JsonResponse
+     */
     public function index(): JsonResponse
     {
         return $this->suppliersRepository->index();
     }
 
+    /**
+     * Yeni bir tedarikçi kaydeder.
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
     public function store(Request $request): JsonResponse
     {
         return $this->suppliersRepository->store($request);
     }
 
+    /**
+     * Belirtilen tedarikçiyi döner.
+     *
+     * @param int $id
+     * @return JsonResponse
+     */
     public function show($id): JsonResponse
     {
         return $this->suppliersRepository->show($id);
     }
 
+    /**
+     * Var olan bir tedarikçi kaydını günceller.
+     *
+     * @param Request $request
+     * @param int $id
+     * @return JsonResponse
+     */
     public function update(Request $request, $id): JsonResponse
     {
         return $this->suppliersRepository->update($request, $id);
     }
 
+    /**
+     * Belirtilen ID'ye sahip tedarikçiyi siler.
+     *
+     * @param int $id
+     * @return JsonResponse
+     */
     public function destroy($id): JsonResponse
     {
         return $this->suppliersRepository->destroy($id);
     }
 
+    /**
+     * Seçili tedarikçi kayıtlarını siler.
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
     public function destroySelected(Request $request): JsonResponse
     {
         return $this->suppliersRepository->destroySelected($request);
+    }
+
+    /**
+     * Manuel transaction ekler.
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function addTransaction(Request $request): JsonResponse
+    {
+        return $this->suppliersRepository->addTransaction($request);
+    }
+
+    /**
+     * Toplu transaction güncelleme yapar.
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function bulkUpdateTransactions(Request $request): JsonResponse
+    {
+        return $this->suppliersRepository->bulkUpdateTransactions($request);
     }
 }

@@ -2,85 +2,99 @@
 
 namespace App\Domains\Suppliers\Repositories;
 
-use App\Domains\Customer\Models\Transaction;
 use App\Domains\Suppliers\Models\Supplier;
+use App\Domains\Suppliers\Models\SupplierTransaction;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 class SuppliersRepository
 {
+    /**
+     * Tüm tedarikçi kayıtlarını alır.
+     *
+     * @return JsonResponse
+     */
     public function index(): JsonResponse
     {
-        $suppliers = Supplier::with('customer')->get();
+        $suppliers = Supplier::with('transactions')->get();
         return response()->json($suppliers);
     }
 
+    /**
+     * Yeni bir tedarikçi kaydı oluşturur.
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
     public function store(Request $request): JsonResponse
     {
-
-        $totalAmount = 0;
-
-        $supplyDate = Carbon::parse($request->supply_date)->setTimezone('Asia/Istanbul')->format('Y-m-d H:i:s');
-        $customer_id =$request->customer_id['id'];
-
         $supplier = Supplier::create([
-            'customer_id' => $customer_id,
-            'supplied_product' => $request->supplied_product,
-            'supplied_product_quantity' => $request->supplied_product_quantity,
-            'supplied_product_price' => $request->supplied_product_price,
-            'supply_date' => $supplyDate,
+            'supplier_name' => $request->supplier_name,
+            'supplier_email' => $request->supplier_email,
+            'supplier_phone' => $request->supplier_phone,
+            'supplier_address' => $request->supplier_address,
+            'debt' => $request->debt ?? 0,
         ]);
-        $supplierId=$supplier->id;
-        $totalAmount=$request->supplied_product_quantity*$request->supplied_product_price;
-
-        $this->createTransaction($customer_id,$supplyDate,$totalAmount,$supplierId);
 
         return response()->json($supplier, 201);
     }
 
+    /**
+     * Belirtilen tedarikçi kaydını döner.
+     *
+     * @param int $id
+     * @return JsonResponse
+     */
     public function show($id): JsonResponse
     {
-        // Tedarikçi bilgilerini ve ilişkili müşteri bilgilerini alıyoruz
-        $supplier = Supplier::with('customer')->findOrFail($id);
-
+        $supplier = Supplier::with('transactions')->findOrFail($id);
         return response()->json($supplier);
     }
 
+    /**
+     * Belirtilen tedarikçi kaydını günceller.
+     *
+     * @param Request $request
+     * @param int $id
+     * @return JsonResponse
+     */
     public function update(Request $request, $id): JsonResponse
     {
         $supplier = Supplier::findOrFail($id);
-
-
-        $supplyDate = Carbon::parse($request->supply_date)->setTimezone('Asia/Istanbul')->format('Y-m-d H:i:s');
-
-
+        
         $supplier->update([
-            'customer_id' => $request->customer_id, // Customer ID'yi güncelliyoruz
-            'supplied_product' => $request->supplied_product,
-            'supplied_product_quantity' => $request->supplied_product_quantity,
-            'supplied_product_price' => $request->supplied_product_price,
-            'supply_date' => $supplyDate,
-        ]);
-
-        Transaction::where('supplier_id',$supplier->id)->update([
-            'amount'=> $supplier->supplied_product_quantity*$supplier->supplied_product_price,
-            'date' => $supplyDate,
+            'supplier_name' => $request->supplier_name,
+            'supplier_email' => $request->supplier_email,
+            'supplier_phone' => $request->supplier_phone,
+            'supplier_address' => $request->supplier_address,
+            'debt' => $request->debt ?? $supplier->debt,
         ]);
 
         return response()->json($supplier);
     }
 
+    /**
+     * Belirtilen tedarikçi kaydını siler (transactions cascade delete).
+     *
+     * @param int $id
+     * @return JsonResponse
+     */
     public function destroy($id): JsonResponse
     {
         $supplier = Supplier::findOrFail($id);
+        $supplier->transactions()->delete();
         $supplier->delete();
-        Transaction::where('supplier_id',$supplier->id)->delete();
 
         return response()->json(null, 204);
     }
 
+    /**
+     * Belirtilen tedarikçi ID'lerine göre birden fazla tedarikçi kaydını siler.
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
     public function destroySelected(Request $request): JsonResponse
     {
         $request->validate(['ids' => 'required|array']);
@@ -89,19 +103,73 @@ class SuppliersRepository
         return response()->json(null, 204);
     }
 
-    private function createTransaction($customer_id,$supplyDate,$totalAmount,$supplierId): void
+    /**
+     * Manuel transaction ekleme.
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function addTransaction(Request $request): JsonResponse
     {
+        $date = Carbon::parse($request->date)->format('Y-m-d');
 
-        DB::table('transactions')->insert([
-            'customer_id' => $customer_id,
-            'supplier_id'=>$supplierId,  // Yeni ilişkiyi burada ekliyoruz
-            'type' => 'borç',
-            'date' => $supplyDate,
-            'amount' => $totalAmount,
-            'description' => 'Hammadde Tedarik',
-            'created_at' => now(),
-            'updated_at' => now(),
+        $transaction = SupplierTransaction::create([
+            'supplier_id' => $request->supplier_id,
+            'type' => $request->type,
+            'description' => $request->description,
+            'date' => $date,
+            'amount' => $request->amount,
         ]);
+
+        return response()->json($transaction, 201);
+    }
+
+    /**
+     * Toplu transaction güncelleme.
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function bulkUpdateTransactions(Request $request): JsonResponse
+    {
+        $transactions = $request->all();
+        if (empty($transactions)) {
+            return response()->json(['message' => 'Hiçbir işlem verisi bulunamadı.'], 400);
+        }
+
+        $supplierId = $transactions[0]['supplier_id'] ?? null;
+        if (!$supplierId) {
+            return response()->json(['message' => 'Tedarikçi ID si bulunamadı.'], 400);
+        }
+
+        $existingTransactions = SupplierTransaction::where('supplier_id', $supplierId)->get();
+        $incomingTransactionIds = collect($transactions)->pluck('id')->toArray();
+        $existingTransactionIds = $existingTransactions->pluck('id')->toArray();
+        $transactionsToDelete = array_diff($existingTransactionIds, $incomingTransactionIds);
+
+        if (!empty($transactionsToDelete)) {
+            SupplierTransaction::whereIn('id', $transactionsToDelete)->delete();
+        }
+
+        foreach ($transactions as $transactionData) {
+            $transaction = SupplierTransaction::find($transactionData['id']);
+            if ($transaction) {
+                // Tarihi uygun formata çevir
+                $date = $transactionData['date'];
+                if ($date && !empty($date)) {
+                    $date = Carbon::parse($date)->format('Y-m-d');
+                }
+                
+                $transaction->update([
+                    'type' => $transactionData['type'],
+                    'date' => $date,
+                    'amount' => $transactionData['amount'],
+                    'description' => $transactionData['description'],
+                ]);
+            }
+        }
+
+        return response()->json(['message' => 'İşlemler başarıyla güncellendi!'], 200);
     }
 
 

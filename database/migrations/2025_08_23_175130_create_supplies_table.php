@@ -11,13 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('suppliers', function (Blueprint $table) {
+        Schema::create('supplies', function (Blueprint $table) {
             $table->id();
-            $table->string('supplier_name');
-            $table->string('supplier_email')->nullable();
-            $table->string('supplier_phone')->nullable();
-            $table->text('supplier_address')->nullable();
-            $table->decimal('debt', 15, 2)->default(0);
+            $table->foreignId('supplier_id')->constrained('suppliers')->onDelete('cascade');
             $table->string('supplied_product');
             $table->string('supplied_product_quantity');
             $table->decimal('supplied_product_price', 15, 2);
@@ -31,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('suppliers');
+        Schema::dropIfExists('supplies');
     }
 };
