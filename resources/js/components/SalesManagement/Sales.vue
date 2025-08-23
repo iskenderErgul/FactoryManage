@@ -22,7 +22,6 @@
                 :rowsPerPageOptions="[5, 10, 25]"
                 currentPageReportTemplate="Mevcut {first} ile {last} arasında, toplam {totalRecords} satış">
                 <Column selectionMode="multiple" style="width: 2rem" :exportable="false"></Column>
-                <Column field="id" header="Satış ID" sortable style="min-width:8rem"></Column>
                 <Column field="customer.name" header="Müşteri Adı" sortable style="min-width:10rem"></Column>
                 <Column field="sale_date" header="Satış Tarihi" sortable style="min-width:10rem"></Column>
                 <Column :exportable="false" style="min-width:8rem">
@@ -452,7 +451,7 @@ const paymentOptions = [
 // Ürünleri türlerine göre gruplandır
 const groupedProducts = computed(() => {
     const groups = {};
-    
+
     products.value.forEach(product => {
         const type = product.product_type || 'Diğer';
         if (!groups[type]) {
@@ -463,7 +462,7 @@ const groupedProducts = computed(() => {
             label: product.product_name
         });
     });
-    
+
     return Object.keys(groups).map(type => ({
         label: type,
         items: groups[type]
@@ -475,9 +474,9 @@ const filteredSales = computed(() => {
     if (!globalFilterValue.value) {
         return sales.value;
     }
-    
+
     const searchTerm = globalFilterValue.value.toLowerCase();
-    
+
     return sales.value.filter(sale => {
         return (
             sale.id.toString().includes(searchTerm) ||
@@ -557,10 +556,10 @@ const openSaleDetailDialog = (data) => {
 const openUpdateSaleDialog = (data) => {
     selectedSales.value = data;
     saleDate.value = data.sale_date;
-    
+
     // Müşteriyi customers listesinden bul
     const customerInList = customers.value.find(customer => customer.id === data.customer_id);
-    
+
     selectedCustomer.value = customerInList || data.customer;
     selectedPymentType.value = data.payment_type;
     selectedPartialPayment.value = data.paid_amount || null;
@@ -575,11 +574,11 @@ const openUpdateSaleDialog = (data) => {
 const openEditDialog = (product) => {
     editingProduct.value = { ...product };
     editingProduct.value.price = parseFloat(editingProduct.value.price);
-    
+
     // Ürünü dropdown'da seçili hale getir
     const productInList = products.value.find(p => p.id === product.id);
     editingSelectedProduct.value = productInList ? { ...productInList, label: productInList.product_name } : null;
-    
+
     isEditDialogVisible.value = true;
 
 };
@@ -597,7 +596,7 @@ const saveEdit = () => {
                 },
                 total_price: editingProduct.value.pivot.price * editingProduct.value.pivot.quantity
             };
-            
+
             // Düzenlenen ürünü güncelle
             saleProducts.value[index] = updatedProduct;
         }
@@ -663,13 +662,13 @@ const calculateTotalPrice = (rowData) => {
 
 const saveSale = () => {
     submitted.value = true;
-    
+
     // Ödeme türü kontrolü
     if (!paymentType.value) {
         toast.value.add({ severity: 'error', summary: 'Hata', detail: 'Lütfen ödeme türünü seçiniz.', life: 3000 });
         return;
     }
-    
+
     if (selectedCustomer && saleProducts.value.length > 0) {
 
         //Bunu validasyon yapan bir fonksiyonla yap.Burada değil
@@ -706,7 +705,7 @@ const updateSale = () => {
         toast.value.add({ severity: 'error', summary: 'Hata', detail: 'Lütfen ödeme türünü seçiniz.', life: 3000 });
         return;
     }
-    
+
     if (selectedCustomer && saleProducts.value.length > 0) {
         const selectedProductss = selectedSales.value.products;
         const totalAmount = selectedProductss.reduce((sum, product) =>

@@ -16,7 +16,6 @@
                 :rowsPerPageOptions="[5, 10, 25]"
                 currentPageReportTemplate="Mevcut {first} ile {last} arasında, toplam {totalRecords} sipariş">
                 <Column selectionMode="multiple" style="width: 2rem" :exportable="false"></Column>
-                <Column field="id" header="Sipariş ID" sortable style="min-width:8rem"></Column>
                 <Column field="customer.name" header="Müşteri Adı" sortable style="min-width:10rem"></Column>
                 <Column field="order_date" header="Sipariş Tarihi" sortable style="min-width:10rem"></Column>
                 <Column field="status" header="Sipariş Durumu" sortable style="min-width:10rem"></Column>

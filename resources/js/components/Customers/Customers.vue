@@ -21,7 +21,6 @@
                     </div>
                 </template>
                 <Column selectionMode="multiple" style="width: 2rem" :exportable="false"></Column>
-                <Column field="id" header="Müşteri ID" sortable style="min-width:8rem"></Column>
                 <Column field="name" header="İsim" sortable style="min-width:10rem"></Column>
                 <Column field="email" header="E-posta" sortable style="min-width:12rem"></Column>
                 <Column field="phone" header="Telefon" sortable style="min-width:10rem"></Column>
