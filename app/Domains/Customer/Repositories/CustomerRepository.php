@@ -121,9 +121,15 @@ class CustomerRepository implements CustomerRepositoryInterface
         foreach ($transactions as $transactionData) {
             $transaction = Transaction::find($transactionData['id']);
             if ($transaction) {
+                // Tarihi uygun formata çevir
+                $date = $transactionData['date'];
+                if ($date && !empty($date)) {
+                    $date = Carbon::parse($date)->format('Y-m-d');
+                }
+                
                 $transaction->update([
                     'type' => $transactionData['type'],
-                    'date' => $transactionData['date'],
+                    'date' => $date,
                     'amount' => $transactionData['amount'],
                     'description' => $transactionData['description'],
                 ]);

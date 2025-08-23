@@ -17,10 +17,36 @@
                     dataKey="id"
                     :paginator="true"
                     :rows="10"
-                    :rowsPerPageOptions="[5, 10, 25]"
-                    currentPageReportTemplate="Mevcut {first} ile {last} arasında, toplam {totalRecords} satış">
+                    :rowsPerPageOptions="[5, 10, 25, 50]"
+                    currentPageReportTemplate="Mevcut {first} ile {last} arasında, toplam {totalRecords} müşteri"
+                    :globalFilterFields="['name', 'email', 'phone', 'address']"
+                    v-model:filters="filters"
+                    filterDisplay="menu">
+                    <template #header>
+                        <div class="flex justify-content-between">
+                            <Button type="button" icon="pi pi-filter-slash" label="Filtreleri Temizle" outlined @click="clearFilter()" />
+                            <span class="p-input-icon-left">
+                                <i class="pi pi-search" />
+                                <InputText v-model="filters['global'].value" placeholder="Müşteri ara..." />
+                            </span>
+                        </div>
+                    </template>
                     <Column selectionMode="multiple" style="width: 2rem" :exportable="false"></Column>
-                    <Column field="name" header="Müşteri Adı" sortable style="min-width:10rem"></Column>
+                    <Column field="name" header="Müşteri Adı" sortable style="min-width:10rem" :showFilterMatchModes="false">
+                        <template #filter="{ filterModel }">
+                            <InputText type="text" v-model="filterModel.value" class="p-column-filter" placeholder="Ada göre ara" />
+                        </template>
+                    </Column>
+                    <Column field="email" header="E-posta" sortable style="min-width:12rem" :showFilterMatchModes="false">
+                        <template #filter="{ filterModel }">
+                            <InputText type="text" v-model="filterModel.value" class="p-column-filter" placeholder="E-posta ara" />
+                        </template>
+                    </Column>
+                    <Column field="phone" header="Telefon" sortable style="min-width:10rem" :showFilterMatchModes="false">
+                        <template #filter="{ filterModel }">
+                            <InputText type="text" v-model="filterModel.value" class="p-column-filter" placeholder="Telefon ara" />
+                        </template>
+                    </Column>
                     <Column :exportable="false" style="min-width:8rem">
                         <template #body="slotProps">
                             <Button icon="pi pi-info-circle" outlined rounded class="mr-2" @click="openCustomerTransactionsDetailDialog(slotProps.data)" />
@@ -302,17 +328,18 @@
                                     <td class="amount-cell">{{ formatAmount(transaction.amount) }}</td>
                                 </tr>
                                 <!-- Boş satırlar ekle (15 satıra tamamlamak için) -->
-                                <tr
-                                    v-for="n in (15 - getLast15Transactions().length)"
-                                    :key="`empty-${n}`"
-                                    class="empty-row"
-                                    v-if="getLast15Transactions().length < 15"
-                                >
-                                    <td>&nbsp;</td>
-                                    <td>&nbsp;</td>
-                                    <td>&nbsp;</td>
-                                    <td>&nbsp;</td>
-                                </tr>
+                                <template v-if="getLast15Transactions().length < 15">
+                                    <tr
+                                        v-for="n in (15 - getLast15Transactions().length)"
+                                        :key="`empty-${n}`"
+                                        class="empty-row"
+                                    >
+                                        <td>&nbsp;</td>
+                                        <td>&nbsp;</td>
+                                        <td>&nbsp;</td>
+                                        <td>&nbsp;</td>
+                                    </tr>
+                                </template>
                                 </tbody>
                             </table>
 
@@ -388,6 +415,7 @@
     import Toast from 'primevue/toast';
     import Dropdown from 'primevue/dropdown';
     import Calendar from "primevue/calendar";
+    import { FilterMatchMode, FilterOperator } from 'primevue/api';
 
     const customers = ref([]);
     const toast = ref(null);
@@ -412,12 +440,30 @@
     ]);
     const selectedPrintCustomerTransaction = ref([]);
 
+    // Filtreleme için state
+    const filters = ref({
+        'global': { value: null, matchMode: FilterMatchMode.CONTAINS },
+        'name': { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }] },
+        'email': { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.CONTAINS }] },
+        'phone': { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.CONTAINS }] }
+    });
+
     // Yazdırma için sabit değerler
     const ROWS_PER_PAGE = 15; // Her sayfada maksimum satır sayısı
 
     onMounted(() => {
         fetchCustomers();
     });
+
+    // Filtreleri temizleme fonksiyonu
+    const clearFilter = () => {
+        filters.value = {
+            'global': { value: null, matchMode: FilterMatchMode.CONTAINS },
+            'name': { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }] },
+            'email': { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.CONTAINS }] },
+            'phone': { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.CONTAINS }] }
+        };
+    };
 
     const fetchCustomers = () => {
         axios.get('/api/customers')
@@ -474,7 +520,19 @@
 
     const formatDate = (date) => {
         if (!date) return '';
-        return new Date(date).toLocaleDateString('tr-TR');
+        try {
+            const dateObj = new Date(date);
+            // Geçersiz tarih kontrolü
+            if (isNaN(dateObj.getTime())) return '';
+            
+            return dateObj.toLocaleDateString('tr-TR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            });
+        } catch (error) {
+            return '';
+        }
     };
 
     // ESKİ YAZDIRMA FONKSİYONLARI (TÜM İŞLEMLER İÇİN)
@@ -565,7 +623,13 @@
     };
 
     const openEditDialog = (transaction) => {
-        editingTransaction.value = { ...transaction };
+        editingTransaction.value = { 
+            ...transaction,
+            // Type'ı dropdown'daki value formatına çevir
+            type: transaction.type.toLowerCase() === 'borç' ? 'borç' : 'ödeme',
+            // customer_id'nin kesinlikle mevcut olmasını sağla
+            customer_id: transaction.customer_id || selectedCustomer.value?.id
+        };
         isEditDialogVisible.value = true;
     };
 
@@ -578,16 +642,25 @@
     };
 
     const saveEdit = () => {
+        // Tarihi doğru formatta hazırla
+        let formattedDate = editingTransaction.value.date;
+        if (formattedDate instanceof Date) {
+            formattedDate = formattedDate.toISOString().split('T')[0];
+        } else if (typeof formattedDate === 'string' && formattedDate.includes('T')) {
+            formattedDate = formattedDate.split('T')[0];
+        }
+
         const updatedTransaction = {
             id: editingTransaction.value.id,
-            type: editingTransaction.value.type,
-            date: editingTransaction.value.date,
+            customer_id: editingTransaction.value.customer_id, // customer_id'yi koruyalım
+            type: editingTransaction.value.type === 'borç' ? 'Borç' : 'Ödeme', // Tablo görünümü için büyük harfle
+            date: formattedDate,
             amount: editingTransaction.value.amount,
             description: editingTransaction.value.description,
         };
 
         customerTransactions.value = customerTransactions.value.map((transaction) =>
-            transaction.id === updatedTransaction.id ? updatedTransaction : transaction
+            transaction.id === updatedTransaction.id ? { ...transaction, ...updatedTransaction } : transaction
         );
 
         updateCalculations();
@@ -596,14 +669,24 @@
 
     const saveAllTransactions = async () => {
         try {
-            const updatedTransactions = customerTransactions.value.map(transaction => ({
-                customer_id: transaction.customer_id,
-                id: transaction.id,
-                type: transaction.type,
-                date: transaction.date,
-                amount: transaction.amount,
-                description: transaction.description,
-            }));
+            const updatedTransactions = customerTransactions.value.map(transaction => {
+                // Tarihi doğru formatta hazırla
+                let formattedDate = transaction.date;
+                if (formattedDate instanceof Date) {
+                    formattedDate = formattedDate.toISOString().split('T')[0];
+                } else if (typeof formattedDate === 'string' && formattedDate.includes('T')) {
+                    formattedDate = formattedDate.split('T')[0];
+                }
+
+                return {
+                    customer_id: transaction.customer_id,
+                    id: transaction.id,
+                    type: transaction.type.toLowerCase() === 'borç' ? 'borç' : 'ödeme', // Backend için küçük harfle
+                    date: formattedDate,
+                    amount: transaction.amount,
+                    description: transaction.description,
+                };
+            });
             const resp = await axios.post('/api/transactions/bulk-update', updatedTransactions);
             toast.value.add({ severity: 'success', summary: 'İşlem Başarılı', detail: resp.data.message, life: 3000 });
             updateCustomerTransactionDialog.value = false;
@@ -692,10 +775,18 @@
 
     const saveTransaction = async () => {
         try {
+            // Tarihi doğru formatta hazırla
+            let formattedDate = newTransactionDate.value;
+            if (formattedDate instanceof Date) {
+                formattedDate = formattedDate.toISOString().split('T')[0];
+            } else if (typeof formattedDate === 'string' && formattedDate.includes('T')) {
+                formattedDate = formattedDate.split('T')[0];
+            }
+
             const resp = await axios.post("/api/transactions", {
                 customer_id: newTransactionCustomer.value.id,
                 type: newTransactionType.value.value,
-                date: newTransactionDate.value,
+                date: formattedDate,
                 description: newTransactionDescription.value,
                 amount: newTransactionAmount.value
             });
@@ -955,7 +1046,6 @@
         /* Global ayarlar */
         * {
             -webkit-print-color-adjust: exact !important;
-            color-adjust: exact !important;
             print-color-adjust: exact !important;
         }
 
