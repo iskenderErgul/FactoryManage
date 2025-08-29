@@ -125,8 +125,15 @@ const model = ref([
         ]
     },
     {
+
         items: [
-            { label: 'Maliyet Yönetimi', icon: 'pi pi-money-bill', to: '/sys/cost-management' }
+            {
+                label: 'Maliyet Yönetimi',
+                items: [
+                    {label: 'Maliyet Yönetimi', icon: 'pi pi-money-bill', to: '/sys/cost-management'}
+                ]
+
+    }
         ]
     },
     // {
@@ -196,6 +203,7 @@ if (userRole.value !== 'admin') {
                 subMenu.label !== 'Geri Dönüşüm Kayıtları' &&
                 subMenu.label !== 'Müşteri İşlemleri' &&
                 subMenu.label !== 'Vardiya Yönetimi' &&
+                subMenu.label !== 'Maliyet Yönetimi' &&
                 subMenu.label !== 'Tedarikçi Yönetimi'
 
             );
