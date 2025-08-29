@@ -23,11 +23,12 @@ class CustomerController extends Controller
     /**
      * Tüm müşterileri döner.
      *
+     * @param Request $request
      * @return JsonResponse
      */
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
-        return $this->customerRepository->index();
+        return $this->customerRepository->index($request);
     }
 
     /**
@@ -84,5 +85,15 @@ class CustomerController extends Controller
         return $this->customerRepository->bulkUpdateTransactions($request);
     }
 
-
+    /**
+     * Belirtilen müşterinin dönemsel borç bilgilerini döner.
+     *
+     * @param int $id
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function getPeriodicDebt($id, Request $request): JsonResponse
+    {
+        return $this->customerRepository->getPeriodicDebt($id, $request);
+    }
 }

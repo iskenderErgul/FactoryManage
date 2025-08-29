@@ -23,6 +23,12 @@
                         :products="products"
                         @filter="handleStockFilter" />
                 </TabPanel>
+
+                <!-- Maliyet Analizi Tab -->
+                <TabPanel header="💰 Maliyet Analizi">
+                    <CostsTab
+                        ref="costsTabRef" />
+                </TabPanel>
             </TabView>
         </div>
 
@@ -75,6 +81,7 @@ import OverviewTab from '@/components/dashboard/OverviewTab.vue';
 import ProductionTab from '@/components/dashboard/ProductionTab.vue';
 import SalesTab from '@/components/dashboard/SalesTab.vue';
 import StockTab from '@/components/dashboard/StockTab.vue';
+import CostsTab from '@/components/dashboard/CostsTab.vue';
 
 // Store
 const store = useStore();
@@ -93,6 +100,7 @@ const overviewTabRef = ref(null);
 const productionTabRef = ref(null);
 const salesTabRef = ref(null);
 const stockTabRef = ref(null);
+const costsTabRef = ref(null);
 
 // Data References
 const dashboardData = ref({

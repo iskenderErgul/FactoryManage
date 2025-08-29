@@ -70,6 +70,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/suppliers/delete', [SuppliersController::class, 'destroySelected']);
     Route::post('/suppliers/transactions', [SuppliersController::class, 'addTransaction']);
     Route::put('/suppliers/transactions/bulk', [SuppliersController::class, 'bulkUpdateTransactions']);
+    Route::get('/suppliers/{id}/periodic-debt', [SuppliersController::class, 'getPeriodicDebt']);
 
     // Supplies (Tedarikler)
     Route::get('/supplies', [SuppliesController::class, 'index']);
@@ -101,6 +102,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/customers', [CustomerController::class, 'deleteSelected']);
     Route::post('/transactions', [CustomerController::class, 'addTransaction']);
     Route::post('/transactions/bulk-update', [CustomerController::class, 'bulkUpdateTransactions']);
+    Route::get('/customers/{id}/periodic-debt', [CustomerController::class, 'getPeriodicDebt']);
 
 
     Route::get('/sales', [SalesController::class, 'index']);
@@ -119,6 +121,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/getStockMovements', [StockController::class, 'getStockMovements']);
 
     Route::get('/costs', [CostsController::class, 'index']);
+    Route::get('/costs/periodic/report', [CostsController::class, 'getPeriodicCosts']);
     Route::post('/costs', [CostsController::class, 'store']);
     Route::get('/costs/{id}', [CostsController::class, 'show']);
     Route::put('/costs/{id}', [CostsController::class, 'update']);

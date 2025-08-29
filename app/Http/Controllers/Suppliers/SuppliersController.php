@@ -19,11 +19,12 @@ class SuppliersController extends Controller
     /**
      * Tüm tedarikçileri döner.
      *
+     * @param Request $request
      * @return JsonResponse
      */
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
-        return $this->suppliersRepository->index();
+        return $this->suppliersRepository->index($request);
     }
 
     /**
@@ -102,5 +103,17 @@ class SuppliersController extends Controller
     public function bulkUpdateTransactions(Request $request): JsonResponse
     {
         return $this->suppliersRepository->bulkUpdateTransactions($request);
+    }
+
+    /**
+     * Belirtilen tedarikçinin dönemsel borç bilgilerini döner.
+     *
+     * @param int $id
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function getPeriodicDebt($id, Request $request): JsonResponse
+    {
+        return $this->suppliersRepository->getPeriodicDebt($id, $request);
     }
 }

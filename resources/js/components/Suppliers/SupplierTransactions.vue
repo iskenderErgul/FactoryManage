@@ -47,6 +47,13 @@
                             <InputText type="text" v-model="filterModel.value" class="p-column-filter" placeholder="Telefon ara" />
                         </template>
                     </Column>
+                    <Column field="display_debt" header="Net Bakiye (TL)" sortable style="min-width:8rem">
+                        <template #body="slotProps">
+                            <span :class="slotProps.data.display_debt > 0 ? 'text-red-400 font-bold' : slotProps.data.display_debt < 0 ? 'text-green-400 font-bold' : 'text-gray-400 font-bold'">
+                                {{ slotProps.data.display_debt > 0 ? '+' : slotProps.data.display_debt < 0 ? '' : '' }}{{ formatAmount(slotProps.data.display_debt) }} TL
+                            </span>
+                        </template>
+                    </Column>
                     <Column :exportable="false" style="min-width:8rem">
                         <template #body="slotProps">
                             <Button icon="pi pi-info-circle" outlined rounded class="mr-2" @click="openSupplierTransactionsDetailDialog(slotProps.data)" />
@@ -102,10 +109,27 @@
                     </DataTable>
 
                     <div class="total-summary" style="text-align: right; margin-top: 20px;">
-                        <p><strong>Toplam Borç:</strong> {{ formatAmount(totalDebt(supplierTransactions)) }} TL</p>
-                        <p><strong>Toplam Ödeme:</strong> {{ formatAmount(totalCredit(supplierTransactions)) }} TL</p>
+                        <div class="flex justify-content-end align-items-center mb-3">
+                            <label for="detailPeriodSelect" class="mr-2 font-semibold">Hesaplama Dönemi:</label>
+                            <Dropdown 
+                                id="detailPeriodSelect"
+                                v-model="selectedPeriod" 
+                                :options="periodOptions" 
+                                optionLabel="label" 
+                                placeholder="Dönem Seçin"
+                                class="w-10rem"
+                                @change="updateCalculations"
+                            />
+                        </div>
+                        <p><strong>Toplam Borç ({{ selectedPeriod.label }}):</strong> {{ formatAmount(totalDebtForPeriod(supplierTransactions, selectedPeriod.value)) }} TL</p>
+                        <p><strong>Toplam Ödeme ({{ selectedPeriod.label }}):</strong> {{ formatAmount(totalCreditForPeriod(supplierTransactions, selectedPeriod.value)) }} TL</p>
                         <p v-if="lastPayment(supplierTransactions)"><strong>Son Ödeme:</strong> {{ formatAmount(lastPayment(supplierTransactions).amount) }} TL <span v-if="lastPayment(supplierTransactions).date">({{ lastPayment(supplierTransactions).date }})</span></p>
-                        <p><strong style="font-size: 1.5em; font-weight: bold;">Genel Toplam:</strong> {{ formatSignedTotal(calculateTotalAmount(supplierTransactions)) }} TL</p>
+                        <hr style="margin: 15px 0; border: 1px solid var(--surface-border);">
+                        <p><strong style="font-size: 1.5em; font-weight: bold; color: var(--text-color);">Net Bakiye (Tüm Geçmiş):</strong> 
+                            <span :style="calculateTotalAmount(supplierTransactions, 0) > 0 ? 'color: #f87171;' : calculateTotalAmount(supplierTransactions, 0) < 0 ? 'color: #4ade80;' : 'color: #9ca3af;'">
+                                {{ calculateTotalAmount(supplierTransactions, 0) > 0 ? '+' : '' }}{{ formatAmount(calculateTotalAmount(supplierTransactions, 0)) }} TL
+                            </span>
+                        </p>
                     </div>
 
                     <div class="p-field" style="text-align: right; margin-top: 20px;">
@@ -249,10 +273,26 @@
                     </DataTable>
 
                     <div class="total-summary" style="text-align: right; margin-top: 20px;">
-                        <p><strong>Toplam Borç:</strong> {{ formatAmount(totalDebt(selectedSupplierTransaction.transactions)) }} TL</p>
-                        <p><strong>Toplam Alacak:</strong> {{ formatAmount(totalCredit(selectedSupplierTransaction.transactions)) }} TL</p>
-                        <p v-if="lastPayment(selectedSupplierTransaction.transactions)"><strong>Son Alacak:</strong> {{ formatAmount(lastPayment(selectedSupplierTransaction.transactions).amount) }} TL <span v-if="lastPayment(selectedSupplierTransaction.transactions).date">({{ lastPayment(selectedSupplierTransaction.transactions).date }})</span></p>
-                        <p><strong style="font-size: 1.5em; font-weight: bold;">Genel Toplam:</strong> {{ formatSignedTotal(calculateTotalAmount(selectedSupplierTransaction.transactions)) }} TL</p>
+                        <div class="flex justify-content-end align-items-center mb-3">
+                            <label for="readOnlyPeriodSelect" class="mr-2 font-semibold">Hesaplama Dönemi:</label>
+                            <Dropdown 
+                                id="readOnlyPeriodSelect"
+                                v-model="selectedPeriod" 
+                                :options="periodOptions" 
+                                optionLabel="label" 
+                                placeholder="Dönem Seçin"
+                                class="w-10rem"
+                            />
+                        </div>
+                        <p><strong>Toplam Borç ({{ selectedPeriod.label }}):</strong> {{ formatAmount(totalDebtForPeriod(selectedSupplierTransaction.transactions, selectedPeriod.value)) }} TL</p>
+                        <p><strong>Toplam Ödeme ({{ selectedPeriod.label }}):</strong> {{ formatAmount(totalCreditForPeriod(selectedSupplierTransaction.transactions, selectedPeriod.value)) }} TL</p>
+                        <p v-if="lastPayment(selectedSupplierTransaction.transactions)"><strong>Son Ödeme:</strong> {{ formatAmount(lastPayment(selectedSupplierTransaction.transactions).amount) }} TL <span v-if="lastPayment(selectedSupplierTransaction.transactions).date">({{ lastPayment(selectedSupplierTransaction.transactions).date }})</span></p>
+                        <hr style="margin: 15px 0; border: 1px solid var(--surface-border);">
+                        <p><strong style="font-size: 1.5em; font-weight: bold; color: var(--text-color);">Net Bakiye (Tüm Geçmiş):</strong> 
+                            <span :style="calculateTotalAmount(selectedSupplierTransaction.transactions, 0) > 0 ? 'color: #f87171;' : calculateTotalAmount(selectedSupplierTransaction.transactions, 0) < 0 ? 'color: #4ade80;' : 'color: #9ca3af;'">
+                                {{ calculateTotalAmount(selectedSupplierTransaction.transactions, 0) > 0 ? '+' : '' }}{{ formatAmount(calculateTotalAmount(selectedSupplierTransaction.transactions, 0)) }} TL
+                            </span>
+                        </p>
                     </div>
                 </div>
             </Dialog>
@@ -440,6 +480,16 @@
     ]);
     const selectedPrintSupplierTransaction = ref([]);
 
+    // Dönem seçimi için state
+    const selectedPeriod = ref({ label: 'Son 3 Ay', value: 3 });
+    const periodOptions = ref([
+        { label: 'Son 3 Ay', value: 3 },
+        { label: 'Son 6 Ay', value: 6 },
+        { label: 'Son 1 Yıl', value: 12 },
+        { label: 'Son 3 Yıl', value: 36 },
+        { label: 'Tüm Geçmiş', value: 0 }
+    ]);
+
     // Filtreleme için state
     const filters = ref({
         'global': { value: null, matchMode: FilterMatchMode.CONTAINS },
@@ -466,9 +516,16 @@
     };
 
     const fetchSuppliers = () => {
-        axios.get('/api/suppliers')
+        // Ana ekranda her zaman varsayılan (Son 3 Ay) göster
+        const params = { period_months: 3 };
+        
+        axios.get('/api/suppliers', { params })
             .then(response => {
-                suppliers.value = response.data;
+                suppliers.value = response.data.map(supplier => ({
+                    ...supplier,
+                    // Dönemsel borç varsa onu kullan, yoksa calculated_debt kullan
+                    display_debt: supplier.period_debt !== undefined ? supplier.period_debt : supplier.calculated_debt
+                }));
             })
             .catch(error => {
                 toast.value.add({ severity: 'error', summary: 'İşlem Başarısız', detail: error.data, life: 3000 });
@@ -524,7 +581,7 @@
             const dateObj = new Date(date);
             // Geçersiz tarih kontrolü
             if (isNaN(dateObj.getTime())) return '';
-            
+
             return dateObj.toLocaleDateString('tr-TR', {
                 day: '2-digit',
                 month: '2-digit',
@@ -623,7 +680,7 @@
     };
 
     const openEditDialog = (transaction) => {
-        editingTransaction.value = { 
+        editingTransaction.value = {
             ...transaction,
             // Type'ı dropdown'daki value formatına çevir
             type: transaction.type.toLowerCase() === 'borç' ? 'borç' : 'ödeme',
@@ -693,7 +750,7 @@
                     description: transaction.description,
                 };
             });
-            
+
             // Eğer transaction'lar boşsa, supplier_id'yi ayrı olarak gönder
             let requestData;
             if (updatedTransactions.length === 0) {
@@ -707,7 +764,7 @@
             } else {
                 requestData = updatedTransactions;
             }
-            
+
             console.log('Gönderilen veri:', requestData); // Debug için
             const resp = await axios.put('/api/suppliers/transactions/bulk', requestData);
             toast.value.add({ severity: 'success', summary: 'İşlem Başarılı', detail: resp.data.message, life: 3000 });
@@ -721,19 +778,30 @@
     };
 
     const updateCalculations = () => {
-        const totalDebtAmount = totalDebt(supplierTransactions.value);
-        const totalCreditAmount = totalCredit(supplierTransactions.value);
-        const totalAmount = calculateTotalAmount(supplierTransactions.value);
+        // Bu fonksiyon artık sadece reactive olarak çalışıyor
+        // Dropdown değiştiğinde otomatik olarak hesaplamalar güncelleniyor
     };
 
     const removeTransaction = (transaction) => {
         supplierTransactions.value = supplierTransactions.value.filter(t => t.id !== transaction.id);
     };
 
-    const calculateTotalAmount = (transactions) => {
+    const calculateTotalAmount = (transactions, periodMonths = null) => {
         let totalDebt = 0;
+        let filteredTransactions = transactions;
 
-        transactions.forEach((transaction) => {
+        // Eğer dönem belirtilmişse, sadece o döneme ait işlemleri al
+        if (periodMonths && periodMonths > 0) {
+            const startDate = new Date();
+            startDate.setMonth(startDate.getMonth() - periodMonths);
+            
+            filteredTransactions = transactions.filter(transaction => {
+                const transactionDate = new Date(transaction.date);
+                return transactionDate >= startDate;
+            });
+        }
+
+        filteredTransactions.forEach((transaction) => {
             const type = transaction.type.toLowerCase();
             if (type === "borç") {
                 totalDebt += parseFloat(transaction.amount);  // Tedarik aldık, borç arttı
@@ -762,6 +830,47 @@
 
     const totalCredit = (transactions) => {
         return transactions
+            .filter((transaction) => transaction.type.toLowerCase() === "ödeme")
+            .reduce((sum, transaction) => sum + parseFloat(transaction.amount), 0);
+    };
+
+    // Dönemsel borç hesaplama fonksiyonları
+    const totalDebtForPeriod = (transactions, periodMonths) => {
+        if (!transactions) return 0;
+        
+        let filteredTransactions = transactions;
+        
+        if (periodMonths && periodMonths > 0) {
+            const startDate = new Date();
+            startDate.setMonth(startDate.getMonth() - periodMonths);
+            
+            filteredTransactions = transactions.filter(transaction => {
+                const transactionDate = new Date(transaction.date);
+                return transactionDate >= startDate;
+            });
+        }
+        
+        return filteredTransactions
+            .filter((transaction) => transaction.type.toLowerCase() === "borç")
+            .reduce((sum, transaction) => sum + parseFloat(transaction.amount), 0);
+    };
+
+    const totalCreditForPeriod = (transactions, periodMonths) => {
+        if (!transactions) return 0;
+        
+        let filteredTransactions = transactions;
+        
+        if (periodMonths && periodMonths > 0) {
+            const startDate = new Date();
+            startDate.setMonth(startDate.getMonth() - periodMonths);
+            
+            filteredTransactions = transactions.filter(transaction => {
+                const transactionDate = new Date(transaction.date);
+                return transactionDate >= startDate;
+            });
+        }
+        
+        return filteredTransactions
             .filter((transaction) => transaction.type.toLowerCase() === "ödeme")
             .reduce((sum, transaction) => sum + parseFloat(transaction.amount), 0);
     };

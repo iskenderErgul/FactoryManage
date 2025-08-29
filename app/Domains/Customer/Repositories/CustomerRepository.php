@@ -17,12 +17,23 @@ class CustomerRepository implements CustomerRepositoryInterface
     /**
      * Tüm müşteri kayıtlarını alır.
      *
+     * @param Request $request
      * @return JsonResponse
      */
-    public function index(): JsonResponse
+    public function index(Request $request = null): JsonResponse
     {
-        $customer = Customer::with('transactions')->get();
-        return response()->json($customer);
+        $customers = Customer::with('transactions')->get();
+        
+        // Eğer dönem parametresi varsa, her müşteri için dönemsel borç hesapla
+        if ($request && $request->has('period_months')) {
+            $periodMonths = (int) $request->get('period_months', 3);
+            
+            $customers->each(function ($customer) use ($periodMonths) {
+                $customer->period_debt = $customer->calculateDebtForPeriod($periodMonths);
+            });
+        }
+        
+        return response()->json($customers);
     }
 
     /**
@@ -139,6 +150,25 @@ class CustomerRepository implements CustomerRepositoryInterface
         return response()->json(['message' => 'İşlemler başarıyla güncellendi!'], 200);
     }
 
-
-
+    /**
+     * Belirtilen müşterinin dönemsel borç bilgilerini döner.
+     *
+     * @param int $id
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function getPeriodicDebt($id, Request $request): JsonResponse
+    {
+        $customer = Customer::with('transactions')->findOrFail($id);
+        $periodMonths = (int) $request->get('period_months', 3);
+        
+        $periodicDebt = $customer->calculateDebtForPeriod($periodMonths);
+        $allPeriods = $customer->getDebtForAllPeriods();
+        
+        return response()->json([
+            'customer' => $customer,
+            'current_period_debt' => $periodicDebt,
+            'all_periods' => $allPeriods
+        ]);
+    }
 }

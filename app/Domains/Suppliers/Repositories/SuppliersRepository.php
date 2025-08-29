@@ -13,11 +13,22 @@ class SuppliersRepository
     /**
      * Tüm tedarikçi kayıtlarını alır.
      *
+     * @param Request $request
      * @return JsonResponse
      */
-    public function index(): JsonResponse
+    public function index(Request $request = null): JsonResponse
     {
         $suppliers = Supplier::with('transactions')->get();
+        
+        // Eğer dönem parametresi varsa, her tedarikçi için dönemsel borç hesapla
+        if ($request && $request->has('period_months')) {
+            $periodMonths = (int) $request->get('period_months', 3);
+            
+            $suppliers->each(function ($supplier) use ($periodMonths) {
+                $supplier->period_debt = $supplier->calculateDebtForPeriod($periodMonths);
+            });
+        }
+        
         return response()->json($suppliers);
     }
 
@@ -183,5 +194,25 @@ class SuppliersRepository
         return response()->json(['message' => 'İşlemler başarıyla güncellendi!'], 200);
     }
 
-
+    /**
+     * Belirtilen tedarikçinin dönemsel borç bilgilerini döner.
+     *
+     * @param int $id
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function getPeriodicDebt($id, Request $request): JsonResponse
+    {
+        $supplier = Supplier::with('transactions')->findOrFail($id);
+        $periodMonths = (int) $request->get('period_months', 3);
+        
+        $periodicDebt = $supplier->calculateDebtForPeriod($periodMonths);
+        $allPeriods = $supplier->getDebtForAllPeriods();
+        
+        return response()->json([
+            'supplier' => $supplier,
+            'current_period_debt' => $periodicDebt,
+            'all_periods' => $allPeriods
+        ]);
+    }
 }

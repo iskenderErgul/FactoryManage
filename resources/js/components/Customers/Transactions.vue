@@ -47,6 +47,13 @@
                             <InputText type="text" v-model="filterModel.value" class="p-column-filter" placeholder="Telefon ara" />
                         </template>
                     </Column>
+                    <Column field="display_debt" header="Net Bakiye (TL)" sortable style="min-width:8rem">
+                        <template #body="slotProps">
+                            <span :class="slotProps.data.display_debt > 0 ? 'text-red-400 font-bold' : slotProps.data.display_debt < 0 ? 'text-green-400 font-bold' : 'text-gray-400 font-bold'">
+                                {{ slotProps.data.display_debt > 0 ? '+' : slotProps.data.display_debt < 0 ? '' : '' }}{{ formatAmount(slotProps.data.display_debt) }} TL
+                            </span>
+                        </template>
+                    </Column>
                     <Column :exportable="false" style="min-width:8rem">
                         <template #body="slotProps">
                             <Button icon="pi pi-info-circle" outlined rounded class="mr-2" @click="openCustomerTransactionsDetailDialog(slotProps.data)" />
@@ -102,10 +109,27 @@
                     </DataTable>
 
                     <div class="total-summary" style="text-align: right; margin-top: 20px;">
-                        <p><strong>Toplam Borç:</strong> {{ formatAmount(totalDebt(customerTransactions)) }} TL</p>
-                        <p><strong>Toplam Ödeme:</strong> {{ formatAmount(totalCredit(customerTransactions)) }} TL</p>
+                        <div class="flex justify-content-end align-items-center mb-3">
+                            <label for="detailPeriodSelect" class="mr-2 font-semibold">Hesaplama Dönemi:</label>
+                            <Dropdown 
+                                id="detailPeriodSelect"
+                                v-model="selectedPeriod" 
+                                :options="periodOptions" 
+                                optionLabel="label" 
+                                placeholder="Dönem Seçin"
+                                class="w-10rem"
+                                @change="updateCalculations"
+                            />
+                        </div>
+                        <p><strong>Toplam Borç ({{ selectedPeriod.label }}):</strong> {{ formatAmount(totalDebtForPeriod(customerTransactions, selectedPeriod.value)) }} TL</p>
+                        <p><strong>Toplam Ödeme ({{ selectedPeriod.label }}):</strong> {{ formatAmount(totalCreditForPeriod(customerTransactions, selectedPeriod.value)) }} TL</p>
                         <p v-if="lastPayment(customerTransactions)"><strong>Son Ödeme:</strong> {{ formatAmount(lastPayment(customerTransactions).amount) }} TL <span v-if="lastPayment(customerTransactions).date">({{ lastPayment(customerTransactions).date }})</span></p>
-                        <p><strong style="font-size: 1.5em; font-weight: bold;">Genel Toplam:</strong> {{ formatSignedTotal(calculateTotalAmount(customerTransactions)) }} TL</p>
+                        <hr style="margin: 15px 0; border: 1px solid var(--surface-border);">
+                        <p><strong style="font-size: 1.5em; font-weight: bold; color: var(--text-color);">Net Bakiye (Tüm Geçmiş):</strong> 
+                            <span :style="calculateTotalAmount(customerTransactions, 0) > 0 ? 'color: #f87171;' : calculateTotalAmount(customerTransactions, 0) < 0 ? 'color: #4ade80;' : 'color: #9ca3af;'">
+                                {{ calculateTotalAmount(customerTransactions, 0) > 0 ? '+' : '' }}{{ formatAmount(calculateTotalAmount(customerTransactions, 0)) }} TL
+                            </span>
+                        </p>
                     </div>
 
                     <div class="p-field" style="text-align: right; margin-top: 20px;">
@@ -249,10 +273,26 @@
                     </DataTable>
 
                     <div class="total-summary" style="text-align: right; margin-top: 20px;">
-                        <p><strong>Toplam Borç:</strong> {{ formatAmount(totalDebt(selectedCustomerTransaction.transactions)) }} TL</p>
-                        <p><strong>Toplam Ödeme:</strong> {{ formatAmount(totalCredit(selectedCustomerTransaction.transactions)) }} TL</p>
+                        <div class="flex justify-content-end align-items-center mb-3">
+                            <label for="readOnlyPeriodSelect" class="mr-2 font-semibold">Hesaplama Dönemi:</label>
+                            <Dropdown 
+                                id="readOnlyPeriodSelect"
+                                v-model="selectedPeriod" 
+                                :options="periodOptions" 
+                                optionLabel="label" 
+                                placeholder="Dönem Seçin"
+                                class="w-10rem"
+                            />
+                        </div>
+                        <p><strong>Toplam Borç ({{ selectedPeriod.label }}):</strong> {{ formatAmount(totalDebtForPeriod(selectedCustomerTransaction.transactions, selectedPeriod.value)) }} TL</p>
+                        <p><strong>Toplam Ödeme ({{ selectedPeriod.label }}):</strong> {{ formatAmount(totalCreditForPeriod(selectedCustomerTransaction.transactions, selectedPeriod.value)) }} TL</p>
                         <p v-if="lastPayment(selectedCustomerTransaction.transactions)"><strong>Son Ödeme:</strong> {{ formatAmount(lastPayment(selectedCustomerTransaction.transactions).amount) }} TL <span v-if="lastPayment(selectedCustomerTransaction.transactions).date">({{ lastPayment(selectedCustomerTransaction.transactions).date }})</span></p>
-                        <p><strong style="font-size: 1.5em; font-weight: bold;">Genel Toplam:</strong> {{ formatSignedTotal(calculateTotalAmount(selectedCustomerTransaction.transactions)) }} TL</p>
+                        <hr style="margin: 15px 0; border: 1px solid var(--surface-border);">
+                        <p><strong style="font-size: 1.5em; font-weight: bold; color: var(--text-color);">Net Bakiye (Tüm Geçmiş):</strong> 
+                            <span :style="calculateTotalAmount(selectedCustomerTransaction.transactions, 0) > 0 ? 'color: #f87171;' : calculateTotalAmount(selectedCustomerTransaction.transactions, 0) < 0 ? 'color: #4ade80;' : 'color: #9ca3af;'">
+                                {{ calculateTotalAmount(selectedCustomerTransaction.transactions, 0) > 0 ? '+' : '' }}{{ formatAmount(calculateTotalAmount(selectedCustomerTransaction.transactions, 0)) }} TL
+                            </span>
+                        </p>
                     </div>
                 </div>
             </Dialog>
@@ -440,6 +480,16 @@
     ]);
     const selectedPrintCustomerTransaction = ref([]);
 
+    // Dönem seçimi için state
+    const selectedPeriod = ref({ label: 'Son 3 Ay', value: 3 });
+    const periodOptions = ref([
+        { label: 'Son 3 Ay', value: 3 },
+        { label: 'Son 6 Ay', value: 6 },
+        { label: 'Son 1 Yıl', value: 12 },
+        { label: 'Son 3 Yıl', value: 36 },
+        { label: 'Tüm Geçmiş', value: 0 }
+    ]);
+
     // Filtreleme için state
     const filters = ref({
         'global': { value: null, matchMode: FilterMatchMode.CONTAINS },
@@ -466,9 +516,16 @@
     };
 
     const fetchCustomers = () => {
-        axios.get('/api/customers')
+        // Ana ekranda her zaman varsayılan (Son 3 Ay) göster
+        const params = { period_months: 3 };
+        
+        axios.get('/api/customers', { params })
             .then(response => {
-                customers.value = response.data;
+                customers.value = response.data.map(customer => ({
+                    ...customer,
+                    // Dönemsel borç varsa onu kullan, yoksa calculated_debt kullan
+                    display_debt: customer.period_debt !== undefined ? customer.period_debt : customer.calculated_debt
+                }));
             })
             .catch(error => {
                 toast.value.add({ severity: 'error', summary: 'İşlem Başarısız', detail: error.data, life: 3000 });
@@ -699,19 +756,30 @@
     };
 
     const updateCalculations = () => {
-        const totalDebtAmount = totalDebt(customerTransactions.value);
-        const totalCreditAmount = totalCredit(customerTransactions.value);
-        const totalAmount = calculateTotalAmount(customerTransactions.value);
+        // Bu fonksiyon artık sadece reactive olarak çalışıyor
+        // Dropdown değiştiğinde otomatik olarak hesaplamalar güncelleniyor
     };
 
     const removeTransaction = (transaction) => {
         customerTransactions.value = customerTransactions.value.filter(t => t.id !== transaction.id);
     };
 
-    const calculateTotalAmount = (transactions) => {
+    const calculateTotalAmount = (transactions, periodMonths = null) => {
         let totalDebt = 0;
+        let filteredTransactions = transactions;
 
-        transactions.forEach((transaction) => {
+        // Eğer dönem belirtilmişse, sadece o döneme ait işlemleri al
+        if (periodMonths && periodMonths > 0) {
+            const startDate = new Date();
+            startDate.setMonth(startDate.getMonth() - periodMonths);
+            
+            filteredTransactions = transactions.filter(transaction => {
+                const transactionDate = new Date(transaction.date);
+                return transactionDate >= startDate;
+            });
+        }
+
+        filteredTransactions.forEach((transaction) => {
             const type = transaction.type.toLowerCase();
             if (type === "borç") {
                 totalDebt += parseFloat(transaction.amount);
@@ -740,6 +808,47 @@
 
     const totalCredit = (transactions) => {
         return transactions
+            .filter((transaction) => transaction.type.toLowerCase() === "ödeme")
+            .reduce((sum, transaction) => sum + parseFloat(transaction.amount), 0);
+    };
+
+    // Dönemsel borç hesaplama fonksiyonları
+    const totalDebtForPeriod = (transactions, periodMonths) => {
+        if (!transactions) return 0;
+        
+        let filteredTransactions = transactions;
+        
+        if (periodMonths && periodMonths > 0) {
+            const startDate = new Date();
+            startDate.setMonth(startDate.getMonth() - periodMonths);
+            
+            filteredTransactions = transactions.filter(transaction => {
+                const transactionDate = new Date(transaction.date);
+                return transactionDate >= startDate;
+            });
+        }
+        
+        return filteredTransactions
+            .filter((transaction) => transaction.type.toLowerCase() === "borç")
+            .reduce((sum, transaction) => sum + parseFloat(transaction.amount), 0);
+    };
+
+    const totalCreditForPeriod = (transactions, periodMonths) => {
+        if (!transactions) return 0;
+        
+        let filteredTransactions = transactions;
+        
+        if (periodMonths && periodMonths > 0) {
+            const startDate = new Date();
+            startDate.setMonth(startDate.getMonth() - periodMonths);
+            
+            filteredTransactions = transactions.filter(transaction => {
+                const transactionDate = new Date(transaction.date);
+                return transactionDate >= startDate;
+            });
+        }
+        
+        return filteredTransactions
             .filter((transaction) => transaction.type.toLowerCase() === "ödeme")
             .reduce((sum, transaction) => sum + parseFloat(transaction.amount), 0);
     };
