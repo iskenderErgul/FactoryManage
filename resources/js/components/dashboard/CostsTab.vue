@@ -1,7 +1,7 @@
 <template>
     <div class="costs-analysis">
         <!-- Periyot Seçimi -->
-        <div class="period-selector mb-4">
+        <div class="period-selector  mt-2">
             <h3 class="mb-3">📊 Dönemsel Maliyet Analizi</h3>
             <div class="period-buttons">
                 <Button
@@ -26,7 +26,7 @@
         <!-- Maliyet Verileri -->
         <div v-else class="costs-content">
             <!-- Özet Kartları -->
-            <div class="summary-cards mb-4">
+            <div class="summary-cards mb-2">
                 <div class="summary-card">
                     <div class="card-header">
                         <i class="pi pi-calculator"></i>
@@ -54,18 +54,18 @@
                     <template #title>
                         <div class="table-header">
                             <h4>📋 Detaylı Maliyet Kalemleri</h4>
-                            <Button 
-                                icon="pi pi-download" 
-                                label="Excel'e Aktar" 
-                                severity="success" 
+                            <Button
+                                icon="pi pi-download"
+                                label="Excel'e Aktar"
+                                severity="success"
                                 size="small"
                                 @click="exportToExcel" />
                         </div>
                     </template>
                     <template #content>
-                        <DataTable 
-                            :value="costItems" 
-                            :paginator="true" 
+                        <DataTable
+                            :value="costItems"
+                            :paginator="true"
                             :rows="10"
                             :rowsPerPageOptions="[10, 20, 50]"
                             responsiveLayout="scroll"
@@ -74,14 +74,14 @@
                             v-model:filters="filters"
                             sortMode="multiple"
                             class="p-datatable-sm">
-                            
+
                             <template #header>
                                 <div class="table-header-actions">
                                     <span class="p-input-icon-left">
                                         <i class="pi pi-search" />
-                                        <InputText 
-                                            v-model="filters['global'].value" 
-                                            placeholder="Ara..." 
+                                        <InputText
+                                            v-model="filters['global'].value"
+                                            placeholder="Ara..."
                                             class="w-full" />
                                     </span>
                                 </div>
@@ -90,8 +90,8 @@
                             <Column field="category" header="Maliyet Kalemi" :sortable="true" style="min-width: 300px">
                                 <template #body="slotProps">
                                     <div class="category-cell">
-                                        <Tag :severity="getSourceSeverity(slotProps.data.source)" 
-                                             :value="slotProps.data.source" 
+                                        <Tag :severity="getSourceSeverity(slotProps.data.source)"
+                                             :value="slotProps.data.source"
                                              class="mr-2" />
                                         <span>{{ slotProps.data.category }}</span>
                                     </div>
@@ -107,8 +107,8 @@
                             <Column field="percentage" header="Oran" :sortable="true" style="min-width: 100px">
                                 <template #body="slotProps">
                                     <div class="percentage-cell">
-                                        <ProgressBar 
-                                            :value="calculatePercentage(slotProps.data.amount, grandTotal)" 
+                                        <ProgressBar
+                                            :value="calculatePercentage(slotProps.data.amount, grandTotal)"
                                             :showValue="false"
                                             style="height: 6px; flex: 1;" />
                                         <span class="percentage-value ml-2">
@@ -124,7 +124,7 @@
                                         Toplam {{ costItems.length }} maliyet kalemi
                                     </div>
                                     <div class="footer-total">
-                                        <strong>Genel Toplam:</strong> 
+                                        <strong>Genel Toplam:</strong>
                                         <span class="total-amount">₺{{ formatCurrency(grandTotal) }}</span>
                                     </div>
                                 </div>
@@ -142,7 +142,7 @@
             </div>
 
             <!-- Kaynak Bazlı Özet -->
-            <div class="source-summary mt-4">
+            <div class="source-summary mt-2">
                 <Card>
                     <template #title>
                         <h4>📊 Kaynak Bazlı Dağılım</h4>
@@ -154,7 +154,7 @@
                                     <span class="source-name">{{ source.source }}</span>
                                     <span class="source-amount">₺{{ formatCurrency(source.total) }}</span>
                                 </div>
-                                <ProgressBar 
+                                <ProgressBar
                                     :value="calculatePercentage(source.total, grandTotal)"
                                     :showValue="true"
                                     style="height: 20px;" />
@@ -363,7 +363,7 @@ onMounted(() => {
 .summary-cards {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 20px;
+    gap: 15px;
 }
 
 .summary-card {
@@ -636,40 +636,40 @@ onMounted(() => {
     .costs-analysis {
         gap: 20px;
     }
-    
+
     .summary-cards {
         grid-template-columns: 1fr;
         gap: 15px;
     }
-    
+
     .period-buttons {
         flex-direction: column;
         gap: 8px;
     }
-    
+
     .period-btn {
         width: 100%;
         justify-content: center;
     }
-    
+
     .table-header {
         flex-direction: column;
         gap: 1rem;
         align-items: stretch;
     }
-    
+
     .table-header-actions {
         width: 100%;
     }
-    
+
     .summary-card {
         padding: 1.25rem;
     }
-    
+
     .card-value {
         font-size: 1.6rem;
     }
-    
+
     .source-header {
         flex-direction: column;
         align-items: flex-start;
@@ -681,15 +681,15 @@ onMounted(() => {
     .period-selector {
         padding: 1rem;
     }
-    
+
     .summary-card {
         padding: 1rem;
     }
-    
+
     .card-value {
         font-size: 1.4rem;
     }
-    
+
     .period-selector h3 {
         font-size: 1.1rem;
     }

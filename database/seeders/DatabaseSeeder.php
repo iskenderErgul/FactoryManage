@@ -22,6 +22,7 @@ class DatabaseSeeder extends Seeder
             ShiftAssignmentSeeder::class,
             ShiftTemplateSeeder::class,
             MachineSeeder::class,
+            CostSeeder::class
 
 
         ]);
