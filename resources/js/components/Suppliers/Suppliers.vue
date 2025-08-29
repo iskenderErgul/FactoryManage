@@ -25,9 +25,9 @@
                 <Column field="supplier_email" header="E-posta" sortable style="min-width:12rem"></Column>
                 <Column field="supplier_phone" header="Telefon" sortable style="min-width:10rem"></Column>
                 <Column field="supplier_address" header="Adres" sortable style="min-width:15rem"></Column>
-                <Column field="debt" header="Toplam Borç" sortable style="min-width:8rem">
+                <Column field="calculated_debt" header="Toplam Borç" sortable style="min-width:8rem">
                     <template #body="slotProps">
-                        <span>{{ formatPrice(slotProps.data.debt || 0) }} TL</span>
+                        <span>{{ formatPrice(slotProps.data.calculated_debt || 0) }} TL</span>
                     </template>
                 </Column>
                 <Column :exportable="false" style="min-width:8rem">
@@ -59,10 +59,7 @@
                 <label for="supplier_address">Adres</label>
                 <Textarea id="supplier_address" v-model="supplier.supplier_address" rows="3" />
             </div>
-            <div class="field">
-                <label for="debt">Toplam Borç</label>
-                <InputNumber id="debt" v-model="supplier.debt" mode="decimal" :minFractionDigits="2" :maxFractionDigits="2" />
-            </div>
+            <!-- Toplam Borç artık otomatik hesaplanıyor, manuel giriş kaldırıldı -->
             <template #footer>
                 <Button label="İptal" icon="pi pi-times" text @click="hideDialog" />
                 <Button label="Kaydet" icon="pi pi-check" text @click="saveSupplier" />
@@ -143,7 +140,7 @@ onMounted(() => {
 
 // Yeni tedarikçi ekleme işlemi
 const openNew = () => {
-    supplier.value = { debt: 0 };
+    supplier.value = {};
     submitted.value = false;
     supplierDialog.value = true;
 };

@@ -18,6 +18,8 @@ return new class extends Migration
             $table->string('supplied_product_quantity');
             $table->decimal('supplied_product_price', 15, 2);
             $table->date('supply_date');
+            $table->enum('payment_method', ['peşin', 'borç', 'kısmi'])->default('borç');
+            $table->decimal('paid_amount', 15, 2)->nullable()->comment('Kısmi ödeme durumunda ödenen miktar');
             $table->timestamps();
         });
     }

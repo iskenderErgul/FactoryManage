@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('supplier_transactions', function (Blueprint $table) {
             $table->id();
             $table->foreignId('supplier_id')->constrained('suppliers')->onDelete('cascade');
-            $table->enum('type', ['borç', 'alacak']);
+            $table->enum('type', ['borç', 'ödeme']);
             $table->decimal('amount', 15, 2);
             $table->date('date');
             $table->text('description')->nullable();

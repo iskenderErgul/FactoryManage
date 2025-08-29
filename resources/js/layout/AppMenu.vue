@@ -90,7 +90,7 @@ const model = ref([
                 label: 'Satış Yönetimi',
                 icon: 'pi pi-shopping-cart',
                 items: [
-                    { label: 'Satış Yönetimi', icon: 'pi pi-shopping-cart', to: '/sys/sales' },
+                    { label: 'Satış İşlemleri', icon: 'pi pi-shopping-cart', to: '/sys/sales' },
                     { label: 'Sipariş Yönetimi', icon: 'pi pi-book', to: '/sys/orders' }
                 ]
             }
@@ -104,7 +104,7 @@ const model = ref([
                 icon: 'pi pi-users',
                 items: [
                     { label: 'Müşteri Yönetimi', icon: 'pi pi-users', to: '/sys/customers' },
-                    { label: 'Hesap Kaydı İşlemleri', icon: 'pi pi-book', to: '/sys/customers/transactions' },
+                    { label: 'Müşteri Hesap İşlemleri', icon: 'pi pi-book', to: '/sys/customers/transactions' },
 
                 ]
             }
@@ -125,16 +125,16 @@ const model = ref([
             }
         ]
     },
-    {
-        items: [
-            {
-                label: 'Geri Dönüşüm Kayıtları',
-                icon: 'pi pi-replay',
-                to: '/sys/recycling'
-            }
-        ]
-
-    },
+    // {
+    //     items: [
+    //         {
+    //             label: 'Geri Dönüşüm Kayıtları',
+    //             icon: 'pi pi-replay',
+    //             to: '/sys/recycling'
+    //         }
+    //     ]
+    //
+    // },
 
     // {
     //

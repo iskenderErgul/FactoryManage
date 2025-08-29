@@ -18,10 +18,7 @@ return new class extends Migration
             $table->string('supplier_phone')->nullable();
             $table->text('supplier_address')->nullable();
             $table->decimal('debt', 15, 2)->default(0);
-            $table->string('supplied_product');
-            $table->string('supplied_product_quantity');
-            $table->decimal('supplied_product_price', 15, 2);
-            $table->date('supply_date');
+
             $table->timestamps();
         });
     }

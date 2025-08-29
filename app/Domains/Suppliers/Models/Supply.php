@@ -16,6 +16,8 @@ class Supply extends Model
         'supplied_product_quantity',
         'supplied_product_price',
         'supply_date',
+        'payment_method',
+        'paid_amount',
     ];
 
     public function supplier(): BelongsTo

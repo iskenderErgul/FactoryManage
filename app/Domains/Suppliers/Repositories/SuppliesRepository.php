@@ -38,11 +38,20 @@ class SuppliesRepository
             'supplied_product_quantity' => $request->supplied_product_quantity,
             'supplied_product_price' => $request->supplied_product_price,
             'supply_date' => $supplyDate,
+            'payment_method' => $request->payment_method ?? 'borç',
+            'paid_amount' => $request->paid_amount,
         ]);
 
-        // Otomatik transaction oluştur
+        // Ödeme yöntemine göre transaction oluştur
         $totalAmount = $request->supplied_product_quantity * $request->supplied_product_price;
-        $this->createTransaction($request->supplier_id, $supplyDate, $totalAmount, $supply->id);
+        $this->createTransactionsByPaymentMethod(
+            $request->supplier_id, 
+            $supplyDate, 
+            $totalAmount, 
+            $supply->id,
+            $request->payment_method ?? 'borç',
+            $request->paid_amount
+        );
 
         return response()->json($supply->load('supplier'), 201);
     }
@@ -78,17 +87,25 @@ class SuppliesRepository
             'supplied_product_quantity' => $request->supplied_product_quantity,
             'supplied_product_price' => $request->supplied_product_price,
             'supply_date' => $supplyDate,
+            'payment_method' => $request->payment_method ?? $supply->payment_method,
+            'paid_amount' => $request->paid_amount,
         ]);
 
-        // İlgili transaction'ı güncelle (otomatik oluşturulan transaction'ı)
-        $totalAmount = $request->supplied_product_quantity * $request->supplied_product_price;
+        // İlgili transaction'ları sil ve yeniden oluştur (ödeme yöntemi değişebileceği için)
         SupplierTransaction::where('supplier_id', $supply->supplier_id)
             ->where('description', 'LIKE', '%Tedarik #' . $supply->id . '%')
-            ->update([
-                'amount' => $totalAmount,
-                'date' => $supplyDate,
-                'description' => 'Tedarik #' . $supply->id . ' - ' . $supply->supplied_product,
-            ]);
+            ->delete();
+            
+        // Yeni transaction'ları oluştur
+        $totalAmount = $request->supplied_product_quantity * $request->supplied_product_price;
+        $this->createTransactionsByPaymentMethod(
+            $request->supplier_id, 
+            $supplyDate, 
+            $totalAmount, 
+            $supply->id,
+            $request->payment_method ?? $supply->payment_method,
+            $request->paid_amount
+        );
 
         return response()->json($supply->load('supplier'));
     }
@@ -137,7 +154,81 @@ class SuppliesRepository
     }
 
     /**
-     * Otomatik transaction oluşturma (private method).
+     * Ödeme yöntemine göre transaction oluşturma.
+     *
+     * @param int $supplierId
+     * @param string $supplyDate
+     * @param float $totalAmount
+     * @param int $supplyId
+     * @param string $paymentMethod
+     * @param float|null $paidAmount
+     * @return void
+     */
+    private function createTransactionsByPaymentMethod($supplierId, $supplyDate, $totalAmount, $supplyId, $paymentMethod, $paidAmount = null): void
+    {
+        $supply = Supply::find($supplyId);
+        $description = 'Tedarik #' . $supplyId . ' - ' . ($supply ? $supply->supplied_product : 'Tedarik');
+        
+        switch ($paymentMethod) {
+            case 'peşin':
+                // Peşin ödeme: 0 TL borç transaction'ı oluştur (işlem görünsün ama borç 0)
+                SupplierTransaction::create([
+                    'supplier_id' => $supplierId,
+                    'type' => 'borç',
+                    'date' => $supplyDate,
+                    'amount' => 0,
+                    'description' => $description . ' (Peşin Ödeme - ' . number_format($totalAmount, 2) . ' TL ödendi)',
+                ]);
+                break;
+                
+            case 'borç':
+                // Borç: Sadece borç kaydı oluştur
+                SupplierTransaction::create([
+                    'supplier_id' => $supplierId,
+                    'type' => 'borç',
+                    'date' => $supplyDate,
+                    'amount' => $totalAmount,
+                    'description' => $description,
+                ]);
+                break;
+                
+            case 'kısmi':
+                // Kısmi ödeme: Sadece kalan borç kadar transaction oluştur
+                if ($paidAmount && $paidAmount > 0 && $paidAmount < $totalAmount) {
+                    $remainingDebt = $totalAmount - $paidAmount;
+                    
+                    // Sadece kalan borç kadar transaction oluştur
+                    SupplierTransaction::create([
+                        'supplier_id' => $supplierId,
+                        'type' => 'borç',
+                        'date' => $supplyDate,
+                        'amount' => $remainingDebt,
+                        'description' => $description . ' (Kısmi Ödeme: ' . number_format($paidAmount, 2) . ' TL ödendi)',
+                    ]);
+                } elseif ($paidAmount >= $totalAmount) {
+                    // Ödenen miktar toplam tutara eşit veya fazlaysa, 0 TL borç transaction'ı oluştur
+                    SupplierTransaction::create([
+                        'supplier_id' => $supplierId,
+                        'type' => 'borç',
+                        'date' => $supplyDate,
+                        'amount' => 0,
+                        'description' => $description . ' (Tam Ödeme - ' . number_format($paidAmount, 2) . ' TL ödendi)',
+                    ]);
+                } else {
+                    // Ödenen miktar belirtilmemişse sadece borç olarak kaydet
+                    $this->createTransaction($supplierId, $supplyDate, $totalAmount, $supplyId);
+                }
+                break;
+                
+            default:
+                // Varsayılan: borç olarak kaydet
+                $this->createTransaction($supplierId, $supplyDate, $totalAmount, $supplyId);
+                break;
+        }
+    }
+
+    /**
+     * Basit borç transaction oluşturma (private method).
      *
      * @param int $supplierId
      * @param string $supplyDate

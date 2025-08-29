@@ -34,7 +34,7 @@ class SuppliersRepository
             'supplier_email' => $request->supplier_email,
             'supplier_phone' => $request->supplier_phone,
             'supplier_address' => $request->supplier_address,
-            'debt' => $request->debt ?? 0,
+            // debt artık otomatik hesaplanıyor
         ]);
 
         return response()->json($supplier, 201);
@@ -68,7 +68,7 @@ class SuppliersRepository
             'supplier_email' => $request->supplier_email,
             'supplier_phone' => $request->supplier_phone,
             'supplier_address' => $request->supplier_address,
-            'debt' => $request->debt ?? $supplier->debt,
+            // debt artık otomatik hesaplanıyor
         ]);
 
         return response()->json($supplier);
@@ -133,8 +133,19 @@ class SuppliersRepository
     public function bulkUpdateTransactions(Request $request): JsonResponse
     {
         $transactions = $request->all();
-        if (empty($transactions)) {
-            return response()->json(['message' => 'Hiçbir işlem verisi bulunamadı.'], 400);
+        
+        // Eğer transaction array'i boşsa veya sadece supplier_id içeriyorsa
+        if (empty($transactions) || (count($transactions) === 1 && isset($transactions['supplier_id']) && !isset($transactions[0]))) {
+            // supplier_id'yi farklı yollardan almaya çalış
+            $supplierId = $request->input('supplier_id') ?? $transactions['supplier_id'] ?? null;
+            
+            if (!$supplierId) {
+                return response()->json(['message' => 'Tedarikçi ID si bulunamadı.'], 400);
+            }
+            
+            // Tüm transaction'ları sil
+            SupplierTransaction::where('supplier_id', $supplierId)->delete();
+            return response()->json(['message' => 'Tüm işlemler başarıyla silindi!'], 200);
         }
 
         $supplierId = $transactions[0]['supplier_id'] ?? null;

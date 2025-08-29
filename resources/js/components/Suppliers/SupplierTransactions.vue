@@ -103,8 +103,8 @@
 
                     <div class="total-summary" style="text-align: right; margin-top: 20px;">
                         <p><strong>Toplam Borç:</strong> {{ formatAmount(totalDebt(supplierTransactions)) }} TL</p>
-                        <p><strong>Toplam Alacak:</strong> {{ formatAmount(totalCredit(supplierTransactions)) }} TL</p>
-                        <p v-if="lastPayment(supplierTransactions)"><strong>Son Alacak:</strong> {{ formatAmount(lastPayment(supplierTransactions).amount) }} TL <span v-if="lastPayment(supplierTransactions).date">({{ lastPayment(supplierTransactions).date }})</span></p>
+                        <p><strong>Toplam Ödeme:</strong> {{ formatAmount(totalCredit(supplierTransactions)) }} TL</p>
+                        <p v-if="lastPayment(supplierTransactions)"><strong>Son Ödeme:</strong> {{ formatAmount(lastPayment(supplierTransactions).amount) }} TL <span v-if="lastPayment(supplierTransactions).date">({{ lastPayment(supplierTransactions).date }})</span></p>
                         <p><strong style="font-size: 1.5em; font-weight: bold;">Genel Toplam:</strong> {{ formatSignedTotal(calculateTotalAmount(supplierTransactions)) }} TL</p>
                     </div>
 
@@ -121,7 +121,7 @@
                         <Dropdown
                             id="type"
                             v-model="editingTransaction.type"
-                            :options="[ { label: 'Borç', value: 'borç' }, { label: 'Alacak', value: 'alacak' } ]"
+                            :options="[ { label: 'Borç', value: 'borç' }, { label: 'Ödeme', value: 'ödeme' } ]"
                             optionLabel="label"
                             optionValue="value"
                             placeholder="İşlem Türü Seçin"
@@ -436,7 +436,7 @@
     const printTransaction = ref(false);
     const transactionTypes = ref([
         { label: "Borç", value: "borç" },
-        { label: "Alacak", value: "alacak" }
+        { label: "Ödeme", value: "ödeme" }
     ]);
     const selectedPrintSupplierTransaction = ref([]);
 
@@ -626,7 +626,7 @@
         editingTransaction.value = { 
             ...transaction,
             // Type'ı dropdown'daki value formatına çevir
-            type: transaction.type.toLowerCase() === 'borç' ? 'borç' : 'alacak',
+            type: transaction.type.toLowerCase() === 'borç' ? 'borç' : 'ödeme',
             // supplier_id'nin kesinlikle mevcut olmasını sağla
             supplier_id: transaction.supplier_id || selectedSupplier.value?.id
         };
@@ -642,10 +642,13 @@
     };
 
     const saveEdit = () => {
-        // Tarihi doğru formatta hazırla
+        // Tarihi doğru formatta hazırla (timezone sorununu önlemek için)
         let formattedDate = editingTransaction.value.date;
         if (formattedDate instanceof Date) {
-            formattedDate = formattedDate.toISOString().split('T')[0];
+            const year = formattedDate.getFullYear();
+            const month = String(formattedDate.getMonth() + 1).padStart(2, '0');
+            const day = String(formattedDate.getDate()).padStart(2, '0');
+            formattedDate = `${year}-${month}-${day}`;
         } else if (typeof formattedDate === 'string' && formattedDate.includes('T')) {
             formattedDate = formattedDate.split('T')[0];
         }
@@ -653,7 +656,7 @@
         const updatedTransaction = {
             id: editingTransaction.value.id,
             supplier_id: editingTransaction.value.supplier_id, // supplier_id'yi koruyalım
-            type: editingTransaction.value.type === 'borç' ? 'Borç' : 'Alacak', // Tablo görünümü için büyük harfle
+            type: editingTransaction.value.type === 'borç' ? 'Borç' : 'Ödeme', // Tablo görünümü için büyük harfle
             date: formattedDate,
             amount: editingTransaction.value.amount,
             description: editingTransaction.value.description,
@@ -670,10 +673,13 @@
     const saveAllTransactions = async () => {
         try {
             const updatedTransactions = supplierTransactions.value.map(transaction => {
-                // Tarihi doğru formatta hazırla
+                // Tarihi doğru formatta hazırla (timezone sorununu önlemek için)
                 let formattedDate = transaction.date;
                 if (formattedDate instanceof Date) {
-                    formattedDate = formattedDate.toISOString().split('T')[0];
+                    const year = formattedDate.getFullYear();
+                    const month = String(formattedDate.getMonth() + 1).padStart(2, '0');
+                    const day = String(formattedDate.getDate()).padStart(2, '0');
+                    formattedDate = `${year}-${month}-${day}`;
                 } else if (typeof formattedDate === 'string' && formattedDate.includes('T')) {
                     formattedDate = formattedDate.split('T')[0];
                 }
@@ -681,13 +687,29 @@
                 return {
                     supplier_id: transaction.supplier_id,
                     id: transaction.id,
-                    type: transaction.type.toLowerCase() === 'borç' ? 'borç' : 'alacak', // Backend için küçük harfle
+                    type: transaction.type.toLowerCase() === 'borç' ? 'borç' : 'ödeme', // Backend için küçük harfle
                     date: formattedDate,
                     amount: transaction.amount,
                     description: transaction.description,
                 };
             });
-            const resp = await axios.put('/api/suppliers/transactions/bulk', updatedTransactions);
+            
+            // Eğer transaction'lar boşsa, supplier_id'yi ayrı olarak gönder
+            let requestData;
+            if (updatedTransactions.length === 0) {
+                // Boş transaction array'i durumunda sadece supplier_id gönder
+                const supplierId = selectedSupplier.value?.id || selectedSupplierTransaction.value?.id;
+                if (!supplierId) {
+                    toast.value.add({ severity: 'error', summary: 'Hata', detail: 'Tedarikçi ID bulunamadı', life: 3000 });
+                    return;
+                }
+                requestData = { supplier_id: supplierId };
+            } else {
+                requestData = updatedTransactions;
+            }
+            
+            console.log('Gönderilen veri:', requestData); // Debug için
+            const resp = await axios.put('/api/suppliers/transactions/bulk', requestData);
             toast.value.add({ severity: 'success', summary: 'İşlem Başarılı', detail: resp.data.message, life: 3000 });
             updateSupplierTransactionDialog.value = false;
             updateCalculations();
@@ -714,9 +736,9 @@
         transactions.forEach((transaction) => {
             const type = transaction.type.toLowerCase();
             if (type === "borç") {
-                totalDebt += parseFloat(transaction.amount);
-            } else if (type === "alacak") {
-                totalDebt -= parseFloat(transaction.amount);
+                totalDebt += parseFloat(transaction.amount);  // Tedarik aldık, borç arttı
+            } else if (type === "ödeme") {
+                totalDebt -= parseFloat(transaction.amount);  // Ödeme yaptık, borç azaldı
             }
         });
 
@@ -740,13 +762,13 @@
 
     const totalCredit = (transactions) => {
         return transactions
-            .filter((transaction) => transaction.type.toLowerCase() === "alacak")
+            .filter((transaction) => transaction.type.toLowerCase() === "ödeme")
             .reduce((sum, transaction) => sum + parseFloat(transaction.amount), 0);
     };
 
     const lastPayment = (transactions) => {
         const payments = transactions
-            .filter((transaction) => transaction.type.toLowerCase() === "alacak")
+            .filter((transaction) => transaction.type.toLowerCase() === "ödeme")
             .sort((a, b) => {
                 // Önce tarihe göre sırala
                 const dateA = new Date(a.date);
@@ -775,10 +797,13 @@
 
     const saveTransaction = async () => {
         try {
-            // Tarihi doğru formatta hazırla
+            // Tarihi doğru formatta hazırla (timezone sorununu önlemek için)
             let formattedDate = newTransactionDate.value;
             if (formattedDate instanceof Date) {
-                formattedDate = formattedDate.toISOString().split('T')[0];
+                const year = formattedDate.getFullYear();
+                const month = String(formattedDate.getMonth() + 1).padStart(2, '0');
+                const day = String(formattedDate.getDate()).padStart(2, '0');
+                formattedDate = `${year}-${month}-${day}`;
             } else if (typeof formattedDate === 'string' && formattedDate.includes('T')) {
                 formattedDate = formattedDate.split('T')[0];
             }

@@ -39,6 +39,13 @@
                     </template>
                 </Column>
                 <Column field="supply_date" header="Tedarik Tarihi" sortable style="min-width:8rem"></Column>
+                <Column field="payment_method" header="Ödeme Yöntemi" sortable style="min-width:8rem">
+                    <template #body="slotProps">
+                        <span class="p-tag" :class="getPaymentMethodClass(slotProps.data.payment_method)">
+                            {{ getPaymentMethodLabel(slotProps.data.payment_method) }}
+                        </span>
+                    </template>
+                </Column>
                 <Column :exportable="false" style="min-width:8rem">
                     <template #body="slotProps">
                         <Button icon="pi pi-pencil" outlined rounded class="mr-2" @click="editSupply(slotProps.data)" />
@@ -87,10 +94,24 @@
                         <small class="p-error" v-if="submitted && !supply.supply_date">Tedarik Tarihi gereklidir.</small>
                     </div>
                 </div>
+                <div class="col-12 md:col-6">
+                    <div class="field">
+                        <label for="payment_method">Ödeme Yöntemi *</label>
+                        <Dropdown id="payment_method" v-model="supply.payment_method" :options="paymentMethods" optionLabel="label" optionValue="value" placeholder="Ödeme Yöntemi Seçin" required :invalid="submitted && !supply.payment_method" />
+                        <small class="p-error" v-if="submitted && !supply.payment_method">Ödeme yöntemi seçilmelidir.</small>
+                    </div>
+                </div>
+                <div class="col-12 md:col-6" v-if="supply.payment_method === 'kısmi'">
+                    <div class="field">
+                        <label for="paid_amount">Ödenen Miktar *</label>
+                        <InputNumber id="paid_amount" v-model="supply.paid_amount" mode="decimal" :minFractionDigits="2" :maxFractionDigits="2" :invalid="submitted && supply.payment_method === 'kısmi' && !supply.paid_amount" />
+                        <small class="p-error" v-if="submitted && supply.payment_method === 'kısmi' && !supply.paid_amount">Ödenen miktar gereklidir.</small>
+                    </div>
+                </div>
                 <div class="col-12" v-if="supply.supplied_product_quantity && supply.supplied_product_price">
                     <div class="field">
                         <label>Toplam Tutar</label>
-                        <div class="p-3 bg-gray-100 border-round">
+                        <div class="p-3 surface-100 border-round">
                             <strong>{{ formatPrice(supply.supplied_product_quantity * supply.supplied_product_price) }} TL</strong>
                         </div>
                     </div>
@@ -156,6 +177,13 @@ const filters = ref({
 });
 const submitted = ref(false);
 
+// Ödeme yöntemi seçenekleri
+const paymentMethods = ref([
+    { label: 'Peşin', value: 'peşin' },
+    { label: 'Borç', value: 'borç' },
+    { label: 'Kısmi Ödeme', value: 'kısmi' }
+]);
+
 // Tedarikleri al
 const fetchSupplies = () => {
     axios.get('/api/supplies')
@@ -186,7 +214,7 @@ onMounted(() => {
 
 // Yeni tedarik ekleme işlemi
 const openNew = () => {
-    supply.value = {};
+    supply.value = { payment_method: 'borç' }; // Varsayılan olarak borç seçili
     submitted.value = false;
     supplyDialog.value = true;
 };
@@ -212,14 +240,21 @@ const hideDialog = () => {
 const saveSupply = () => {
     submitted.value = true;
 
+    // Validation kontrolü
+    const isValidPayment = supply.value.payment_method !== 'kısmi' || supply.value.paid_amount;
+    
     if (supply.value.supplier_id && supply.value.supplied_product && 
         supply.value.supplied_product_quantity && supply.value.supplied_product_price && 
-        supply.value.supply_date) {
+        supply.value.supply_date && supply.value.payment_method && isValidPayment) {
         
-        // Tarih formatını API için düzenle
+        // Tarih formatını API için düzenle (timezone sorununu önlemek için)
         const supplyData = { ...supply.value };
         if (supplyData.supply_date instanceof Date) {
-            supplyData.supply_date = supplyData.supply_date.toISOString().split('T')[0];
+            // Timezone sorununu önlemek için local tarih formatını kullan
+            const year = supplyData.supply_date.getFullYear();
+            const month = String(supplyData.supply_date.getMonth() + 1).padStart(2, '0');
+            const day = String(supplyData.supply_date.getDate()).padStart(2, '0');
+            supplyData.supply_date = `${year}-${month}-${day}`;
         }
 
         if (supply.value.id) {
@@ -305,6 +340,25 @@ const calculateTotalPrice = (data) => {
 
 const formatPrice = (price) => {
     return new Intl.NumberFormat('tr-TR').format(price || 0);
+};
+
+// Ödeme yöntemi label ve class fonksiyonları
+const getPaymentMethodLabel = (method) => {
+    const labels = {
+        'peşin': 'Peşin',
+        'borç': 'Borç',
+        'kısmi': 'Kısmi'
+    };
+    return labels[method] || method;
+};
+
+const getPaymentMethodClass = (method) => {
+    const classes = {
+        'peşin': 'p-tag-success',
+        'borç': 'p-tag-danger', 
+        'kısmi': 'p-tag-warning'
+    };
+    return classes[method] || '';
 };
 
 const exportCSV = () => {
