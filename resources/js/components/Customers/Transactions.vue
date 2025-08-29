@@ -699,10 +699,14 @@
     };
 
     const saveEdit = () => {
-        // Tarihi doğru formatta hazırla
+        // Basit ve güvenilir tarih formatlaması
         let formattedDate = editingTransaction.value.date;
         if (formattedDate instanceof Date) {
-            formattedDate = formattedDate.toISOString().split('T')[0];
+            // Local tarih olarak formatla (timezone problemlerini önlemek için)
+            const year = formattedDate.getFullYear();
+            const month = String(formattedDate.getMonth() + 1).padStart(2, '0');
+            const day = String(formattedDate.getDate()).padStart(2, '0');
+            formattedDate = `${year}-${month}-${day}`;
         } else if (typeof formattedDate === 'string' && formattedDate.includes('T')) {
             formattedDate = formattedDate.split('T')[0];
         }
@@ -727,10 +731,14 @@
     const saveAllTransactions = async () => {
         try {
             const updatedTransactions = customerTransactions.value.map(transaction => {
-                // Tarihi doğru formatta hazırla
+                // Basit ve güvenilir tarih formatlaması
                 let formattedDate = transaction.date;
                 if (formattedDate instanceof Date) {
-                    formattedDate = formattedDate.toISOString().split('T')[0];
+                    // Local tarih olarak formatla (timezone problemlerini önlemek için)
+                    const year = formattedDate.getFullYear();
+                    const month = String(formattedDate.getMonth() + 1).padStart(2, '0');
+                    const day = String(formattedDate.getDate()).padStart(2, '0');
+                    formattedDate = `${year}-${month}-${day}`;
                 } else if (typeof formattedDate === 'string' && formattedDate.includes('T')) {
                     formattedDate = formattedDate.split('T')[0];
                 }
@@ -884,13 +892,22 @@
 
     const saveTransaction = async () => {
         try {
-            // Tarihi doğru formatta hazırla
+            // Basit ve güvenilir tarih formatlaması
             let formattedDate = newTransactionDate.value;
             if (formattedDate instanceof Date) {
-                formattedDate = formattedDate.toISOString().split('T')[0];
-            } else if (typeof formattedDate === 'string' && formattedDate.includes('T')) {
-                formattedDate = formattedDate.split('T')[0];
+                // Local tarih olarak formatla (timezone problemlerini önlemek için)
+                const year = formattedDate.getFullYear();
+                const month = String(formattedDate.getMonth() + 1).padStart(2, '0');
+                const day = String(formattedDate.getDate()).padStart(2, '0');
+                formattedDate = `${year}-${month}-${day}`;
+            } else if (typeof formattedDate === 'string') {
+                // String ise sadece tarih kısmını al
+                if (formattedDate.includes('T')) {
+                    formattedDate = formattedDate.split('T')[0];
+                }
             }
+
+            console.log('Gönderilen tarih:', formattedDate);
 
             const resp = await axios.post("/api/transactions", {
                 customer_id: newTransactionCustomer.value.id,

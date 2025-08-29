@@ -220,7 +220,11 @@ const exportCSV = () => {
 };
 
 const formatAmount = (amount) => {
-    return amount % 1 === 0 ? amount.toString().split('.')[0] : amount.toFixed(2);
+    if (!amount || amount === null || amount === undefined || isNaN(amount)) {
+        return '0';
+    }
+    const numAmount = parseFloat(amount);
+    return numAmount % 1 === 0 ? numAmount.toString().split('.')[0] : numAmount.toFixed(2);
 }
 </script>
 

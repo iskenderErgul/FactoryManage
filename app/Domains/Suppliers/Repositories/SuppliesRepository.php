@@ -30,7 +30,8 @@ class SuppliesRepository
      */
     public function store(Request $request): JsonResponse
     {
-        $supplyDate = Carbon::parse($request->supply_date)->format('Y-m-d');
+        // Tarihi Türkiye saat dilimine göre formatla
+        $supplyDate = Carbon::parse($request->supply_date)->setTimezone('Europe/Istanbul')->format('Y-m-d');
         
         $supply = Supply::create([
             'supplier_id' => $request->supplier_id,
@@ -79,7 +80,8 @@ class SuppliesRepository
     {
         $supply = Supply::findOrFail($id);
         
-        $supplyDate = Carbon::parse($request->supply_date)->format('Y-m-d');
+        // Tarihi Türkiye saat dilimine göre formatla
+        $supplyDate = Carbon::parse($request->supply_date)->setTimezone('Europe/Istanbul')->format('Y-m-d');
         
         $supply->update([
             'supplier_id' => $request->supplier_id,

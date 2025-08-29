@@ -94,7 +94,26 @@ class CustomerRepository implements CustomerRepositoryInterface
 
     public function addTransaction(Request $request): JsonResponse
     {
-        $date = Carbon::parse($request->date)->format('Y-m-d');
+        // Debug için log ekle
+        \Log::info('Transaction Date Debug', [
+            'original_date' => $request->date,
+            'request_all' => $request->all()
+        ]);
+        
+        // Tarihi basit şekilde parse et (frontend'den doğru format geldiği için)
+        $date = $request->date;
+        
+        // Eğer datetime formatında geliyorsa sadece tarih kısmını al
+        if (strpos($date, 'T') !== false) {
+            $date = explode('T', $date)[0];
+        }
+        
+        // YYYY-MM-DD formatında olduğundan emin ol
+        if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
+            $date = Carbon::parse($date)->format('Y-m-d');
+        }
+
+        \Log::info('Final parsed date: ' . $date);
 
         $transaction = Transaction::create([
             'customer_id' => $request->customer_id,
@@ -103,7 +122,6 @@ class CustomerRepository implements CustomerRepositoryInterface
             'date' => $date,
             'amount' => $request->amount,
         ]);
-
 
         return response()->json($transaction, 201);
     }
@@ -135,7 +153,15 @@ class CustomerRepository implements CustomerRepositoryInterface
                 // Tarihi uygun formata çevir
                 $date = $transactionData['date'];
                 if ($date && !empty($date)) {
-                    $date = Carbon::parse($date)->format('Y-m-d');
+                    // Eğer datetime formatında geliyorsa sadece tarih kısmını al
+                    if (strpos($date, 'T') !== false) {
+                        $date = explode('T', $date)[0];
+                    }
+                    
+                    // YYYY-MM-DD formatında olduğundan emin ol
+                    if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
+                        $date = Carbon::parse($date)->format('Y-m-d');
+                    }
                 }
                 
                 $transaction->update([

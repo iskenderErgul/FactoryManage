@@ -30,7 +30,7 @@ class OrderRepository implements OrderRepositoryInterface
         DB::beginTransaction();
         try {
 
-            $orderDate = Carbon::parse($request->order_date)->setTimezone('Asia/Istanbul')->format('Y-m-d H:i:s');
+            $orderDate = Carbon::parse($request->order_date)->setTimezone('Europe/Istanbul')->format('Y-m-d H:i:s');
 
             $order = Order::create([
                 'customer_id' => $request->customer_id,
@@ -64,7 +64,7 @@ class OrderRepository implements OrderRepositoryInterface
 
         $status = OrderStatus::tryFrom($request->status['label']) ?? OrderStatus::Received;
         $customerId = $request->customer_id;
-        $orderDate = Carbon::parse($request->order_date)->setTimezone('Asia/Istanbul')->format('Y-m-d H:i:s');
+        $orderDate = Carbon::parse($request->order_date)->setTimezone('Europe/Istanbul')->format('Y-m-d H:i:s');
         $products = $request->products;
 
 

@@ -122,7 +122,8 @@ class SuppliersRepository
      */
     public function addTransaction(Request $request): JsonResponse
     {
-        $date = Carbon::parse($request->date)->format('Y-m-d');
+        // Tarihi Türkiye saat dilimine göre formatla
+        $date = Carbon::parse($request->date)->setTimezone('Europe/Istanbul')->format('Y-m-d');
 
         $transaction = SupplierTransaction::create([
             'supplier_id' => $request->supplier_id,
@@ -179,7 +180,7 @@ class SuppliersRepository
                 // Tarihi uygun formata çevir
                 $date = $transactionData['date'];
                 if ($date && !empty($date)) {
-                    $date = Carbon::parse($date)->format('Y-m-d');
+                    $date = Carbon::parse($date)->setTimezone('Europe/Istanbul')->format('Y-m-d');
                 }
                 
                 $transaction->update([

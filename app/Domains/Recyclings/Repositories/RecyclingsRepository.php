@@ -18,7 +18,7 @@ class RecyclingsRepository
     public function store(Request $request): JsonResponse
     {
 
-        $recyclingDate = Carbon::parse($request->get('recycling_date'))->setTimezone('Asia/Istanbul')->format('Y-m-d H:i:s');
+        $recyclingDate = Carbon::parse($request->get('recycling_date'))->setTimezone('Europe/Istanbul')->format('Y-m-d H:i:s');
 
         $recycling = Recycling::create([
             'company_name' => $request->get('company_name'),
@@ -42,7 +42,7 @@ class RecyclingsRepository
         $recycling = Recycling::findOrFail($id);
 
 
-        $recyclingDate = Carbon::parse($request->get('recycling_date'))->setTimezone('Asia/Istanbul')->format('Y-m-d H:i:s');
+        $recyclingDate = Carbon::parse($request->get('recycling_date'))->setTimezone('Europe/Istanbul')->format('Y-m-d H:i:s');
 
         $recycling->update([
             'company_name' => $request->company_name,

@@ -64,7 +64,6 @@ const model = ref([
                 items: [
                     { label: 'Üretim Takibi', icon: 'pi pi-chart-line', to: '/sys/production' },
                     { label: 'Makine Yönetimi', icon: 'pi pi-cog', to: '/sys/machine-management' },
-                    { label: 'Maliyet Yönetimi', icon: 'pi pi-money-bill', to: '/sys/cost-management' }
                 ]
             }
         ]
@@ -123,6 +122,11 @@ const model = ref([
 
                 ]
             }
+        ]
+    },
+    {
+        items: [
+            { label: 'Maliyet Yönetimi', icon: 'pi pi-money-bill', to: '/sys/cost-management' }
         ]
     },
     // {
