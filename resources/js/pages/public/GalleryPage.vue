@@ -25,7 +25,13 @@
               class="gallery-item"
               @click="openImageModal(image.url, gallery.brand)"
             >
-              <img :src="image.url" :alt="image.name" class="gallery-image" />
+              <img 
+                :src="image.url" 
+                :alt="image.name" 
+                class="gallery-image"
+                loading="lazy"
+                decoding="async"
+              />
               <div class="gallery-overlay">
                 <i class="pi pi-search-plus"></i>
               </div>

@@ -19,12 +19,15 @@
               muted 
               loop 
               playsinline
+              preload="none"
               class="hero-video"
+              @loadeddata="onVideoLoaded"
             ></video>
             <div 
               v-else 
               class="hero-slide-bg" 
-              :style="{ backgroundImage: `url(${slotProps.data.url})` }"
+              :data-bg="slotProps.data.url"
+              :style="{ backgroundImage: slotProps.data.loaded ? `url(${slotProps.data.url})` : 'none' }"
             ></div>
             <div class="hero-overlay">
               <div class="hero-content">
@@ -137,7 +140,13 @@
           >
             <template #header>
               <div class="product-image-wrapper">
-                <img :src="product.image" :alt="product.name" class="product-image" />
+                <img 
+                  :src="product.image" 
+                  :alt="product.name" 
+                  class="product-image"
+                  loading="lazy"
+                  decoding="async"
+                />
               </div>
             </template>
             <template #title>
@@ -193,7 +202,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch, nextTick } from 'vue';
 import Carousel from 'primevue/carousel';
 import Card from 'primevue/card';
 import Button from 'primevue/button';
@@ -279,6 +288,15 @@ const openWhatsApp = () => {
   window.open(`https://wa.me/${phoneNumber}?text=${message}`, '_blank');
 };
 
+const onVideoLoaded = (event) => {
+  // Video yüklendiğinde otomatik oynat
+  if (event.target && event.target.readyState >= 2) {
+    event.target.play().catch(() => {
+      // Autoplay engellenirse sessizce devam et
+    });
+  }
+};
+
 const loadProductImages = async () => {
   // Her ürün için resimleri yükle
   for (const product of products.value) {
@@ -311,11 +329,22 @@ const loadHomepageSlider = async () => {
       heroSlides.value = response.data.slides.map((slide, index) => ({
         ...slide,
         id: index + 1,
+        loaded: index === 0, // İlk slide'ı hemen yükle
         title: index === 0 ? 'Geri Dönüşümde Öncüyüz' : index === 1 ? 'Kaliteli Üretim' : 'Modern Üretim Tesisleri',
         subtitle: index === 0 ? 'Çevre dostu, kaliteli poşet üretimi ile sürdürülebilir geleceğe katkı sağlıyoruz' 
                 : index === 1 ? 'Sektördeki tecrübemizle müşterilerimize en iyi hizmeti sunuyoruz'
                 : 'Son teknoloji ekipmanlarımızla yüksek kaliteli üretim yapıyoruz'
       }));
+      
+      // İlk slide'ın resmini önceden yükle
+      if (heroSlides.value.length > 0 && heroSlides.value[0].type === 'image') {
+        const firstSlide = heroSlides.value[0];
+        const img = new Image();
+        img.onload = () => {
+          firstSlide.loaded = true;
+        };
+        img.src = firstSlide.url;
+      }
     } else {
       // Eğer slider dosyaları yoksa varsayılan değerleri kullan
       heroSlides.value = [
@@ -343,11 +372,43 @@ const loadHomepageSlider = async () => {
   }
 };
 
+// Background image lazy loading için Intersection Observer
+const setupLazyBackgroundImages = () => {
+  nextTick(() => {
+    const bgElements = document.querySelectorAll('.hero-slide-bg[data-bg]');
+    const imageObserver = new IntersectionObserver((entries, observer) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const bgUrl = entry.target.getAttribute('data-bg');
+          if (bgUrl) {
+            const img = new Image();
+            img.onload = () => {
+              entry.target.style.backgroundImage = `url(${bgUrl})`;
+              // Slide'ı loaded olarak işaretle
+              const slideIndex = Array.from(bgElements).indexOf(entry.target);
+              if (slideIndex >= 0 && heroSlides.value[slideIndex]) {
+                heroSlides.value[slideIndex].loaded = true;
+              }
+            };
+            img.src = bgUrl;
+          }
+          observer.unobserve(entry.target);
+        }
+      });
+    }, {
+      rootMargin: '50px' // 50px önceden yükle
+    });
+
+    bgElements.forEach(el => imageObserver.observe(el));
+  });
+};
+
 onMounted(async () => {
   await Promise.all([
     loadHomepageSlider(),
     loadProductImages()
   ]);
+  setupLazyBackgroundImages();
 });
 </script>
 

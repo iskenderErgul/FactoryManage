@@ -17,7 +17,13 @@
           >
             <template #header>
               <div class="product-image-wrapper">
-                <img :src="product.image" :alt="product.name" class="product-image" />
+                <img 
+                  :src="product.image" 
+                  :alt="product.name" 
+                  class="product-image"
+                  loading="lazy"
+                  decoding="async"
+                />
               </div>
             </template>
             <template #title>

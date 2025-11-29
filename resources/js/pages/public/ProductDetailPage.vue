@@ -18,7 +18,13 @@
           >
             <template #item="slotProps">
               <div class="product-image-container">
-                <img :src="slotProps.data.url" :alt="slotProps.data.name" class="product-main-image" />
+                <img 
+                  :src="slotProps.data.url" 
+                  :alt="slotProps.data.name" 
+                  class="product-main-image"
+                  loading="lazy"
+                  decoding="async"
+                />
               </div>
             </template>
           </Carousel>
@@ -137,7 +143,13 @@
               class="gallery-item"
               @click="openImageModal(image.url)"
             >
-              <img :src="image.url" :alt="image.name" class="gallery-image" />
+              <img 
+                :src="image.url" 
+                :alt="image.name" 
+                class="gallery-image"
+                loading="lazy"
+                decoding="async"
+              />
             </div>
           </div>
           <div class="gallery-actions" v-if="brand.images.length > 8">
