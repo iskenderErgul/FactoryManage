@@ -2,10 +2,12 @@
 
 import { createApp } from 'vue';
 import './assets/style.scss'
+import './assets/public.scss'
 import PrimeVue from 'primevue/config';
 import HomeView from "@/views/HomeView.vue";
 
 import ToastService from 'primevue/toastservice';
+import Tooltip from 'primevue/tooltip';
 
 import router from './router';
 import store from './store';
@@ -15,6 +17,7 @@ app.component(HomeView)
 app.use(ToastService)
 app.use(router)
 app.use(store)
+app.directive('tooltip', Tooltip)
 app.use(PrimeVue, { ripple: true , locale: {
         firstDayOfWeek: 1,
         dayNames: ["Pazar", "Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi"],

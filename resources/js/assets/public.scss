@@ -1,0 +1,228 @@
+/* Public Website Global Styles */
+
+// Smooth scrolling
+html {
+  scroll-behavior: smooth;
+}
+
+// Custom color variables
+:root {
+  --primary-green: #16A34A;
+  --primary-green-light: #22C55E;
+  --gray-50: #F8FAFC;
+  --gray-100: #F1F5F9;
+  --gray-200: #E2E8F0;
+  --gray-500: #64748B;
+  --gray-700: #334155;
+  --gray-900: #1E293B;
+}
+
+// PrimeVue customizations for public site
+.p-button.p-button-success {
+  background: linear-gradient(135deg, var(--primary-green) 0%, var(--primary-green-light) 100%);
+  border: none;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+  }
+  
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+.p-button.p-button-outlined.p-button-success {
+  border-color: var(--primary-green);
+  color: var(--primary-green);
+  background: transparent;
+  
+  &:hover {
+    background: var(--primary-green);
+    color: white;
+    transform: translateY(-2px);
+  }
+}
+
+// Card animations
+.p-card {
+  border: none;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+// Menubar customizations
+.p-menubar {
+  background: white;
+  border: none;
+  
+  .p-menubar-root-list > .p-menuitem > .p-menuitem-link {
+    color: var(--gray-700);
+    font-weight: 500;
+    transition: all 0.3s ease;
+    
+    &:hover {
+      color: var(--primary-green);
+      background: var(--gray-50);
+    }
+    
+    .p-menuitem-icon {
+      color: var(--primary-green);
+    }
+  }
+}
+
+// DataView customizations
+.p-dataview {
+  .p-dataview-header {
+    background: white;
+    border: none;
+    padding: 1rem;
+  }
+}
+
+// Carousel customizations
+.p-carousel {
+  .p-carousel-indicators {
+    .p-carousel-indicator button {
+      background-color: rgba(255, 255, 255, 0.5);
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      
+      &:hover {
+        background-color: rgba(255, 255, 255, 0.8);
+      }
+    }
+    
+    .p-carousel-indicator.p-highlight button {
+      background-color: var(--primary-green-light);
+    }
+  }
+}
+
+// Galleria customizations
+.p-galleria {
+  .p-galleria-thumbnail-container {
+    background: rgba(0, 0, 0, 0.9);
+  }
+  
+  .p-galleria-item-nav {
+    background: rgba(34, 197, 94, 0.8);
+    color: white;
+    
+    &:hover {
+      background: rgba(34, 197, 94, 1);
+    }
+  }
+}
+
+// TabView customizations
+.p-tabview {
+  .p-tabview-nav {
+    background: white;
+    border-bottom: 2px solid var(--gray-200);
+    
+    .p-tabview-nav-link {
+      color: var(--gray-700);
+      font-weight: 500;
+      transition: all 0.3s ease;
+      
+      &:hover {
+        color: var(--primary-green);
+      }
+    }
+    
+    .p-tabview-selected .p-tabview-nav-link {
+      color: var(--primary-green);
+      border-color: var(--primary-green);
+    }
+  }
+}
+
+// Toast customizations
+.p-toast {
+  .p-toast-message.p-toast-message-success {
+    background: linear-gradient(135deg, var(--primary-green) 0%, var(--primary-green-light) 100%);
+  }
+}
+
+// Tag customizations
+.p-tag.p-tag-success {
+  background: linear-gradient(135deg, var(--primary-green) 0%, var(--primary-green-light) 100%);
+}
+
+// Timeline customizations
+.p-timeline {
+  .p-timeline-event-marker {
+    background: var(--primary-green);
+    border-color: var(--primary-green);
+  }
+  
+  .p-timeline-event-connector {
+    background-color: var(--gray-200);
+  }
+}
+
+// Utility animations
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.slide-in-up {
+  animation: slideInUp 0.6s ease-out;
+}
+
+.fade-in-scale {
+  animation: fadeInScale 0.6s ease-out;
+}
+
+// Loading spinner
+.loading-spinner {
+  display: inline-block;
+  width: 40px;
+  height: 40px;
+  border: 4px solid var(--gray-200);
+  border-top-color: var(--primary-green);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// Responsive utilities
+@media (max-width: 768px) {
+  .hide-mobile {
+    display: none !important;
+  }
+}
+
+@media (min-width: 769px) {
+  .show-mobile {
+    display: none !important;
+  }
+}

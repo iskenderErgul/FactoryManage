@@ -110,6 +110,15 @@ const model = ref([
         ]
     },
     {
+        items: [
+            {
+                label: 'İletişim İstekleri',
+                icon: 'pi pi-envelope',
+                to: '/sys/contact-requests'
+            }
+        ]
+    },
+    {
 
         items: [
             {

@@ -20,6 +20,8 @@ use App\Http\Controllers\Suppliers\SuppliersController;
 use App\Http\Controllers\Suppliers\SuppliesController;
 use App\Http\Controllers\Users\UsersController;
 use App\Http\Controllers\Worker\WorkerController;
+use App\Http\Controllers\ContactRequestController;
+use App\Http\Controllers\GalleryController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -169,7 +171,12 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/logout', [LoginController::class, 'logout']);
 
-
+    // Contact Requests (İletişim İstekleri)
+    Route::get('/contact-requests', [ContactRequestController::class, 'index']);
+    Route::get('/contact-requests/{id}', [ContactRequestController::class, 'show']);
+    Route::put('/contact-requests/{id}', [ContactRequestController::class, 'update']);
+    Route::delete('/contact-requests/{id}', [ContactRequestController::class, 'destroy']);
+    Route::delete('/contact-requests', [ContactRequestController::class, 'destroySelected']);
 
     // Dashboard API Routes
     Route::prefix('dashboard')->group(function () {
@@ -201,6 +208,14 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
 Route::post('/login',[LoginController::class,'login']);
+
+// Public API - Contact Requests (Authentication gerekmez)
+Route::post('/public/contact-requests', [ContactRequestController::class, 'store']);
+
+// Public API - Gallery (Authentication gerekmez)
+Route::get('/public/gallery', [GalleryController::class, 'index']);
+Route::get('/public/gallery/product/{productSlug}', [GalleryController::class, 'getProductImages']);
+Route::get('/public/gallery/homepage-slider', [GalleryController::class, 'getHomepageSlider']);
 
 
 

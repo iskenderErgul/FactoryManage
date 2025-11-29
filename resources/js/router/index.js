@@ -31,9 +31,59 @@ import Suppliers from "@/components/Suppliers/Suppliers.vue";
 import Supplies from "@/components/Suppliers/Supplies.vue";
 import Transactions from "@/components/Customers/Transactions.vue";
 import SupplierTransactions from "@/components/Suppliers/SupplierTransactions.vue";
+import ContactRequests from "@/components/ContactRequests/ContactRequests.vue";
+
+// Public Pages
+import PublicLayout from "@/layout/PublicLayout.vue";
+import HomePage from "@/pages/public/HomePage.vue";
+import ProductsPage from "@/pages/public/ProductsPage.vue";
+import ProductDetailPage from "@/pages/public/ProductDetailPage.vue";
+import AboutPage from "@/pages/public/AboutPage.vue";
+import ContactPage from "@/pages/public/ContactPage.vue";
+import GalleryPage from "@/pages/public/GalleryPage.vue";
 
 
 const routes = [
+    // Public Routes (no authentication required)
+    {
+        path: '/',
+        component: PublicLayout,
+        children: [
+            {
+                path: '',
+                name: 'home-public',
+                component: HomePage
+            },
+            {
+                path: 'urunler',
+                name: 'products',
+                component: ProductsPage
+            },
+            {
+                path: 'urunler/:id',
+                name: 'product-detail',
+                component: ProductDetailPage
+            },
+            {
+                path: 'hakkimizda',
+                name: 'about',
+                component: AboutPage
+            },
+            {
+                path: 'iletisim',
+                name: 'contact',
+                component: ContactPage
+            },
+            {
+                path: 'galeri',
+                name: 'gallery',
+                component: GalleryPage
+            }
+        ]
+    },
+
+    // Admin Routes (authentication required)
+
 
     {
         path : '/sys',
@@ -197,6 +247,11 @@ const routes = [
                 name: 'supplierTransactions',
                 component: SupplierTransactions
             },
+            {
+                path: '/sys/contact-requests',
+                name: 'contactRequests',
+                component: ContactRequests
+            },
 
 //Worker Pages
             {
@@ -227,7 +282,17 @@ const router = createRouter({
     history: createWebHistory(),
     routes,
 });
+
 router.beforeEach(async (to, from, next) => {
+    // Public routes that don't require authentication
+    const publicRoutes = ['home-public', 'products', 'product-detail', 'about', 'contact', 'gallery'];
+    
+    // If it's a public route, allow access without authentication
+    if (publicRoutes.includes(to.name)) {
+        next();
+        return;
+    }
+    
     try {
         await store.dispatch('authenticate');
 
@@ -253,3 +318,4 @@ router.beforeEach(async (to, from, next) => {
 });
 
 export default router;
+
