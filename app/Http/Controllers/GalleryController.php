@@ -96,6 +96,9 @@ class GalleryController extends Controller
             return response()->json(['brands' => []]);
         }
 
+        // URL decode yap (frontend'den encode edilmiş gelebilir)
+        $productName = urldecode($productName);
+        
         // Ürün adını normalize et (küçük harf, Türkçe karakterleri düzelt, boşlukları tire ile değiştir)
         $normalizedProductName = $this->normalizeProductName($productName);
         
@@ -133,23 +136,9 @@ class GalleryController extends Controller
                 }
             }
         } else {
-            // Eski yapı: Marka klasörlerinde ara (geriye dönük uyumluluk)
-            $brands = File::directories($imagesPath);
-            
-            foreach ($brands as $brandPath) {
-                $brandName = basename($brandPath);
-                $brandImages = [];
-                
-                // Marka klasöründeki tüm resimleri topla
-                $this->collectImages($brandPath, $brandName, $brandImages);
-                
-                if (!empty($brandImages)) {
-                    $productImages[] = [
-                        'brand' => $brandName,
-                        'images' => $brandImages
-                    ];
-                }
-            }
+            // Ürün klasörü bulunamadı - boş array döndür (karışık resimler gelmesin)
+            // Eski yapı kaldırıldı çünkü yanlış ürün resimlerini döndürüyordu
+            return response()->json(['brands' => []]);
         }
 
         return response()->json(['brands' => $productImages]);
@@ -162,6 +151,9 @@ class GalleryController extends Controller
     {
         // Özel eşleşmeler (ürün adı -> klasör adı)
         $specialMappings = [
+            'atlet poşet' => 'atlet',
+            'atlet-poset' => 'atlet',
+            'atlet' => 'atlet',
             'hastane torbası' => 'hastane-torba',
             'hastane-torbasi' => 'hastane-torba',
         ];
