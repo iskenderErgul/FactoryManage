@@ -3,23 +3,23 @@
     <div class="page-header">
       <div class="container">
         <h1 class="page-title">Ürünlerimiz</h1>
-        <p class="page-subtitle">Kaliteli ve çevre dostu poşet çözümlerimizi keşfedin</p>
+        <p class="page-subtitle">Kaliteli ve çevre dostu  çözümlerimizi keşfedin</p>
       </div>
     </div>
 
     <div class="container">
       <div class="products-container">
         <div class="products-grid" v-if="products.length">
-          <Card 
-            v-for="product in products" 
-            :key="product.id" 
+          <Card
+            v-for="product in products"
+            :key="product.id"
             class="product-card"
           >
             <template #header>
               <div class="product-image-wrapper">
-                <img 
-                  :src="product.image" 
-                  :alt="product.name" 
+                <img
+                  :src="product.image"
+                  :alt="product.name"
                   class="product-image"
                   loading="lazy"
                   decoding="async"
@@ -33,9 +33,9 @@
               <p class="product-description">{{ product.short_description }}</p>
             </template>
             <template #footer>
-              <Button 
-                label="Detayları Gör" 
-                icon="pi pi-eye" 
+              <Button
+                label="Detayları Gör"
+                icon="pi pi-eye"
                 severity="success"
                 outlined
                 @click="viewProduct(product.id)"
@@ -106,7 +106,7 @@ const loadProductImages = async () => {
     try {
       const productName = encodeURIComponent(product.name);
       const response = await axios.get(`/api/public/gallery/product/${productName}`);
-      
+
       if (response.data && response.data.brands && response.data.brands.length > 0) {
         // İlk markanın ilk resmini al
         const firstBrand = response.data.brands[0];
@@ -140,7 +140,7 @@ onMounted(async () => {
   color: white;
   padding: 4rem 0 3rem;
   margin-bottom: 0;
-  
+
   .container {
     color: white;
   }
@@ -151,7 +151,7 @@ onMounted(async () => {
   font-weight: 700;
   margin-bottom: 1rem;
   color: white !important;
-  
+
   @media (max-width: 768px) {
     font-size: 2rem;
   }
@@ -167,7 +167,7 @@ onMounted(async () => {
   max-width: 1200px;
   margin: 0 auto;
   padding: 2rem;
-  
+
   @media (max-width: 768px) {
     padding: 1rem;
   }
@@ -192,7 +192,7 @@ onMounted(async () => {
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: 2rem;
   margin-bottom: 2rem;
-  
+
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
     gap: 1.5rem;
@@ -202,30 +202,30 @@ onMounted(async () => {
 .product-card {
   transition: all 0.3s ease;
   background: white;
-  
+
   :deep(.p-card-body) {
     padding: 1rem;
   }
-  
+
   :deep(.p-card-title) {
     color: #1e293b;
     font-size: 1.2rem;
     font-weight: 600;
     margin-bottom: 0.5rem;
   }
-  
+
   :deep(.p-card-content) {
     color: #64748b;
     padding: 0.75rem 0;
   }
-  
+
   :deep(h3) {
     color: #1e293b;
     font-size: 1.2rem;
     font-weight: 600;
     margin: 0;
   }
-  
+
   &:hover {
     transform: translateY(-8px);
     box-shadow: 0 12px 24px rgba(34, 197, 94, 0.2);
@@ -243,7 +243,7 @@ onMounted(async () => {
   height: 100%;
   object-fit: cover;
   transition: transform 0.3s ease;
-  
+
   .product-card:hover & {
     transform: scale(1.1);
   }

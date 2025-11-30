@@ -19,8 +19,8 @@
             <h3>WhatsApp'tan Bize Ulaşın</h3>
             <p>Hızlı ve kolay iletişim için WhatsApp üzerinden mesaj gönderin</p>
           </div>
-          <Button 
-            label="WhatsApp'tan Yaz" 
+          <Button
+            label="WhatsApp'tan Yaz"
             icon="pi pi-whatsapp"
             severity="success"
             size="large"
@@ -43,9 +43,9 @@
               <form @submit.prevent="submitForm" class="p-fluid">
                 <div class="field">
                   <label for="name">Ad Soyad *</label>
-                  <InputText 
-                    id="name" 
-                    v-model="formData.name" 
+                  <InputText
+                    id="name"
+                    v-model="formData.name"
                     :class="{ 'p-invalid': submitted && !formData.name }"
                     placeholder="Adınız ve soyadınız"
                   />
@@ -54,9 +54,9 @@
 
                 <div class="field">
                   <label for="email">E-posta *</label>
-                  <InputText 
-                    id="email" 
-                    v-model="formData.email" 
+                  <InputText
+                    id="email"
+                    v-model="formData.email"
                     type="email"
                     :class="{ 'p-invalid': submitted && !formData.email }"
                     placeholder="ornek@email.com"
@@ -66,9 +66,9 @@
 
                 <div class="field">
                   <label for="phone">Telefon *</label>
-                  <InputText 
-                    id="phone" 
-                    v-model="formData.phone" 
+                  <InputText
+                    id="phone"
+                    v-model="formData.phone"
                     :class="{ 'p-invalid': submitted && !formData.phone }"
                     placeholder="+90 (555) 123 45 67"
                   />
@@ -77,10 +77,10 @@
 
                 <div class="field">
                   <label for="subject">Konu</label>
-                  <Dropdown 
-                    id="subject" 
-                    v-model="formData.subject" 
-                    :options="subjects" 
+                  <Dropdown
+                    id="subject"
+                    v-model="formData.subject"
+                    :options="subjects"
                     optionLabel="label"
                     optionValue="value"
                     placeholder="Konu seçin"
@@ -89,9 +89,9 @@
 
                 <div class="field">
                   <label for="message">Mesajınız *</label>
-                  <Textarea 
-                    id="message" 
-                    v-model="formData.message" 
+                  <Textarea
+                    id="message"
+                    v-model="formData.message"
                     rows="6"
                     :class="{ 'p-invalid': submitted && !formData.message }"
                     placeholder="Mesajınızı buraya yazın..."
@@ -100,10 +100,10 @@
                 </div>
 
                 <div class="form-actions">
-                  <Button 
-                    type="submit" 
-                    label="Gönder" 
-                    icon="pi pi-send" 
+                  <Button
+                    type="submit"
+                    label="Gönder"
+                    icon="pi pi-send"
                     severity="success"
                     size="large"
                     :loading="loading"
@@ -128,7 +128,7 @@
                   </div>
                   <div class="info-details">
                     <h4>Adres</h4>
-                    <p>Organize Sanayi Bölgesi<br>1. Cadde No: 123<br>34000 İstanbul, Türkiye</p>
+                    <p>Modern Sanayi Sitesi Adana, Türkiye</p>
                   </div>
                 </div>
 
@@ -139,8 +139,8 @@
                   <div class="info-details">
                     <h4>Telefon</h4>
                     <p>
-                      <a href="tel:+905551234567">+90 (555) 123 45 67</a><br>
-                      <a href="tel:+902121234567">+90 (212) 123 45 67</a>
+                      <a href="tel:+905414314943">+90 (541) 431 49 43</a><br>
+                      <a href="tel:+905317363364">+90 (531) 736 33 64</a>
                     </p>
                   </div>
                 </div>
@@ -153,7 +153,6 @@
                     <h4>E-posta</h4>
                     <p>
                       <a href="mailto:info@ozergulplastik.com">info@ozergulplastik.com</a><br>
-                      <a href="mailto:sales@ozergulplastik.com">sales@ozergulplastik.com</a>
                     </p>
                   </div>
                 </div>
@@ -165,9 +164,7 @@
                   <div class="info-details">
                     <h4>Çalışma Saatleri</h4>
                     <p>
-                      Pazartesi - Cuma: 08:00 - 18:00<br>
-                      Cumartesi: 09:00 - 14:00<br>
-                      Pazar: Kapalı
+                      7/24
                     </p>
                   </div>
                 </div>
@@ -207,12 +204,12 @@
       <section class="map-section">
         <h2 class="section-title">Konumumuz</h2>
         <div class="map-container">
-          <iframe 
-            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3008.7923881383965!2d28.97638331541656!3d41.04618327929553!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14cab9b7d6e9f0a1%3A0x3e8c9c6e0d0f0d0f!2sIstanbul%2C%20Turkey!5e0!3m2!1sen!2str!4v1234567890123!5m2!1sen!2str"
-            width="100%" 
-            height="450" 
-            style="border:0; border-radius: 12px;" 
-            allowfullscreen="" 
+          <iframe
+            src="https://www.google.com/maps/embed?pb=!1m24!1m12!1m3!1d199.21419451421824!2d35.26511859982662!3d36.97573693058595!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!4m9!3e6!4m3!3m2!1d36.9756542!2d35.2650247!4m3!3m2!1d36.9756542!2d35.2650247!5e0!3m2!1str!2str!4v1764497672536!5m2!1str!2str"
+            width="100%"
+            height="450"
+            style="border:0; border-radius: 12px;"
+            allowfullscreen=""
             loading="lazy"
             referrerpolicy="no-referrer-when-downgrade"
           ></iframe>
@@ -255,7 +252,7 @@ const subjects = ref([
 
 const openWhatsApp = () => {
   // WhatsApp numarası - buraya gerçek numara eklenebilir
-  const phoneNumber = '905551234567'; // Örnek numara
+  const phoneNumber = '905414314943'; // Örnek numara
   const message = encodeURIComponent('Merhaba, Öz Ergül Plastik hakkında bilgi almak istiyorum.');
   window.open(`https://wa.me/${phoneNumber}?text=${message}`, '_blank');
 };
@@ -279,7 +276,7 @@ const submitForm = async () => {
   try {
     // CSRF token al
     await axios.get('/sanctum/csrf-cookie');
-    
+
     const response = await axios.post('/api/public/contact-requests', {
       name: formData.value.name,
       email: formData.value.email,
@@ -329,7 +326,7 @@ const submitForm = async () => {
   color: white;
   padding: 4rem 0 3rem;
   margin-bottom: 0;
-  
+
   .container {
     color: white;
     background: transparent;
@@ -341,7 +338,7 @@ const submitForm = async () => {
   font-weight: 700;
   margin-bottom: 1rem;
   color: white !important;
-  
+
   @media (max-width: 768px) {
     font-size: 2rem;
   }
@@ -357,7 +354,7 @@ const submitForm = async () => {
   max-width: 1200px;
   margin: 0 auto;
   padding: 2rem;
-  
+
   @media (max-width: 768px) {
     padding: 1rem;
   }
@@ -369,7 +366,7 @@ const submitForm = async () => {
   gap: 3rem;
   margin-bottom: 4rem;
   padding: 2rem 0;
-  
+
   @media (max-width: 968px) {
     grid-template-columns: 1fr;
   }
@@ -380,84 +377,84 @@ const submitForm = async () => {
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   background: white;
   border: none;
-  
+
   :deep(.p-card-body) {
     padding: 2rem;
   }
-  
+
   :deep(.p-card-title) {
     padding: 0;
     margin-bottom: 1.5rem;
   }
-  
+
   :deep(.p-card-content) {
     padding: 0;
   }
-  
+
   h2 {
     color: #1e293b;
     margin-bottom: 1.5rem;
   }
-  
+
   .field {
     margin-bottom: 1.5rem;
-    
+
     label {
       display: block;
       margin-bottom: 0.5rem;
       font-weight: 600;
       color: #334155;
     }
-    
+
     :deep(.p-inputtext),
     :deep(.p-dropdown),
     :deep(.p-textarea) {
       background: white !important;
       color: #1e293b !important;
       border: 1px solid #E2E8F0 !important;
-      
+
       &:enabled {
         background: white !important;
         color: #1e293b !important;
       }
-      
+
       &:enabled:hover {
         border-color: #16A34A !important;
         background: white !important;
         color: #1e293b !important;
       }
-      
+
       &:enabled:focus {
         border-color: #16A34A !important;
         box-shadow: 0 0 0 1px #16A34A !important;
         background: white !important;
         color: #1e293b !important;
       }
-      
+
       &::placeholder {
         color: #94A3B8 !important;
       }
     }
-    
+
     :deep(.p-dropdown-label) {
       background: white !important;
       color: #1e293b !important;
     }
-    
+
     :deep(.p-dropdown-trigger) {
       color: #64748B !important;
     }
-    
+
     :deep(.p-dropdown-label) {
       background: white !important;
       color: #1e293b !important;
     }
-    
+
     :deep(.p-dropdown-trigger) {
       color: #64748B !important;
     }
   }
-  
+
   .form-actions {
     margin-top: 2rem;
   }
@@ -474,20 +471,20 @@ const submitForm = async () => {
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   background: white;
   border: none;
-  
+
   :deep(.p-card-body) {
     padding: 2rem;
   }
-  
+
   :deep(.p-card-title) {
     padding: 0;
     margin-bottom: 1.5rem;
   }
-  
+
   :deep(.p-card-content) {
     padding: 0;
   }
-  
+
   h2 {
     color: #1e293b;
     margin-bottom: 1.5rem;
@@ -515,7 +512,7 @@ const submitForm = async () => {
   background: linear-gradient(135deg, #16A34A 0%, #22C55E 100%);
   border-radius: 12px;
   color: white;
-  
+
   i {
     font-size: 1.8rem;
   }
@@ -527,16 +524,16 @@ const submitForm = async () => {
     color: #1e293b;
     margin-bottom: 0.5rem;
   }
-  
+
   p {
     color: #64748b;
     line-height: 1.8;
-    
+
     a {
       color: #16A34A;
       text-decoration: none;
       transition: color 0.3s ease;
-      
+
       &:hover {
         color: #22C55E;
         text-decoration: underline;
@@ -550,20 +547,20 @@ const submitForm = async () => {
   background: white;
   border: none;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  
+
   :deep(.p-card-body) {
     padding: 2rem;
   }
-  
+
   :deep(.p-card-title) {
     padding: 0;
     margin-bottom: 1.5rem;
   }
-  
+
   :deep(.p-card-content) {
     padding: 0;
   }
-  
+
   h3 {
     color: #1e293b;
     margin-bottom: 1rem;
@@ -587,31 +584,31 @@ const submitForm = async () => {
   color: #334155;
   font-weight: 600;
   transition: all 0.3s ease;
-  
+
   i {
     font-size: 1.5rem;
   }
-  
+
   &:hover {
     transform: translateY(-3px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   }
-  
+
   &.facebook:hover {
     color: #1877f2;
     border-left: 4px solid #1877f2;
   }
-  
+
   &.twitter:hover {
     color: #1da1f2;
     border-left: 4px solid #1da1f2;
   }
-  
+
   &.instagram:hover {
     color: #e4405f;
     border-left: 4px solid #e4405f;
   }
-  
+
   &.linkedin:hover {
     color: #0077b5;
     border-left: 4px solid #0077b5;
@@ -643,7 +640,7 @@ const submitForm = async () => {
   background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
   padding: 2rem 0;
   margin: 0;
-  
+
   .container {
     max-width: 1200px;
     margin: 0 auto;
@@ -656,7 +653,7 @@ const submitForm = async () => {
   align-items: center;
   justify-content: space-between;
   gap: 2rem;
-  
+
   @media (max-width: 768px) {
     flex-direction: column;
     text-align: center;
@@ -666,11 +663,11 @@ const submitForm = async () => {
 
 .whatsapp-icon {
   flex-shrink: 0;
-  
+
   i {
     font-size: 3.5rem;
     color: white;
-    
+
     @media (max-width: 768px) {
       font-size: 3rem;
     }
@@ -680,24 +677,24 @@ const submitForm = async () => {
 .whatsapp-text {
   flex: 1;
   color: white;
-  
+
   h3 {
     font-size: 1.8rem;
     font-weight: 700;
     margin-bottom: 0.5rem;
     color: white;
-    
+
     @media (max-width: 768px) {
       font-size: 1.5rem;
     }
   }
-  
+
   p {
     font-size: 1.1rem;
     opacity: 0.95;
     margin: 0;
     color: white;
-    
+
     @media (max-width: 768px) {
       font-size: 1rem;
     }
@@ -711,21 +708,21 @@ const submitForm = async () => {
   border: none !important;
   font-weight: 600;
   padding: 0.875rem 2rem;
-  
+
   :deep(.p-button-label) {
     color: #25D366 !important;
   }
-  
+
   :deep(.p-button-icon) {
     color: #25D366 !important;
   }
-  
+
   &:hover {
     background: rgba(255, 255, 255, 0.9) !important;
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   }
-  
+
   @media (max-width: 768px) {
     width: 100%;
     padding: 0.875rem 1.5rem;

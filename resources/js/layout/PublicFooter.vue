@@ -6,7 +6,7 @@
         <div class="footer-section">
           <h3 class="footer-title">Öz Ergül Plastik</h3>
           <p class="footer-desc">
-            Geri dönüşüm sektöründe öncü, çevre dostu poşet üretimi yapan fabrikamız, 
+            Geri dönüşüm sektöründe öncü, çevre dostu poşet üretimi yapan fabrikamız,
             kaliteli ve sürdürülebilir ürünlerle sektörde fark yaratıyor.
           </p>
           <div class="social-links">
@@ -42,19 +42,19 @@
           <ul class="contact-info">
             <li>
               <i class="pi pi-phone"></i>
-              <span>+90 (555) 123 45 67</span>
+              <span>+90 (541) 431 49 43</span>
             </li>
             <li>
               <i class="pi pi-envelope"></i>
-              <span>info@ecobagfactory.com</span>
+              <span>info@ozergulplastik.com</span>
             </li>
             <li>
               <i class="pi pi-map-marker"></i>
-              <span>Organize Sanayi Bölgesi, İstanbul</span>
+              <span>Modern Sanayi Sitesi Adana</span>
             </li>
             <li>
               <i class="pi pi-clock"></i>
-              <span>Pzt-Cum: 08:00 - 18:00</span>
+              <span>7/24</span>
             </li>
           </ul>
         </div>

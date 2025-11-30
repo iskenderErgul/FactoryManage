@@ -2,30 +2,30 @@
   <div class="home-page">
     <!-- Hero Section -->
     <section class="hero-section">
-      <Carousel 
-        :value="heroSlides" 
-        :numVisible="1" 
-        :numScroll="1" 
+      <Carousel
+        :value="heroSlides"
+        :numVisible="1"
+        :numScroll="1"
         :circular="true"
         :autoplayInterval="5000"
         class="hero-carousel"
       >
         <template #item="slotProps">
           <div class="hero-slide">
-            <video 
-              v-if="slotProps.data.type === 'video'" 
-              :src="slotProps.data.url" 
-              autoplay 
-              muted 
-              loop 
+            <video
+              v-if="slotProps.data.type === 'video'"
+              :src="slotProps.data.url"
+              autoplay
+              muted
+              loop
               playsinline
               preload="none"
               class="hero-video"
               @loadeddata="onVideoLoaded"
             ></video>
-            <div 
-              v-else 
-              class="hero-slide-bg" 
+            <div
+              v-else
+              class="hero-slide-bg"
               :data-bg="slotProps.data.url"
               :style="{ backgroundImage: slotProps.data.loaded ? `url(${slotProps.data.url})` : 'none' }"
             ></div>
@@ -34,10 +34,10 @@
                 <h1 class="hero-title animate-fade-in">{{ slotProps.data.title || 'Öz Ergül Plastik' }}</h1>
                 <p class="hero-subtitle animate-fade-in-delay">{{ slotProps.data.subtitle || 'Kaliteli ve çevre dostu poşet çözümleri' }}</p>
                 <div class="hero-actions animate-fade-in-delay-2">
-                  <Button 
-                    label="Ürünlerimizi Keşfedin" 
-                    icon="pi pi-arrow-right" 
-                    severity="success" 
+                  <Button
+                    label="Ürünlerimizi Keşfedin"
+                    icon="pi pi-arrow-right"
+                    severity="success"
                     size="large"
                     @click="$router.push('/urunler')"
                   />
@@ -60,8 +60,8 @@
             <h3>WhatsApp'tan Bize Ulaşın</h3>
             <p>Hızlı ve kolay iletişim için WhatsApp üzerinden mesaj gönderin</p>
           </div>
-          <Button 
-            label="WhatsApp'tan Yaz" 
+          <Button
+            label="WhatsApp'tan Yaz"
             icon="pi pi-whatsapp"
             severity="success"
             size="large"
@@ -81,26 +81,26 @@
               <div class="about-text">
                 <h2 class="section-title">Çevre Dostu Üretim Lideri</h2>
                 <p class="section-desc">
-                  Öz Ergül Plastik olarak, geri dönüşüm sektöründe faaliyet gösteren öncü bir plastik 
-                  poşet üreticisiyiz. En kaliteli ve çevre dostu poşet ürünlerini üretiyor, modern 
+                  Öz Ergül Plastik olarak, geri dönüşüm sektöründe faaliyet gösteren öncü bir plastik
+                  poşet üreticisiyiz. En kaliteli ve çevre dostu poşet ürünlerini üretiyor, modern
                   tesislerimiz ve uzman ekibimizle sürdürülebilir bir gelecek için çalışıyoruz.
                 </p>
                 <p class="section-desc">
-                  Geri dönüştürülmüş hammaddelerden üretilen poşetlerimiz, hem çevre dostu hem de 
-                  yüksek kalite standartlarına uygundur. Geniş ürün yelpazemiz ile farklı sektörlerden 
-                  müşterilerimize özel çözümler sunuyoruz. T-Shirt poşetlerden endüstriyel poşetlere, 
-                  çöp torbalarından özel tasarım poşetlere kadar geniş bir ürün yelpazesi ile hizmet 
+                  Geri dönüştürülmüş hammaddelerden üretilen poşetlerimiz, hem çevre dostu hem de
+                  yüksek kalite standartlarına uygundur. Geniş ürün yelpazemiz ile farklı sektörlerden
+                  müşterilerimize özel çözümler sunuyoruz. T-Shirt poşetlerden endüstriyel poşetlere,
+                  çöp torbalarından özel tasarım poşetlere kadar geniş bir ürün yelpazesi ile hizmet
                   vermekteyiz.
                 </p>
                 <p class="section-desc">
-                  Kalite, güvenilirlik ve müşteri memnuniyeti ilkelerimizden ödün vermeden, sektörde 
-                  öncü ve yenilikçi bir anlayışla ilerlemeye devam ediyoruz. Sürdürülebilir üretim 
-                  anlayışımız ve çevreye olan sorumluluğumuz, iş yapış şeklimizin temel taşlarını 
+                  Kalite, güvenilirlik ve müşteri memnuniyeti ilkelerimizden ödün vermeden, sektörde
+                  öncü ve yenilikçi bir anlayışla ilerlemeye devam ediyoruz. Sürdürülebilir üretim
+                  anlayışımız ve çevreye olan sorumluluğumuz, iş yapış şeklimizin temel taşlarını
                   oluşturmaktadır.
                 </p>
-                <Button 
-                  label="Daha Fazla Bilgi" 
-                  icon="pi pi-arrow-right" 
+                <Button
+                  label="Daha Fazla Bilgi"
+                  icon="pi pi-arrow-right"
                   severity="success"
                   class="about-button"
                   @click="$router.push('/hakkimizda')"
@@ -131,18 +131,18 @@
       <div class="container">
         <h2 class="section-title text-center">Ürünlerimiz</h2>
         <p class="section-subtitle text-center">En kaliteli ve çevre dostu ürünlerimizi keşfedin</p>
-        
+
         <div class="products-grid" v-if="products.length">
-          <Card 
-            v-for="product in featuredProducts" 
-            :key="product.id" 
+          <Card
+            v-for="product in featuredProducts"
+            :key="product.id"
             class="product-card"
           >
             <template #header>
               <div class="product-image-wrapper">
-                <img 
-                  :src="product.image" 
-                  :alt="product.name" 
+                <img
+                  :src="product.image"
+                  :alt="product.name"
                   class="product-image"
                   loading="lazy"
                   decoding="async"
@@ -156,9 +156,9 @@
               <p class="product-description">{{ product.short_description }}</p>
             </template>
             <template #footer>
-              <Button 
-                label="Detayları Gör" 
-                icon="pi pi-eye" 
+              <Button
+                label="Detayları Gör"
+                icon="pi pi-eye"
                 severity="success"
                 outlined
                 @click="$router.push(`/urunler/${product.id}`)"
@@ -166,11 +166,11 @@
             </template>
           </Card>
         </div>
-        
+
         <div class="text-center mt-4">
-          <Button 
-            label="Tüm Ürünleri Gör" 
-            icon="pi pi-th-large" 
+          <Button
+            label="Tüm Ürünleri Gör"
+            icon="pi pi-th-large"
             severity="success"
             size="large"
             @click="$router.push('/urunler')"
@@ -184,7 +184,7 @@
       <div class="container">
         <h2 class="section-title text-center">Neden Biz?</h2>
         <p class="section-subtitle text-center">Bizi tercih etmeniz için birçok neden var</p>
-        
+
         <div class="features-grid">
           <Card v-for="feature in features" :key="feature.id" class="feature-card">
             <template #content>
@@ -283,7 +283,7 @@ const features = ref([
 
 const openWhatsApp = () => {
   // WhatsApp numarası - buraya gerçek numara eklenebilir
-  const phoneNumber = '905551234567'; // Örnek numara
+  const phoneNumber = '905414314943'; // Örnek numara
   const message = encodeURIComponent('Merhaba, Öz Ergül Plastik hakkında bilgi almak istiyorum.');
   window.open(`https://wa.me/${phoneNumber}?text=${message}`, '_blank');
 };
@@ -303,7 +303,7 @@ const loadProductImages = async () => {
     try {
       const productName = encodeURIComponent(product.name);
       const response = await axios.get(`/api/public/gallery/product/${productName}`);
-      
+
       if (response.data && response.data.brands && response.data.brands.length > 0) {
         // İlk markanın ilk resmini al
         const firstBrand = response.data.brands[0];
@@ -331,11 +331,11 @@ const loadHomepageSlider = async () => {
         id: index + 1,
         loaded: index === 0, // İlk slide'ı hemen yükle
         title: index === 0 ? 'Geri Dönüşümde Öncüyüz' : index === 1 ? 'Kaliteli Üretim' : 'Modern Üretim Tesisleri',
-        subtitle: index === 0 ? 'Çevre dostu, kaliteli poşet üretimi ile sürdürülebilir geleceğe katkı sağlıyoruz' 
+        subtitle: index === 0 ? 'Çevre dostu, kaliteli poşet üretimi ile sürdürülebilir geleceğe katkı sağlıyoruz'
                 : index === 1 ? 'Sektördeki tecrübemizle müşterilerimize en iyi hizmeti sunuyoruz'
                 : 'Son teknoloji ekipmanlarımızla yüksek kaliteli üretim yapıyoruz'
       }));
-      
+
       // İlk slide'ın resmini önceden yükle
       if (heroSlides.value.length > 0 && heroSlides.value[0].type === 'image') {
         const firstSlide = heroSlides.value[0];
@@ -425,11 +425,11 @@ onMounted(async () => {
 
 .hero-carousel {
   position: relative;
-  
+
   :deep(.p-carousel-content) {
     overflow: visible;
   }
-  
+
   // Indicators inside the image at bottom
   :deep(.p-carousel-indicators) {
     position: absolute;
@@ -439,11 +439,11 @@ onMounted(async () => {
     z-index: 10;
     margin: 0;
     padding: 0;
-    
+
     @media (max-width: 768px) {
       bottom: 1.5rem;
     }
-    
+
     .p-carousel-indicator {
       button {
         background: rgba(255, 255, 255, 0.5);
@@ -452,13 +452,13 @@ onMounted(async () => {
         border-radius: 50%;
         border: 2px solid rgba(255, 255, 255, 0.8);
         transition: all 0.3s ease;
-        
+
         &:hover {
           background: rgba(255, 255, 255, 0.8);
           transform: scale(1.2);
         }
       }
-      
+
       &.p-highlight button {
         background: #22C55E;
         border-color: white;
@@ -467,7 +467,7 @@ onMounted(async () => {
       }
     }
   }
-  
+
   // Carousel navigation arrows inside the image
   :deep(.p-carousel-prev),
   :deep(.p-carousel-next) {
@@ -481,29 +481,29 @@ onMounted(async () => {
     height: 3rem;
     border-radius: 50%;
     transition: all 0.3s ease;
-    
+
     &:hover {
       background: rgba(22, 163, 74, 1);
       transform: translateY(-50%) scale(1.1);
     }
-    
+
     @media (max-width: 768px) {
       width: 2.5rem;
       height: 2.5rem;
     }
   }
-  
+
   :deep(.p-carousel-prev) {
     left: 2rem;
-    
+
     @media (max-width: 768px) {
       left: 1rem;
     }
   }
-  
+
   :deep(.p-carousel-next) {
     right: 2rem;
-    
+
     @media (max-width: 768px) {
       right: 1rem;
     }
@@ -515,7 +515,7 @@ onMounted(async () => {
   background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
   padding: 2rem 0;
   margin: 0;
-  
+
   .container {
     max-width: 1200px;
     margin: 0 auto;
@@ -528,7 +528,7 @@ onMounted(async () => {
   align-items: center;
   justify-content: space-between;
   gap: 2rem;
-  
+
   @media (max-width: 768px) {
     flex-direction: column;
     text-align: center;
@@ -538,11 +538,11 @@ onMounted(async () => {
 
 .whatsapp-icon {
   flex-shrink: 0;
-  
+
   i {
     font-size: 3.5rem;
     color: white;
-    
+
     @media (max-width: 768px) {
       font-size: 3rem;
     }
@@ -552,24 +552,24 @@ onMounted(async () => {
 .whatsapp-text {
   flex: 1;
   color: white;
-  
+
   h3 {
     font-size: 1.8rem;
     font-weight: 700;
     margin-bottom: 0.5rem;
     color: white;
-    
+
     @media (max-width: 768px) {
       font-size: 1.5rem;
     }
   }
-  
+
   p {
     font-size: 1.1rem;
     opacity: 0.95;
     margin: 0;
     color: white;
-    
+
     @media (max-width: 768px) {
       font-size: 1rem;
     }
@@ -583,21 +583,21 @@ onMounted(async () => {
   border: none !important;
   font-weight: 600;
   padding: 0.875rem 2rem;
-  
+
   :deep(.p-button-label) {
     color: #25D366 !important;
   }
-  
+
   :deep(.p-button-icon) {
     color: #25D366 !important;
   }
-  
+
   &:hover {
     background: rgba(255, 255, 255, 0.9) !important;
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   }
-  
+
   @media (max-width: 768px) {
     width: 100%;
     padding: 0.875rem 1.5rem;
@@ -608,11 +608,11 @@ onMounted(async () => {
   position: relative;
   height: 700px;
   overflow: hidden;
-  
+
   @media (max-width: 968px) {
     height: 550px;
   }
-  
+
   @media (max-width: 768px) {
     height: 450px;
   }
@@ -652,11 +652,11 @@ onMounted(async () => {
   z-index: 1;
   padding: 2rem 1rem;
   box-sizing: border-box;
-  
+
   @media (max-width: 768px) {
     padding: 1.5rem 0.75rem;
   }
-  
+
   @media (max-width: 480px) {
     padding: 1rem 0.5rem;
   }
@@ -669,7 +669,7 @@ onMounted(async () => {
   width: 100%;
   padding: 2rem 1.5rem;
   box-sizing: border-box;
-  
+
   @media (max-width: 768px) {
     padding: 1.5rem 1rem;
     max-width: 100%;
@@ -683,16 +683,16 @@ onMounted(async () => {
   line-height: 1.2;
   word-wrap: break-word;
   overflow-wrap: break-word;
-  
+
   @media (max-width: 968px) {
     font-size: 2.5rem;
   }
-  
+
   @media (max-width: 768px) {
     font-size: 1.8rem;
     margin-bottom: 0.75rem;
   }
-  
+
   @media (max-width: 480px) {
     font-size: 1.5rem;
   }
@@ -705,17 +705,17 @@ onMounted(async () => {
   line-height: 1.5;
   word-wrap: break-word;
   overflow-wrap: break-word;
-  
+
   @media (max-width: 968px) {
     font-size: 1.3rem;
     margin-bottom: 1.5rem;
   }
-  
+
   @media (max-width: 768px) {
     font-size: 1rem;
     margin-bottom: 1.25rem;
   }
-  
+
   @media (max-width: 480px) {
     font-size: 0.9rem;
     margin-bottom: 1rem;
@@ -728,13 +728,13 @@ onMounted(async () => {
   justify-content: center;
   flex-wrap: wrap;
   width: 100%;
-  
+
   @media (max-width: 768px) {
     gap: 0.75rem;
     flex-direction: column;
     align-items: center;
   }
-  
+
   :deep(.p-button) {
     @media (max-width: 768px) {
       width: 100%;
@@ -742,7 +742,7 @@ onMounted(async () => {
       font-size: 0.9rem;
       padding: 0.75rem 1.5rem;
     }
-    
+
     @media (max-width: 480px) {
       font-size: 0.85rem;
       padding: 0.65rem 1.25rem;
@@ -779,7 +779,7 @@ onMounted(async () => {
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 2rem;
-  
+
   @media (max-width: 768px) {
     padding: 0 1rem;
   }
@@ -791,7 +791,7 @@ onMounted(async () => {
   font-weight: 700;
   color: #1e293b;
   margin-bottom: 1rem;
-  
+
   @media (max-width: 768px) {
     font-size: 2rem;
   }
@@ -814,7 +814,7 @@ onMounted(async () => {
 .about-quick {
   padding: 4rem 0;
   background: white;
-  
+
   // Widen the container specifically for this section
   .container {
     max-width: 1400px;
@@ -832,7 +832,7 @@ onMounted(async () => {
   grid-template-columns: 1.2fr 0.8fr; // Give more space to text
   gap: 4rem;
   padding: 2rem;
-  
+
   @media (max-width: 968px) {
     grid-template-columns: 1fr;
     gap: 3rem;
@@ -860,7 +860,7 @@ onMounted(async () => {
   border-radius: 12px;
   color: white;
   transition: transform 0.3s ease;
-  
+
   &:hover {
     transform: scale(1.05);
   }
@@ -888,12 +888,12 @@ onMounted(async () => {
   grid-template-columns: repeat(2, 1fr);
   gap: 2.5rem;
   margin-bottom: 2rem;
-  
+
   @media (max-width: 968px) {
     grid-template-columns: 1fr;
     gap: 2rem;
   }
-  
+
   @media (max-width: 768px) {
     gap: 1.5rem;
   }
@@ -902,19 +902,19 @@ onMounted(async () => {
 .product-card {
   transition: all 0.3s ease;
   background: white;
-  
+
   &:hover {
     transform: translateY(-8px);
     box-shadow: 0 12px 24px rgba(34, 197, 94, 0.2);
   }
-  
+
   :deep(.p-card-title) {
     color: #1e293b !important;
     font-size: 1.4rem;
     font-weight: 600;
     margin-bottom: 0.5rem;
   }
-  
+
   :deep(h3) {
     color: #1e293b !important;
     font-size: 1.4rem;
@@ -927,7 +927,7 @@ onMounted(async () => {
   height: 300px;
   overflow: hidden;
   background: #f1f5f9;
-  
+
   @media (max-width: 968px) {
     height: 250px;
   }
@@ -938,7 +938,7 @@ onMounted(async () => {
   height: 100%;
   object-fit: cover;
   transition: transform 0.3s ease;
-  
+
   .product-card:hover & {
     transform: scale(1.1);
   }
@@ -959,7 +959,7 @@ onMounted(async () => {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
   gap: 2.5rem;
-  
+
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
     gap: 2rem;
@@ -972,7 +972,7 @@ onMounted(async () => {
   background: white;
   padding: 2rem;
   border-radius: 16px;
-  
+
   &:hover {
     transform: translateY(-8px);
     box-shadow: 0 12px 28px rgba(34, 197, 94, 0.2);
@@ -990,19 +990,19 @@ onMounted(async () => {
   border-radius: 50%;
   color: white;
   font-size: 3.5rem;
-  
+
   i {
     font-size: 3.5rem !important;
     display: block;
     line-height: 1;
     font-weight: normal;
   }
-  
+
   @media (max-width: 768px) {
     width: 100px;
     height: 100px;
     font-size: 3rem;
-    
+
     i {
       font-size: 3rem !important;
     }

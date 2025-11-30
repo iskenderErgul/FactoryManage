@@ -17,26 +17,26 @@
               <div class="history-text">
                 <h2 class="section-title">Şirket Tarihimiz</h2>
                 <p>
-                  Öz Ergül Plastik, geri dönüşüm sektöründe faaliyet gösteren öncü bir plastik poşet 
-                  üreticisidir. Çevreye duyarlı üretim anlayışımız ve kaliteli ürünlerimizle sektörde 
+                  Öz Ergül Plastik, geri dönüşüm sektöründe faaliyet gösteren öncü bir geri dönüştürülebilir plastik ürünler
+                  üreticisidir. Çevreye duyarlı üretim anlayışımız ve kaliteli ürünlerimizle sektörde
                   önemli bir konum edinmiş bulunmaktayız.
                 </p>
                 <p>
-                  Modern ve teknolojik tesislerimizde, geri dönüştürülmüş hammaddelerden üretilen 
-                  poşetlerimiz, hem çevre dostu hem de yüksek kalite standartlarına uygun olarak 
-                  üretilmektedir. Uzman ekibimiz ve sürekli gelişen üretim kapasitemizle, müşterilerimize 
+                  Modern ve teknolojik tesislerimizde, geri dönüştürülmüş hammaddelerden üretilen
+                  poşetlerimiz, hem çevre dostu hem de yüksek kalite standartlarına uygun olarak
+                  üretilmektedir. Uzman ekibimiz ve sürekli gelişen üretim kapasitemizle, müşterilerimize
                   en iyi hizmeti sunmayı hedefliyoruz.
                 </p>
                 <p>
-                  İlk günden bu yana kalite, güvenilirlik ve müşteri memnuniyeti ilkelerimizden 
-                  ödün vermeden, sektörde öncü ve yenilikçi bir anlayışla ilerlemeye devam ediyoruz. 
-                  Sürdürülebilir üretim anlayışımız ve çevreye olan sorumluluğumuz, iş yapış şeklimizin 
+                  İlk günden bu yana kalite, güvenilirlik ve müşteri memnuniyeti ilkelerimizden
+                  ödün vermeden, sektörde öncü ve yenilikçi bir anlayışla ilerlemeye devam ediyoruz.
+                  Sürdürülebilir üretim anlayışımız ve çevreye olan sorumluluğumuz, iş yapış şeklimizin
                   temel taşlarını oluşturmaktadır.
                 </p>
                 <p>
-                  Geniş ürün yelpazemiz ve esnek üretim kapasitemiz sayesinde, farklı sektörlerden 
-                  müşterilerimize özel çözümler sunabiliyoruz. T-Shirt poşetlerden endüstriyel poşetlere, 
-                  çöp torbalarından özel tasarım poşetlere kadar geniş bir ürün yelpazesi ile 
+                  Geniş ürün yelpazemiz ve esnek üretim kapasitemiz sayesinde, farklı sektörlerden
+                  müşterilerimize özel çözümler sunabiliyoruz. T-Shirt poşetlerden endüstriyel poşetlere,
+                  çöp torbalarından özel tasarım poşetlere kadar geniş bir ürün yelpazesi ile
                   hizmet vermekteyiz.
                 </p>
               </div>
@@ -49,7 +49,7 @@
       <section class="production-process">
         <h2 class="section-title text-center">Üretim Sürecimiz</h2>
         <p class="section-subtitle text-center">Modern teknoloji ile çevre dostu üretim</p>
-        
+
         <div class="process-grid">
           <Card v-for="step in productionSteps" :key="step.id" class="process-card">
             <template #content>
@@ -74,12 +74,12 @@
             </template>
             <template #content>
               <p>
-                Geri dönüştürülmüş malzemelerden en yüksek kalitede ürünler üreterek, 
+                Geri dönüştürülmüş malzemelerden en yüksek kalitede ürünler üreterek,
                 çevreye olan zararı minimize etmek ve sürdürülebilir bir gelecek inşa etmektir.
               </p>
             </template>
           </Card>
-          
+
           <Card class="mission-card">
             <template #title>
               <i class="pi pi-eye"></i>
@@ -87,12 +87,12 @@
             </template>
             <template #content>
               <p>
-                Türkiye'nin ve bölgenin en büyük, en teknolojik ve çevre dostu poşet üreticisi 
+                Türkiye'nin ve bölgenin en büyük, en teknolojik ve çevre dostu poşet üreticisi
                 olmak, sektörde standartları belirleyen öncü firma konumunu sürdürmektir.
               </p>
             </template>
           </Card>
-          
+
           <Card class="mission-card">
             <template #title>
               <i class="pi pi-heart"></i>
@@ -109,26 +109,6 @@
             </template>
           </Card>
         </div>
-      </section>
-
-      <!-- Factory Gallery -->
-      <section class="factory-gallery">
-        <h2 class="section-title text-center">Fabrikamız</h2>
-        <p class="section-subtitle text-center">Modern tesislerimizden görüntüler</p>
-        
-        <Carousel 
-          :value="factoryImages" 
-          :numVisible="1" 
-          :numScroll="1" 
-          :circular="true"
-          :autoplayInterval="5000"
-          class="factory-carousel"
-        >
-          <template #item="slotProps">
-            <div class="factory-slide" :style="{ backgroundImage: `url(${slotProps.data.url})` }">
-            </div>
-          </template>
-        </Carousel>
       </section>
     </div>
   </div>
@@ -160,7 +140,7 @@ const productionSteps = ref([
   },
   {
     id: 4,
-    icon: 'pi-scissors',
+    icon: 'pi-wrench',
     title: 'Kesim ve Şekillendirme',
     description: 'İstenilen boyut ve şekilde kesim işlemi'
   },
@@ -209,7 +189,7 @@ const factoryImages = ref([
   color: white;
   padding: 4rem 0 3rem;
   margin-bottom: 0;
-  
+
   .container {
     color: white;
     background: transparent;
@@ -221,7 +201,7 @@ const factoryImages = ref([
   font-weight: 700;
   margin-bottom: 1rem;
   color: white !important;
-  
+
   @media (max-width: 768px) {
     font-size: 2rem;
   }
@@ -237,7 +217,7 @@ const factoryImages = ref([
   max-width: 1200px;
   margin: 0 auto;
   padding: 2rem;
-  
+
   @media (max-width: 768px) {
     padding: 1rem;
   }
@@ -248,7 +228,7 @@ const factoryImages = ref([
   font-weight: 700;
   color: #1e293b;
   margin-bottom: 1rem;
-  
+
   @media (max-width: 768px) {
     font-size: 2rem;
   }
@@ -273,11 +253,11 @@ const factoryImages = ref([
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   background: white;
   border: none;
-  
+
   :deep(.p-card-body) {
     padding: 2rem;
   }
-  
+
   :deep(.p-card-content) {
     padding: 0;
   }
@@ -315,15 +295,15 @@ const factoryImages = ref([
   background: white;
   border: none;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
-  
+
   :deep(.p-card-body) {
     padding: 2rem;
   }
-  
+
   :deep(.p-card-content) {
     padding: 0;
   }
-  
+
   &:hover {
     transform: translateY(-8px);
     box-shadow: 0 12px 24px rgba(34, 197, 94, 0.2);
@@ -355,7 +335,7 @@ const factoryImages = ref([
   justify-content: center;
   background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
   border-radius: 50%;
-  
+
   i {
     font-size: 2.5rem;
     color: #16A34A;
@@ -393,45 +373,45 @@ const factoryImages = ref([
   background: white;
   border: none;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
-  
+
   :deep(.p-card-body) {
     padding: 2rem;
   }
-  
+
   &:hover {
     transform: translateY(-8px);
     box-shadow: 0 12px 24px rgba(34, 197, 94, 0.2);
   }
-  
+
   :deep(.p-card-title) {
     display: flex;
     align-items: center;
     gap: 0.75rem;
     color: #16A34A;
     font-size: 1.5rem;
-    
+
     i {
       font-size: 2rem;
     }
   }
-  
+
   :deep(.p-card-content) {
     padding: 0;
-    
+
     p {
       color: #475569;
       line-height: 1.8;
       font-size: 1.05rem;
     }
-    
+
     ul {
       list-style: none;
       padding: 0;
-      
+
       li {
         padding: 0.5rem 0;
         color: #475569;
-        
+
         &:before {
           content: '✓ ';
           color: #22C55E;
@@ -453,11 +433,11 @@ const factoryImages = ref([
   position: relative;
   overflow: hidden;
   border-radius: 12px;
-  
+
   :deep(.p-carousel-content) {
     overflow: visible;
   }
-  
+
   // Indicators inside the image at bottom
   :deep(.p-carousel-indicators) {
     position: absolute;
@@ -467,11 +447,11 @@ const factoryImages = ref([
     z-index: 10;
     margin: 0;
     padding: 0;
-    
+
     @media (max-width: 768px) {
       bottom: 1.5rem;
     }
-    
+
     .p-carousel-indicator {
       button {
         background: rgba(255, 255, 255, 0.5);
@@ -480,13 +460,13 @@ const factoryImages = ref([
         border-radius: 50%;
         border: 2px solid rgba(255, 255, 255, 0.8);
         transition: all 0.3s ease;
-        
+
         &:hover {
           background: rgba(255, 255, 255, 0.8);
           transform: scale(1.2);
         }
       }
-      
+
       &.p-highlight button {
         background: #22C55E;
         border-color: white;
@@ -495,7 +475,7 @@ const factoryImages = ref([
       }
     }
   }
-  
+
   // Carousel navigation arrows inside the image
   :deep(.p-carousel-prev),
   :deep(.p-carousel-next) {
@@ -509,29 +489,29 @@ const factoryImages = ref([
     height: 3rem;
     border-radius: 50%;
     transition: all 0.3s ease;
-    
+
     &:hover {
       background: rgba(22, 163, 74, 1);
       transform: translateY(-50%) scale(1.1);
     }
-    
+
     @media (max-width: 768px) {
       width: 2.5rem;
       height: 2.5rem;
     }
   }
-  
+
   :deep(.p-carousel-prev) {
     left: 2rem;
-    
+
     @media (max-width: 768px) {
       left: 1rem;
     }
   }
-  
+
   :deep(.p-carousel-next) {
     right: 2rem;
-    
+
     @media (max-width: 768px) {
       right: 1rem;
     }
@@ -543,11 +523,11 @@ const factoryImages = ref([
   height: 600px;
   background-size: cover;
   background-position: center;
-  
+
   @media (max-width: 968px) {
     height: 500px;
   }
-  
+
   @media (max-width: 768px) {
     height: 400px;
   }
