@@ -23,6 +23,7 @@ use App\Http\Controllers\Users\UsersController;
 use App\Http\Controllers\Worker\WorkerController;
 use App\Http\Controllers\ContactRequestController;
 use App\Http\Controllers\GalleryController;
+use App\Http\Controllers\SiteSettingsController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -215,6 +216,12 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/stats', [DashboardController::class, 'getDashboardStats']);
 
     });
+
+    // Site Settings
+    Route::get('/site-settings', [SiteSettingsController::class, 'index']);
+    Route::post('/site-settings', [SiteSettingsController::class, 'bulkUpdate']);
+    Route::put('/site-settings/upsert', [SiteSettingsController::class, 'upsert']);
+    Route::post('/site-settings/upload-file', [SiteSettingsController::class, 'uploadFile']);
 });
 
 

@@ -138,11 +138,24 @@ const model = ref([
         items: [
             {
                 label: 'Maliyet Yönetimi',
+                icon: 'pi pi-dollar',
                 items: [
                     {label: 'Maliyet Yönetimi', icon: 'pi pi-money-bill', to: '/sys/cost-management'}
                 ]
 
     }
+        ]
+    },
+    {
+
+        items: [
+            {
+                label: 'Ayarlar',
+                icon: 'pi pi-cog',
+                items: [
+                    { label: 'Site Ayarları', icon: 'pi pi-sliders-h', to: '/sys/settings/site' }
+                ]
+            }
         ]
     },
     // {

@@ -32,6 +32,7 @@ import Supplies from "@/components/Suppliers/Supplies.vue";
 import Transactions from "@/components/Customers/Transactions.vue";
 import SupplierTransactions from "@/components/Suppliers/SupplierTransactions.vue";
 import ContactRequests from "@/components/ContactRequests/ContactRequests.vue";
+import SiteSettings from "@/components/Settings/SiteSettings.vue";
 
 // Public Pages
 import PublicLayout from "@/layout/PublicLayout.vue";
@@ -251,6 +252,11 @@ const routes = [
                 path: '/sys/contact-requests',
                 name: 'contactRequests',
                 component: ContactRequests
+            },
+            {
+                path: '/sys/settings/site',
+                name: 'siteSettings',
+                component: SiteSettings
             },
 
 //Worker Pages
