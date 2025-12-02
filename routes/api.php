@@ -4,6 +4,7 @@
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Costs\CostsController;
 use App\Http\Controllers\Customer\CustomerController;
+use App\Http\Controllers\Customer\TransactionPdfController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Exports\ExportController;
 use App\Http\Controllers\Machines\MachinesController;
@@ -105,6 +106,17 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/transactions', [CustomerController::class, 'addTransaction']);
     Route::post('/transactions/bulk-update', [CustomerController::class, 'bulkUpdateTransactions']);
     Route::get('/customers/{id}/periodic-debt', [CustomerController::class, 'getPeriodicDebt']);
+    
+    // Transaction PDF Generation (Rate Limited)
+    Route::post('/customers/{customer}/transactions/pdf', [TransactionPdfController::class, 'generate'])
+        ->middleware('throttle:pdf')
+        ->name('customers.transactions.pdf');
+
+    // Supplier PDF Generation (Rate Limited)
+    Route::post('/suppliers/{supplier}/transactions/pdf', [App\Http\Controllers\Supplier\SupplierPdfController::class, 'generate'])
+        ->middleware('throttle:pdf')
+        ->name('suppliers.transactions.pdf');
+
 
 
     Route::get('/sales', [SalesController::class, 'index']);

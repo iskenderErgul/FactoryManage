@@ -47,18 +47,11 @@
                             <InputText type="text" v-model="filterModel.value" class="p-column-filter" placeholder="Telefon ara" />
                         </template>
                     </Column>
-                    <Column field="display_debt" header="Net Bakiye (TL)" sortable style="min-width:8rem">
-                        <template #body="slotProps">
-                            <span :class="slotProps.data.display_debt > 0 ? 'text-red-400 font-bold' : slotProps.data.display_debt < 0 ? 'text-green-400 font-bold' : 'text-gray-400 font-bold'">
-                                {{ slotProps.data.display_debt > 0 ? '+' : slotProps.data.display_debt < 0 ? '' : '' }}{{ formatAmount(slotProps.data.display_debt) }} TL
-                            </span>
-                        </template>
-                    </Column>
                     <Column :exportable="false" style="min-width:8rem">
                         <template #body="slotProps">
                             <Button icon="pi pi-info-circle" outlined rounded class="mr-2" @click="openSupplierTransactionsDetailDialog(slotProps.data)" />
                             <Button icon="pi pi-pencil" outlined rounded class="mr-2" @click="openUpdateSupplierTransactionDialog(slotProps.data)" />
-                            <Button icon="pi pi-print" outlined rounded  severity="info"   @click="openPrintDialog(slotProps.data)" />
+                            <Button icon="pi pi-file-pdf" outlined rounded  severity="danger" @click="openPdfDialog(slotProps.data)" />
                         </template>
                     </Column>
                 </DataTable>
@@ -111,11 +104,11 @@
                     <div class="total-summary" style="text-align: right; margin-top: 20px;">
                         <div class="flex justify-content-end align-items-center mb-3">
                             <label for="detailPeriodSelect" class="mr-2 font-semibold">Hesaplama Dönemi:</label>
-                            <Dropdown 
+                            <Dropdown
                                 id="detailPeriodSelect"
-                                v-model="selectedPeriod" 
-                                :options="periodOptions" 
-                                optionLabel="label" 
+                                v-model="selectedPeriod"
+                                :options="periodOptions"
+                                optionLabel="label"
                                 placeholder="Dönem Seçin"
                                 class="w-10rem"
                                 @change="updateCalculations"
@@ -125,7 +118,7 @@
                         <p><strong>Toplam Ödeme ({{ selectedPeriod.label }}):</strong> {{ formatAmount(totalCreditForPeriod(supplierTransactions, selectedPeriod.value)) }} TL</p>
                         <p v-if="lastPayment(supplierTransactions)"><strong>Son Ödeme:</strong> {{ formatAmount(lastPayment(supplierTransactions).amount) }} TL <span v-if="lastPayment(supplierTransactions).date">({{ lastPayment(supplierTransactions).date }})</span></p>
                         <hr style="margin: 15px 0; border: 1px solid var(--surface-border);">
-                        <p><strong style="font-size: 1.5em; font-weight: bold; color: var(--text-color);">Net Bakiye (Tüm Geçmiş):</strong> 
+                        <p><strong style="font-size: 1.5em; font-weight: bold; color: var(--text-color);">Net Bakiye (Tüm Geçmiş):</strong>
                             <span :style="calculateTotalAmount(supplierTransactions, 0) > 0 ? 'color: #f87171;' : calculateTotalAmount(supplierTransactions, 0) < 0 ? 'color: #4ade80;' : 'color: #9ca3af;'">
                                 {{ calculateTotalAmount(supplierTransactions, 0) > 0 ? '+' : '' }}{{ formatAmount(calculateTotalAmount(supplierTransactions, 0)) }} TL
                             </span>
@@ -275,11 +268,11 @@
                     <div class="total-summary" style="text-align: right; margin-top: 20px;">
                         <div class="flex justify-content-end align-items-center mb-3">
                             <label for="readOnlyPeriodSelect" class="mr-2 font-semibold">Hesaplama Dönemi:</label>
-                            <Dropdown 
+                            <Dropdown
                                 id="readOnlyPeriodSelect"
-                                v-model="selectedPeriod" 
-                                :options="periodOptions" 
-                                optionLabel="label" 
+                                v-model="selectedPeriod"
+                                :options="periodOptions"
+                                optionLabel="label"
                                 placeholder="Dönem Seçin"
                                 class="w-10rem"
                             />
@@ -288,7 +281,7 @@
                         <p><strong>Toplam Ödeme ({{ selectedPeriod.label }}):</strong> {{ formatAmount(totalCreditForPeriod(selectedSupplierTransaction.transactions, selectedPeriod.value)) }} TL</p>
                         <p v-if="lastPayment(selectedSupplierTransaction.transactions)"><strong>Son Ödeme:</strong> {{ formatAmount(lastPayment(selectedSupplierTransaction.transactions).amount) }} TL <span v-if="lastPayment(selectedSupplierTransaction.transactions).date">({{ lastPayment(selectedSupplierTransaction.transactions).date }})</span></p>
                         <hr style="margin: 15px 0; border: 1px solid var(--surface-border);">
-                        <p><strong style="font-size: 1.5em; font-weight: bold; color: var(--text-color);">Net Bakiye (Tüm Geçmiş):</strong> 
+                        <p><strong style="font-size: 1.5em; font-weight: bold; color: var(--text-color);">Net Bakiye (Tüm Geçmiş):</strong>
                             <span :style="calculateTotalAmount(selectedSupplierTransaction.transactions, 0) > 0 ? 'color: #f87171;' : calculateTotalAmount(selectedSupplierTransaction.transactions, 0) < 0 ? 'color: #4ade80;' : 'color: #9ca3af;'">
                                 {{ calculateTotalAmount(selectedSupplierTransaction.transactions, 0) > 0 ? '+' : '' }}{{ formatAmount(calculateTotalAmount(selectedSupplierTransaction.transactions, 0)) }} TL
                             </span>
@@ -297,147 +290,89 @@
                 </div>
             </Dialog>
 
-            <!-- YENİ YAZDIRMA DIALOG'U - SON 15 İŞLEM -->
+            <!-- YENİ PDF OLUŞTURMA DIALOG'U -->
             <Dialog
-                v-model:visible="printTransaction"
+                v-model:visible="pdfDialog"
                 modal
-                header="Yazdırma Önizleme"
-                :style="{ width: '90vw', height: '90vh' }"
-                :breakpoints="{ '1199px': '95vw', '575px': '98vw' }"
-                :maximizable="true"
+                header="Cari Ekstre Oluştur"
+                :style="{ width: '40rem' }"
+                :breakpoints="{ '1199px': '60vw', '575px': '90vw' }"
             >
-                <template #header>
-                    <div class="flex justify-content-between align-items-center w-full">
-                        <span>Yazdırma Önizleme - Son 15 İşlem</span>
-                        <Button
-                            label="Yazdır"
-                            icon="pi pi-print"
-                            @click="printDocument"
-                            class="p-button-success"
+                <div class="p-fluid">
+                    <div class="p-field mb-4">
+                        <label for="pdfSupplierName" class="font-semibold">Tedarikçi:</label>
+                        <InputText
+                            id="pdfSupplierName"
+                            v-model="selectedPdfSupplier.supplier_name"
+                            readonly
+                            class="mt-2"
                         />
                     </div>
-                </template>
 
-                <div id="printArea" class="print-container">
-                    <!-- TEK SAYFA - SON 15 İŞLEM -->
-                    <div class="print-page-wrapper">
-                        <div class="print-page">
-                            <!-- Header -->
-                            <div class="print-header">
-                                <div class="company-info">
-                                    <img src="../../../../public/Logo.png" alt="Logo" class="company-logo" />
-                                    <div class="company-details">
-                                        <h2>ÖZ ERGÜL PLASTİK</h2>
-                                        <p>Tedarikçi İşlem Raporu - Son 15 İşlem</p>
-                                        <p>Tarih: {{ getCurrentDate() }}</p>
-                                    </div>
-                                </div>
+                    <div class="p-field mb-2">
+                        <div class="flex align-items-center">
+                            <Checkbox v-model="pdfAllHistory" :binary="true" inputId="allHistory" />
+                            <label for="allHistory" class="ml-2 font-semibold">Tüm Geçmiş İşlemler</label>
+                        </div>
+                    </div>
 
-                                <div class="supplier-info">
-                                    <h3>Tedarikçi Bilgileri</h3>
-                                    <p><strong>Ad:</strong> {{ selectedPrintSupplierTransaction.supplier_name }}</p>
-                                    <p><strong>Adres:</strong> {{ selectedPrintSupplierTransaction.supplier_address }}</p>
-                                    <p><strong>E-Posta:</strong> {{ selectedPrintSupplierTransaction.supplier_email }}</p>
-                                    <p><strong>Telefon:</strong> {{ selectedPrintSupplierTransaction.supplier_phone }}</p>
-                                </div>
+                    <div class="p-field mb-4">
+                        <label for="pdfDateRange" class="font-semibold" :class="{ 'text-gray-400': pdfAllHistory }">Tarih Aralığı:</label>
+                        <Calendar
+                            id="pdfDateRange"
+                            v-model="pdfDateRange"
+                            selectionMode="range"
+                            :manualInput="false"
+                            dateFormat="dd.mm.yy"
+                            placeholder="Başlangıç - Bitiş"
+                            class="mt-2"
+                            :maxDate="new Date()"
+                            :disabled="pdfAllHistory"
+                        />
+                        <small class="text-gray-500 mt-1" v-if="!pdfAllHistory">
+                            * Maksimum 1 yıllık tarih aralığı seçebilirsiniz
+                        </small>
+                    </div>
+
+                    <div class="p-field mb-4">
+                        <label class="font-semibold mb-2">Görüntüleme Modu:</label>
+                        <div class="flex gap-3 mt-2">
+                            <div class="flex align-items-center">
+                                <RadioButton
+                                    v-model="pdfDisplayMode"
+                                    inputId="download"
+                                    value="download"
+                                />
+                                <label for="download" class="ml-2">İndir</label>
                             </div>
-
-                            <!-- İşlem Geçmişi Başlık -->
-                            <h3 class="section-title">Son 15 İşlem</h3>
-
-                            <!-- Tablo -->
-                            <table class="print-table">
-                                <thead>
-                                <tr>
-                                    <th>İşlem Tarihi</th>
-                                    <th>Açıklama</th>
-                                    <th>Tür</th>
-                                    <th>Miktar (TL)</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                <!-- Son 15 işlem -->
-                                <tr
-                                    v-for="(transaction, index) in getLast15Transactions()"
-                                    :key="`last15-${index}`"
-                                    class="table-row"
-                                >
-                                    <td>{{ formatDate(transaction.date) }}</td>
-                                    <td>{{ transaction.description }}</td>
-                                    <td>{{ transaction.type }}</td>
-                                    <td class="amount-cell">{{ formatAmount(transaction.amount) }}</td>
-                                </tr>
-                                <!-- Boş satırlar ekle (15 satıra tamamlamak için) -->
-                                <template v-if="getLast15Transactions().length < 15">
-                                    <tr
-                                        v-for="n in (15 - getLast15Transactions().length)"
-                                        :key="`empty-${n}`"
-                                        class="empty-row"
-                                    >
-                                        <td>&nbsp;</td>
-                                        <td>&nbsp;</td>
-                                        <td>&nbsp;</td>
-                                        <td>&nbsp;</td>
-                                    </tr>
-                                </template>
-                                </tbody>
-                            </table>
-
-                            <!-- HESAP ÖZETİ (TÜM İŞLEMLERDEN HESAPLANAN) -->
-                            <div class="total-summary-print">
-                                <div class="summary-header">
-                                    <h4>Hesap Özeti</h4>
-                                    <p class="summary-note">(Tüm işlemler dahil)</p>
-                                </div>
-
-                                <!-- Toplam Borç (Sadece borçlu ise göster) -->
-                                <div
-                                    class="summary-row"
-                                    v-if="calculateTotalAmount(selectedPrintSupplierTransaction.transactions) > 0"
-                                >
-                                    <span><strong>Toplam Borç:</strong></span>
-                                    <span class="debt-amount"><strong>{{ formatAmount(calculateTotalAmount(selectedPrintSupplierTransaction.transactions)) }} TL</strong></span>
-                                </div>
-
-                                <!-- Toplam Alacak (Sadece alacaklı ise göster) -->
-                                <div
-                                    class="summary-row receivable-row"
-                                    v-if="calculateTotalAmount(selectedPrintSupplierTransaction.transactions) < 0"
-                                >
-                                    <span><strong>Toplam Alacak:</strong></span>
-                                    <span class="receivable-amount"><strong>{{ formatAmount(Math.abs(calculateTotalAmount(selectedPrintSupplierTransaction.transactions))) }} TL</strong></span>
-                                </div>
-
-                                <!-- Son Alacak -->
-                                <div class="summary-row" v-if="lastPayment(selectedPrintSupplierTransaction.transactions)">
-                                    <span><strong>Son Alacak:</strong></span>
-                                    <span>
-                            <strong>{{ formatAmount(lastPayment(selectedPrintSupplierTransaction.transactions).amount) }} TL</strong>
-                            <span class="last-payment-date"> - {{ formatDate(lastPayment(selectedPrintSupplierTransaction.transactions).date) }}</span>
-                        </span>
-                                </div>
-
-                                <!-- Güncel Bakiye -->
-                                <div class="summary-row total-row">
-                                    <span><strong>GÜNCEL BAKİYE:</strong></span>
-                                    <span class="balance-amount">
-                            <strong>
-                                <span v-if="calculateTotalAmount(selectedPrintSupplierTransaction.transactions) > 0" class="debt-balance">
-                                    {{ formatAmount(calculateTotalAmount(selectedPrintSupplierTransaction.transactions)) }} TL (Borç)
-                                </span>
-                                <span v-else-if="calculateTotalAmount(selectedPrintSupplierTransaction.transactions) < 0" class="credit-balance">
-                                    {{ formatAmount(Math.abs(calculateTotalAmount(selectedPrintSupplierTransaction.transactions))) }} TL (Alacak)
-                                </span>
-                                <span v-else class="zero-balance">
-                                    0 TL (Hesap Kapalı)
-                                </span>
-                            </strong>
-                        </span>
-                                </div>
+                            <div class="flex align-items-center">
+                                <RadioButton
+                                    v-model="pdfDisplayMode"
+                                    inputId="inline"
+                                    value="inline"
+                                />
+                                <label for="inline" class="ml-2">Tarayıcıda Görüntüle</label>
                             </div>
                         </div>
                     </div>
                 </div>
+
+                <template #footer>
+                    <Button
+                        label="İptal"
+                        icon="pi pi-times"
+                        @click="pdfDialog = false"
+                        text
+                    />
+                    <Button
+                        label="PDF Oluştur"
+                        icon="pi pi-file-pdf"
+                        @click="generatePdf"
+                        :loading="pdfLoading"
+                        :disabled="!pdfAllHistory && (!pdfDateRange || !pdfDateRange[0] || !pdfDateRange[1])"
+                        severity="danger"
+                    />
+                </template>
             </Dialog>
         </div>
     </template>
@@ -455,6 +390,8 @@
     import Toast from 'primevue/toast';
     import Dropdown from 'primevue/dropdown';
     import Calendar from "primevue/calendar";
+    import Checkbox from 'primevue/checkbox';
+    import RadioButton from 'primevue/radiobutton';
     import { FilterMatchMode, FilterOperator } from 'primevue/api';
 
     const suppliers = ref([]);
@@ -479,6 +416,14 @@
         { label: "Ödeme", value: "ödeme" }
     ]);
     const selectedPrintSupplierTransaction = ref([]);
+
+    // PDF Generation State
+    const pdfDialog = ref(false);
+    const selectedPdfSupplier = ref({});
+    const pdfDateRange = ref(null);
+    const pdfDisplayMode = ref('download');
+    const pdfLoading = ref(false);
+    const pdfAllHistory = ref(false);
 
     // Dönem seçimi için state
     const selectedPeriod = ref({ label: 'Son 3 Ay', value: 3 });
@@ -518,7 +463,7 @@
     const fetchSuppliers = () => {
         // Ana ekranda her zaman varsayılan (Son 3 Ay) göster
         const params = { period_months: 3 };
-        
+
         axios.get('/api/suppliers', { params })
             .then(response => {
                 suppliers.value = response.data.map(supplier => ({
@@ -532,43 +477,125 @@
             });
     };
 
-    // SON 15 İŞLEM YAZDIRMA FONKSİYONLARI - EKLENEN
-    // Son 15 işlemi al ve tarihe göre sırala (en yeni en üstte)
-    const getLast15Transactions = () => {
-        const transactions = selectedPrintSupplierTransaction.value.transactions || [];
-        return transactions
-            .sort((a, b) => new Date(b.date) - new Date(a.date)) // En yeni en üstte
-            .slice(0, 15); // Son 15 işlem
+    // PDF Generation Functions
+    const openPdfDialog = (supplier) => {
+        selectedPdfSupplier.value = supplier;
+
+        // Varsayılan olarak son 3 ay
+        const endDate = new Date();
+        const startDate = new Date();
+        startDate.setMonth(startDate.getMonth() - 3);
+
+        pdfDateRange.value = [startDate, endDate];
+        pdfDisplayMode.value = 'download';
+        pdfAllHistory.value = false;
+        pdfDialog.value = true;
     };
 
-    // Toplam sayfa sayısını hesapla (maksimum 1 sayfa - çünkü sadece 15 işlem)
-    const getTotalPagesForLast15 = () => {
-        const totalTransactions = getLast15Transactions().length;
-        return Math.max(1, Math.ceil(totalTransactions / ROWS_PER_PAGE));
+    const generatePdf = async () => {
+        // Tarih kontrolü (Eğer tüm geçmiş seçili değilse)
+        if (!pdfAllHistory.value && (!pdfDateRange.value || !pdfDateRange.value[0] || !pdfDateRange.value[1])) {
+            toast.value.add({
+                severity: 'warn',
+                summary: 'Uyarı',
+                detail: 'Lütfen tarih aralığı seçin veya Tüm Geçmiş seçeneğini işaretleyin',
+                life: 3000
+            });
+            return;
+        }
+
+        pdfLoading.value = true;
+
+        try {
+            let payload = {
+                display: pdfDisplayMode.value,
+                all_history: pdfAllHistory.value
+            };
+
+            // Eğer tüm geçmiş seçili değilse tarihleri ekle
+            if (!pdfAllHistory.value) {
+                payload.start_date = formatDateForApi(pdfDateRange.value[0]);
+                payload.end_date = formatDateForApi(pdfDateRange.value[1]);
+            }
+
+            const response = await axios.post(
+                `/api/suppliers/${selectedPdfSupplier.value.id}/transactions/pdf`,
+                payload,
+                {
+                    responseType: 'blob'
+                }
+            );
+
+            // PDF'i işle
+            const blob = new Blob([response.data], { type: 'application/pdf' });
+            const url = window.URL.createObjectURL(blob);
+
+            // Dosya adı oluştur
+            let fileName = '';
+            if (pdfAllHistory.value) {
+                fileName = `tedarikci_ekstre_${selectedPdfSupplier.value.supplier_name}_tum_gecmis.pdf`;
+            } else {
+                fileName = `tedarikci_ekstre_${selectedPdfSupplier.value.supplier_name}_${payload.start_date}_${payload.end_date}.pdf`;
+            }
+
+            if (pdfDisplayMode.value === 'inline') {
+                // Yeni sekmede aç
+                window.open(url, '_blank');
+            } else {
+                // İndir
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = fileName;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+
+            // URL'i temizle
+            window.URL.revokeObjectURL(url);
+
+            toast.value.add({
+                severity: 'success',
+                summary: 'Başarılı',
+                detail: 'Cari Ekstre başarıyla oluşturuldu',
+                life: 3000
+            });
+
+            pdfDialog.value = false;
+
+        } catch (error) {
+            console.error('PDF oluşturma hatası:', error);
+
+            let errorMessage = 'PDF oluşturulurken bir hata oluştu';
+
+            if (error.response) {
+                if (error.response.status === 429) {
+                    errorMessage = 'Çok fazla istek gönderdiniz. Lütfen bir süre bekleyin.';
+                } else if (error.response.status === 404) {
+                    errorMessage = 'Tedarikçi bulunamadı.';
+                } else if (error.response.data && error.response.data.message) {
+                    errorMessage = error.response.data.message;
+                }
+            }
+
+            toast.value.add({
+                severity: 'error',
+                summary: 'Hata',
+                detail: errorMessage,
+                life: 5000
+            });
+        } finally {
+            pdfLoading.value = false;
+        }
     };
 
-    // İlk sayfa işlemlerini getir (en fazla 15)
-    const getFirstPageTransactionsLast15 = () => {
-        return getLast15Transactions();
-    };
-
-    // Son 15 işlem için boş satır sayısı
-    const getEmptyRowsForLast15 = () => {
-        const transactionCount = getLast15Transactions().length;
-        const emptyRows = ROWS_PER_PAGE - transactionCount;
-        return emptyRows > 0 ? emptyRows : 0;
-    };
-
-    // Yazdırma fonksiyonları
-    const openPrintDialog = (data) => {
-        selectedPrintSupplierTransaction.value = data;
-        printTransaction.value = true;
-    };
-
-    const printDocument = () => {
-        setTimeout(() => {
-            window.print();
-        }, 100);
+    const formatDateForApi = (date) => {
+        if (!date) return '';
+        const d = new Date(date);
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
     };
 
     const getCurrentDate = () => {
@@ -794,7 +821,7 @@
         if (periodMonths && periodMonths > 0) {
             const startDate = new Date();
             startDate.setMonth(startDate.getMonth() - periodMonths);
-            
+
             filteredTransactions = transactions.filter(transaction => {
                 const transactionDate = new Date(transaction.date);
                 return transactionDate >= startDate;
@@ -837,19 +864,19 @@
     // Dönemsel borç hesaplama fonksiyonları
     const totalDebtForPeriod = (transactions, periodMonths) => {
         if (!transactions) return 0;
-        
+
         let filteredTransactions = transactions;
-        
+
         if (periodMonths && periodMonths > 0) {
             const startDate = new Date();
             startDate.setMonth(startDate.getMonth() - periodMonths);
-            
+
             filteredTransactions = transactions.filter(transaction => {
                 const transactionDate = new Date(transaction.date);
                 return transactionDate >= startDate;
             });
         }
-        
+
         return filteredTransactions
             .filter((transaction) => transaction.type.toLowerCase() === "borç")
             .reduce((sum, transaction) => sum + parseFloat(transaction.amount), 0);
@@ -857,19 +884,19 @@
 
     const totalCreditForPeriod = (transactions, periodMonths) => {
         if (!transactions) return 0;
-        
+
         let filteredTransactions = transactions;
-        
+
         if (periodMonths && periodMonths > 0) {
             const startDate = new Date();
             startDate.setMonth(startDate.getMonth() - periodMonths);
-            
+
             filteredTransactions = transactions.filter(transaction => {
                 const transactionDate = new Date(transaction.date);
                 return transactionDate >= startDate;
             });
         }
-        
+
         return filteredTransactions
             .filter((transaction) => transaction.type.toLowerCase() === "ödeme")
             .reduce((sum, transaction) => sum + parseFloat(transaction.amount), 0);
@@ -934,52 +961,13 @@
     };
     </script>
 
-    <style scoped>
+
+<style scoped>
     .card {
         margin: 2rem 0;
     }
 
-    /* Print Container Stilleri */
-    .print-container {
-        background: white;
-        color: black !important;
-        font-family: 'Times New Roman', serif;
-        font-size: 12px;
-        line-height: 1.4;
-    }
-
-    /* SAYFA WRAPPER */
-    .print-page-wrapper {
-        width: 100%;
-        background: white;
-        margin-bottom: 30px;
-        box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        position: relative;
-    }
-
-    .print-page {
-        width: 100%;
-        min-height: 250mm;
-        padding: 20mm;
-        background: white;
-        position: relative;
-    }
-
-    /* Header Stilleri */
     .print-header {
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 30px;
-        border-bottom: 2px solid #333;
-        padding-bottom: 20px;
-    }
-
-    .company-info {
-        flex: 1;
-    }
-
-    .company-logo {
-        width: 80px;
         height: 80px;
         margin-bottom: 10px;
     }
