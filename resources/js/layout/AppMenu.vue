@@ -169,21 +169,21 @@ const model = ref([
     //
     // },
 
-    // {
-    //
-    //     items: [
-    //         {
-    //             label: 'Raporlar',
-    //             icon: 'pi pi-chart-bar',
-    //             items: [
-    //                 { label: 'Üretim Raporları', icon: 'pi pi-chart-bar', to: '/sys/reports/production' },
-    //                 { label: 'Satış Raporları', icon: 'pi pi-chart-bar', to: '/sys/reports/sales' },
-    //                 { label: 'Stok Raporları', icon: 'pi pi-chart-bar', to: '/sys/reports/stocks' },
-    //                 { label: 'Finansal Raporlar', icon: 'pi pi-chart-bar', to: '/sys/reports/financial' }
-    //             ]
-    //         }
-    //     ]
-    // },
+    {
+
+        items: [
+            {
+                label: 'Raporlar',
+                icon: 'pi pi-chart-bar',
+                items: [
+                    { label: 'Üretim Raporları', icon: 'pi pi-chart-bar', to: '/sys/reports/production' },
+                    { label: 'Satış Raporları', icon: 'pi pi-chart-bar', to: '/sys/reports/sales' },
+                    { label: 'Stok Raporları', icon: 'pi pi-chart-bar', to: '/sys/reports/stocks' },
+                    { label: 'Finansal Raporlar', icon: 'pi pi-chart-bar', to: '/sys/reports/financial' }
+                ]
+            }
+        ]
+    },
 
     {
         items: [

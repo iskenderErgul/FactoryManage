@@ -222,7 +222,21 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/site-settings', [SiteSettingsController::class, 'bulkUpdate']);
     Route::put('/site-settings/upsert', [SiteSettingsController::class, 'upsert']);
     Route::post('/site-settings/upload-file', [SiteSettingsController::class, 'uploadFile']);
+
+    // Sales Reports
+    Route::prefix('reports/sales')->group(function () {
+        Route::post('date-range', [App\Http\Controllers\Reports\SalesReportController::class, 'dateRangeReport']);
+        Route::post('monthly', [App\Http\Controllers\Reports\SalesReportController::class, 'monthlyReport']);
+        Route::post('customer', [App\Http\Controllers\Reports\SalesReportController::class, 'customerReport']);
+        Route::post('customer-products', [App\Http\Controllers\Reports\SalesReportController::class, 'customerProductsReport']);
+        Route::post('customer-payments', [App\Http\Controllers\Reports\SalesReportController::class, 'customerPaymentsReport']);
+        Route::get('trends', [App\Http\Controllers\Reports\SalesReportController::class, 'trendsReport']);
+        Route::post('export-pdf', [App\Http\Controllers\Reports\SalesReportController::class, 'exportPdf']);
+        Route::post('export-excel', [App\Http\Controllers\Reports\SalesReportController::class, 'exportExcel']);
+    });
 });
+
+
 
 
 

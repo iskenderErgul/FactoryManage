@@ -13,8 +13,9 @@ return new class extends Migration
     {
         Schema::create('site_settings', function (Blueprint $table) {
             $table->id();
-            $table->string('group')->nullable();
-            $table->string('key');
+            // MySQL index key uzunluğu sınırına takılmamak için 120 karakter ile sınırla
+            $table->string('group', 120)->index();
+            $table->string('key', 120)->index();
             $table->text('value')->nullable();
             $table->timestamps();
 
