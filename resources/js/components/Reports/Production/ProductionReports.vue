@@ -3,13 +3,12 @@ import { ref } from 'vue';
 import TabView from 'primevue/tabview';
 import TabPanel from 'primevue/tabpanel';
 
-import DateRangeReport from './Production/DateRangeReport.vue';
-import WorkerEfficiencyReport from './Production/WorkerEfficiencyReport.vue';
-import WorkerDetailReport from './Production/WorkerDetailReport.vue';
-import ProductAnalysisReport from './Production/ProductAnalysisReport.vue';
-import TrendAnalysisReport from './Production/TrendAnalysisReport.vue';
-import RealtimeDashboard from './Production/RealtimeDashboard.vue';
-import ExecutiveSummary from './Production/ExecutiveSummary.vue';
+import DateRangeReport from './DateRangeReport.vue';
+import WorkerEfficiencyReport from './WorkerEfficiencyReport.vue';
+import ProductAnalysisReport from './ProductAnalysisReport.vue';
+import TrendAnalysisReport from './TrendAnalysisReport.vue';
+import RealtimeDashboard from './RealtimeDashboard.vue';
+import ExecutiveSummary from './ExecutiveSummary.vue';
 
 const activeIndex = ref(0);
 </script>
@@ -17,7 +16,7 @@ const activeIndex = ref(0);
 <template>
     <div class="production-reports">
         <div class="page-header mb-4">
-            <h1 class="text-2xl font-bold text-white">🏭 Üretim Raporları</h1>
+            <h1 class="text-2xl font-bold">🏭 Üretim Raporları</h1>
             <p class="text-gray-400 mt-1">Üretim performansını analiz edin ve raporlayın</p>
         </div>
 
@@ -28,10 +27,6 @@ const activeIndex = ref(0);
             
             <TabPanel header="👷 İşçi Verimliliği">
                 <WorkerEfficiencyReport />
-            </TabPanel>
-            
-            <TabPanel header="👤 İşçi Detay">
-                <WorkerDetailReport />
             </TabPanel>
             
             <TabPanel header="📦 Ürün Analizi">

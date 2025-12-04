@@ -13,96 +13,77 @@ const activeTab = ref(0);
 </script>
 
 <template>
-    <div class="sales-reports-container">
-        <div class="card">
-            <TabView v-model:activeIndex="activeTab">
-                <TabPanel header="📅 Tarih Aralıklı Rapor">
-                    <DateRangeReport />
-                </TabPanel>
-
-                <TabPanel header="📆 Aylık Rapor">
-                    <MonthlyReport />
-                </TabPanel>
-
-                <TabPanel header="👤 Müşteri Bazlı Rapor">
-                    <CustomerReport />
-                </TabPanel>
-
-                <TabPanel header="📦 Müşteri Ürün Raporu">
-                    <CustomerProductReport />
-                </TabPanel>
-
-                <TabPanel header="💳 Müşteri Ödeme Raporu">
-                    <CustomerPaymentReport />
-                </TabPanel>
-
-                <TabPanel header="📈 Trend Analizi">
-                    <TrendReport />
-                </TabPanel>
-            </TabView>
+    <div class="sales-reports">
+        <div class="page-header mb-4">
+            <h1 class="text-2xl font-bold text-white">💰 Satış Raporları</h1>
+            <p class="text-gray-400 mt-1">Satış performansını analiz edin ve raporlayın</p>
         </div>
+
+        <TabView v-model:activeIndex="activeTab" class="sales-tabs">
+            <TabPanel header="📅 Tarih Aralıklı">
+                <DateRangeReport />
+            </TabPanel>
+
+            <TabPanel header="📆 Aylık Rapor">
+                <MonthlyReport />
+            </TabPanel>
+
+            <TabPanel header="👤 Müşteri Bazlı">
+                <CustomerReport />
+            </TabPanel>
+
+            <TabPanel header="📦 Müşteri Ürün">
+                <CustomerProductReport />
+            </TabPanel>
+
+            <TabPanel header="💳 Müşteri Ödeme">
+                <CustomerPaymentReport />
+            </TabPanel>
+
+            <TabPanel header="📈 Trend Analizi">
+                <TrendReport />
+            </TabPanel>
+        </TabView>
     </div>
 </template>
 
 <style scoped>
-.sales-reports-container {
-    width: 100%;
+.sales-reports {
+    padding: 1.5rem;
+}
+
+.page-header {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 1rem;
+}
+
+:deep(.sales-tabs .p-tabview-nav) {
     background: transparent;
+    border: none;
+    gap: 0.5rem;
 }
 
-.card {
+:deep(.sales-tabs .p-tabview-nav-link) {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 0.75rem 1.25rem;
+    color: #e5e7eb;
+    transition: all 0.3s ease;
+}
+
+:deep(.sales-tabs .p-tabview-nav-link:hover) {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+:deep(.sales-tabs .p-highlight .p-tabview-nav-link) {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    border-color: transparent;
+    color: white;
+}
+
+:deep(.sales-tabs .p-tabview-panels) {
     background: transparent;
-    border-radius: 0;
-    padding: 0;
-    box-shadow: none;
-}
-
-/* PrimeVue Override - Koyu tema ve Geniş Tablar için */
-:deep(.p-tabview .p-tabview-nav) {
-    background: rgba(30, 41, 59, 0.95) !important;
-    border-bottom: 1px solid rgba(71, 85, 105, 0.3) !important;
-    display: flex !important;
-    width: 100% !important;
-    border-radius: 12px 12px 0 0;
-}
-
-:deep(.p-tabview .p-tabview-nav li) {
-    flex: 1 !important;
-    min-width: 0 !important;
-}
-
-:deep(.p-tabview .p-tabview-nav li .p-tabview-nav-link) {
-    color: #94A3B8 !important;
-    background: transparent !important;
-    border: none !important;
-    width: 100% !important;
-    text-align: center !important;
-    padding: 16px 20px !important;
-    font-size: 14px !important;
-    font-weight: 600 !important;
-    white-space: nowrap !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-    transition: all 0.2s ease;
-}
-
-:deep(.p-tabview .p-tabview-nav li:not(.p-highlight):hover .p-tabview-nav-link) {
-    color: #E2E8F0 !important;
-    background: rgba(30, 41, 59, 0.8) !important;
-}
-
-:deep(.p-tabview .p-tabview-nav li.p-highlight .p-tabview-nav-link) {
-    color: #F1F5F9 !important;
-    background: rgba(59, 130, 246, 0.2) !important;
-    border-bottom: 2px solid #3B82F6 !important;
-}
-
-:deep(.p-tabview .p-tabview-panels) {
-    background: rgba(15, 23, 42, 0.6) !important;
-    border: 1px solid rgba(71, 85, 105, 0.3) !important;
-    border-top: none !important;
-    padding: 2rem !important;
-    border-radius: 0 0 12px 12px;
-    backdrop-filter: blur(10px);
+    padding: 1.5rem 0;
 }
 </style>

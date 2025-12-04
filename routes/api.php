@@ -234,6 +234,17 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('export-pdf', [App\Http\Controllers\Reports\SalesReportController::class, 'exportPdf']);
         Route::post('export-excel', [App\Http\Controllers\Reports\SalesReportController::class, 'exportExcel']);
     });
+
+    // Production Reports
+    Route::prefix('reports/production')->group(function () {
+        Route::get('date-range', [App\Http\Controllers\Production\ProductionReportController::class, 'dateRange']);
+        Route::get('worker-efficiency', [App\Http\Controllers\Production\ProductionReportController::class, 'workerEfficiency']);
+        Route::get('worker-detail/{userId}', [App\Http\Controllers\Production\ProductionReportController::class, 'workerDetail']);
+        Route::get('product-analysis', [App\Http\Controllers\Production\ProductionReportController::class, 'productAnalysis']);
+        Route::get('trend-analysis', [App\Http\Controllers\Production\ProductionReportController::class, 'trendAnalysis']);
+        Route::get('realtime-dashboard', [App\Http\Controllers\Production\ProductionReportController::class, 'realtimeDashboard']);
+        Route::get('executive-summary', [App\Http\Controllers\Production\ProductionReportController::class, 'executiveSummary']);
+    });
 });
 
 
