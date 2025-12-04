@@ -80,7 +80,8 @@ onUnmounted(stopAutoRefresh);
                     Son güncelleme: {{ formatTime(lastUpdated) }}
                 </p>
             </div>
-            <Button icon="pi pi-refresh" @click="loadDashboard" :loading="loading" severity="secondary" />
+            <Button icon="pi pi-refresh" @click="loadDashboard" :loading="loading" 
+                    text rounded class="refresh-btn" />
         </div>
 
         <!-- Loading -->
@@ -207,5 +208,16 @@ onUnmounted(stopAutoRefresh);
     background: rgba(255, 255, 255, 0.05);
     backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+:deep(.refresh-btn) {
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    color: #e5e7eb !important;
+}
+
+:deep(.refresh-btn:hover) {
+    background: rgba(255, 255, 255, 0.1) !important;
+    border-color: rgba(16, 185, 129, 0.5) !important;
 }
 </style>
