@@ -25,27 +25,27 @@ const activeIndex = ref(0);
             <TabPanel header="📊 Tarih Aralıklı">
                 <DateRangeReport />
             </TabPanel>
-            
+
             <TabPanel header="👷 İşçi Verimliliği">
                 <WorkerEfficiencyReport />
             </TabPanel>
-            
+
             <TabPanel header="👤 İşçi Detay">
                 <WorkerDetailReport />
             </TabPanel>
-            
+
             <TabPanel header="📦 Ürün Analizi">
                 <ProductAnalysisReport />
             </TabPanel>
-            
-            <TabPanel header="📈 Trend Analizi">
-                <TrendAnalysisReport />
-            </TabPanel>
-            
-            <TabPanel header="⚡ Gerçek Zamanlı">
-                <RealtimeDashboard />
-            </TabPanel>
-            
+
+<!--            <TabPanel header="📈 Trend Analizi">-->
+<!--                <TrendAnalysisReport />-->
+<!--            </TabPanel>-->
+
+<!--            <TabPanel header="⚡ Gerçek Zamanlı">-->
+<!--                <RealtimeDashboard />-->
+<!--            </TabPanel>-->
+
             <TabPanel header="📋 Özet Rapor">
                 <ExecutiveSummary />
             </TabPanel>

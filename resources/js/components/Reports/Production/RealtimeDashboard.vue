@@ -23,9 +23,9 @@ const formatTime = (date) => {
 };
 
 const hourlyChartData = computed(() => {
-    if (!reportData.value?.data?.hourly_production) return null;
+    if (!reportData.value?.hourly_production) return null;
     
-    const data = reportData.value.data.hourly_production;
+    const data = reportData.value.hourly_production;
     return {
         labels: data.map(d => `${d.hour}:00`),
         datasets: [{
@@ -47,7 +47,9 @@ const chartOptions = {
 };
 
 const loadDashboard = async () => {
-    reportData.value = await fetchRealtimeDashboard();
+    const response = await fetchRealtimeDashboard();
+    // Backend response.data içinde veriyi döndürüyor
+    reportData.value = response.data || response;
     lastUpdated.value = new Date();
 };
 
@@ -94,7 +96,7 @@ onUnmounted(stopAutoRefresh);
         <div v-else-if="error" class="p-4 bg-red-900/50 text-red-300 rounded">{{ error }}</div>
 
         <!-- Content -->
-        <div v-else-if="reportData?.data" class="dashboard-content">
+        <div v-else-if="reportData" class="dashboard-content">
             <!-- Today Summary -->
             <div class="grid mb-4">
                 <div class="col-6 md:col-3">
@@ -103,7 +105,7 @@ onUnmounted(stopAutoRefresh);
                             <div class="text-center">
                                 <i class="pi pi-box text-3xl text-green-500 mb-2"></i>
                                 <div class="text-3xl font-bold text-white">
-                                    {{ formatNumber(reportData.data.today_summary.total_quantity) }}
+                                    {{ formatNumber(reportData.today_summary?.total_quantity || 0) }}
                                 </div>
                                 <div class="text-sm text-gray-300">Bugün Üretim</div>
                             </div>
@@ -116,7 +118,7 @@ onUnmounted(stopAutoRefresh);
                             <div class="text-center">
                                 <i class="pi pi-list text-3xl text-blue-500 mb-2"></i>
                                 <div class="text-3xl font-bold text-white">
-                                    {{ reportData.data.today_summary.production_count }}
+                                    {{ reportData.today_summary?.production_count || 0 }}
                                 </div>
                                 <div class="text-sm text-gray-300">Üretim Kayıdı</div>
                             </div>
@@ -129,7 +131,7 @@ onUnmounted(stopAutoRefresh);
                             <div class="text-center">
                                 <i class="pi pi-users text-3xl text-purple-500 mb-2"></i>
                                 <div class="text-3xl font-bold text-white">
-                                    {{ reportData.data.today_summary.active_workers }}
+                                    {{ reportData.today_summary?.active_workers || 0 }}
                                 </div>
                                 <div class="text-sm text-gray-300">Aktif İşçi</div>
                             </div>
@@ -142,7 +144,7 @@ onUnmounted(stopAutoRefresh);
                             <div class="text-center">
                                 <i class="pi pi-clock text-3xl text-orange-500 mb-2"></i>
                                 <div class="text-3xl font-bold text-white">
-                                    {{ formatNumber(reportData.data.today_summary.hourly_average) }}
+                                    {{ formatNumber(reportData.today_summary?.hourly_average || 0) }}
                                 </div>
                                 <div class="text-sm text-gray-300">Saatlik Ortalama</div>
                             </div>
@@ -152,19 +154,19 @@ onUnmounted(stopAutoRefresh);
             </div>
 
             <!-- Comparison -->
-            <Card class="mb-4" v-if="reportData.data.comparison">
+            <Card class="mb-4" v-if="reportData.comparison">
                 <template #content>
                     <div class="flex justify-between items-center">
                         <div>
                             <span class="text-gray-300">Dün:</span>
                             <span class="font-bold text-white ml-2">
-                                {{ formatNumber(reportData.data.comparison.yesterday_total) }}
+                                {{ formatNumber(reportData.comparison.yesterday_total) }}
                             </span>
                         </div>
                         <div class="flex items-center gap-2">
-                            <i :class="['pi', reportData.data.comparison.trend === 'up' ? 'pi-arrow-up text-green-500' : 'pi-arrow-down text-red-500']"></i>
-                            <span :class="['font-bold text-xl', reportData.data.comparison.change_percentage >= 0 ? 'text-green-500' : 'text-red-500']">
-                                {{ reportData.data.comparison.change_percentage >= 0 ? '+' : '' }}{{ reportData.data.comparison.change_percentage }}%
+                            <i :class="['pi', reportData.comparison.trend === 'up' ? 'pi-arrow-up text-green-500' : 'pi-arrow-down text-red-500']"></i>
+                            <span :class="['font-bold text-xl', reportData.comparison.change_percentage >= 0 ? 'text-green-500' : 'text-red-500']">
+                                {{ reportData.comparison.change_percentage >= 0 ? '+' : '' }}{{ reportData.comparison.change_percentage }}%
                             </span>
                         </div>
                     </div>
@@ -187,7 +189,7 @@ onUnmounted(stopAutoRefresh);
                     <Card>
                         <template #title>🕐 Son Üretimler</template>
                         <template #content>
-                            <DataTable :value="reportData.data.recent_productions" :rows="8" scrollable scrollHeight="300px">
+                            <DataTable :value="reportData.recent_productions" :rows="8" scrollable scrollHeight="300px">
                                 <Column field="product_name" header="Ürün"></Column>
                                 <Column field="quantity" header="Miktar">
                                     <template #body="{ data }">{{ formatNumber(data.quantity) }}</template>

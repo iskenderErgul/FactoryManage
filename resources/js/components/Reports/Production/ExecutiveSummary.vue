@@ -23,7 +23,8 @@ const getChangeColor = (change) => {
 const loadReport = async () => {
     const start = startDate.value.toISOString().split('T')[0];
     const end = endDate.value.toISOString().split('T')[0];
-    reportData.value = await fetchExecutiveSummary(start, end);
+    const response = await fetchExecutiveSummary(start, end);
+    reportData.value = response.data || response;
 };
 
 onMounted(loadReport);
@@ -57,35 +58,73 @@ onMounted(loadReport);
         <div v-else-if="error" class="p-4 bg-red-900/50 text-red-300 rounded">{{ error }}</div>
 
         <!-- Content -->
-        <div v-else-if="reportData?.data" class="report-content">
+        <div v-else-if="reportData" class="report-content">
             <!-- Period Info -->
             <Card class="mb-4">
                 <template #content>
                     <div class="text-center">
                         <h2 class="text-xl font-bold text-white mb-2">📋 Üretim Özet Raporu</h2>
                         <p class="text-gray-300">
-                            {{ new Date(reportData.data.period.start_date).toLocaleDateString('tr-TR') }} - 
-                            {{ new Date(reportData.data.period.end_date).toLocaleDateString('tr-TR') }}
-                            <span class="text-gray-500 ml-2">({{ reportData.data.period.days }} gün)</span>
+                            {{ reportData.period?.current?.start_date }} - {{ reportData.period?.current?.end_date }}
+                            <span class="text-gray-500 ml-2">({{ reportData.period?.current?.days || 0 }} gün)</span>
                         </p>
                     </div>
                 </template>
             </Card>
 
-            <!-- KPIs -->
+            <!-- Current Period Stats -->
             <div class="grid mb-4">
-                <div class="col-6 md:col-3" v-for="(kpi, index) in reportData.data.kpis" :key="index">
+                <div class="col-6 md:col-3">
                     <Card class="kpi-card">
                         <template #content>
                             <div class="text-center">
-                                <div class="text-sm text-gray-300 mb-1">{{ kpi.name }}</div>
+                                <div class="text-sm text-gray-300 mb-1">Toplam Üretim</div>
                                 <div class="text-2xl font-bold text-white">
-                                    {{ formatNumber(kpi.value) }}
-                                    <span class="text-sm text-gray-400">{{ kpi.unit }}</span>
+                                    {{ formatNumber(reportData.current_period?.total_quantity || 0) }}
                                 </div>
-                                <div v-if="kpi.change !== null" 
-                                     :class="['text-sm', getChangeColor(kpi.change)]">
-                                    {{ kpi.change >= 0 ? '+' : '' }}{{ kpi.change }}% önceki döneme göre
+                                <div v-if="reportData.comparison?.quantity" 
+                                     :class="['text-sm', getChangeColor(reportData.comparison.quantity.rate)]">
+                                    {{ reportData.comparison.quantity.rate >= 0 ? '+' : '' }}{{ reportData.comparison.quantity.rate }}%
+                                </div>
+                            </div>
+                        </template>
+                    </Card>
+                </div>
+                <div class="col-6 md:col-3">
+                    <Card class="kpi-card">
+                        <template #content>
+                            <div class="text-center">
+                                <div class="text-sm text-gray-300 mb-1">Üretim Sayısı</div>
+                                <div class="text-2xl font-bold text-white">
+                                    {{ formatNumber(reportData.current_period?.total_count || 0) }}
+                                </div>
+                                <div v-if="reportData.comparison?.count" 
+                                     :class="['text-sm', getChangeColor(reportData.comparison.count.rate)]">
+                                    {{ reportData.comparison.count.rate >= 0 ? '+' : '' }}{{ reportData.comparison.count.rate }}%
+                                </div>
+                            </div>
+                        </template>
+                    </Card>
+                </div>
+                <div class="col-6 md:col-3">
+                    <Card class="kpi-card">
+                        <template #content>
+                            <div class="text-center">
+                                <div class="text-sm text-gray-300 mb-1">Aktif İşçi</div>
+                                <div class="text-2xl font-bold text-white">
+                                    {{ reportData.current_period?.unique_workers || 0 }}
+                                </div>
+                            </div>
+                        </template>
+                    </Card>
+                </div>
+                <div class="col-6 md:col-3">
+                    <Card class="kpi-card">
+                        <template #content>
+                            <div class="text-center">
+                                <div class="text-sm text-gray-300 mb-1">Günlük Ortalama</div>
+                                <div class="text-2xl font-bold text-white">
+                                    {{ formatNumber(reportData.key_metrics?.daily_average || 0) }}
                                 </div>
                             </div>
                         </template>
@@ -99,7 +138,7 @@ onMounted(loadReport);
                     <Card>
                         <template #title>🏆 En Çok Üretilen Ürünler</template>
                         <template #content>
-                            <DataTable :value="reportData.data.top_products" :rows="5">
+                            <DataTable :value="reportData.top_performers?.top_products || []" :rows="5">
                                 <Column field="product_name" header="Ürün"></Column>
                                 <Column field="total_quantity" header="Üretim">
                                     <template #body="{ data }">
@@ -114,7 +153,7 @@ onMounted(loadReport);
                     <Card>
                         <template #title>👷 En Verimli İşçiler</template>
                         <template #content>
-                            <DataTable :value="reportData.data.top_workers" :rows="5">
+                            <DataTable :value="reportData.top_performers?.top_workers || []" :rows="5">
                                 <Column field="user_name" header="İşçi"></Column>
                                 <Column field="total_quantity" header="Üretim">
                                     <template #body="{ data }">
@@ -128,7 +167,7 @@ onMounted(loadReport);
             </div>
 
             <!-- Previous Period Comparison -->
-            <Card v-if="reportData.data.previous_period">
+            <Card v-if="reportData.previous_period">
                 <template #title>📊 Önceki Dönem Karşılaştırması</template>
                 <template #content>
                     <div class="grid">
@@ -136,8 +175,7 @@ onMounted(loadReport);
                             <div class="p-3 bg-gray-800 rounded">
                                 <div class="text-sm text-gray-400">Önceki Dönem</div>
                                 <div class="text-lg text-gray-200">
-                                    {{ new Date(reportData.data.previous_period.previous_start).toLocaleDateString('tr-TR') }} - 
-                                    {{ new Date(reportData.data.previous_period.previous_end).toLocaleDateString('tr-TR') }}
+                                    {{ reportData.period?.previous?.start_date }} - {{ reportData.period?.previous?.end_date }}
                                 </div>
                             </div>
                         </div>
@@ -145,7 +183,7 @@ onMounted(loadReport);
                             <div class="p-3 bg-gray-800 rounded">
                                 <div class="text-sm text-gray-400">Önceki Dönem Üretimi</div>
                                 <div class="text-lg text-gray-200">
-                                    {{ formatNumber(reportData.data.previous_period.previous_total) }}
+                                    {{ formatNumber(reportData.previous_period.total_quantity) }}
                                 </div>
                             </div>
                         </div>
@@ -153,8 +191,8 @@ onMounted(loadReport);
                             <div class="p-3 bg-gray-800 rounded">
                                 <div class="text-sm text-gray-400">Değişim</div>
                                 <div class="text-lg font-bold" 
-                                     :class="getChangeColor(reportData.data.previous_period.quantity_change)">
-                                    {{ reportData.data.previous_period.quantity_change >= 0 ? '+' : '' }}{{ reportData.data.previous_period.quantity_change }}%
+                                     :class="getChangeColor(reportData.comparison?.quantity?.rate)">
+                                    {{ reportData.comparison?.quantity?.rate >= 0 ? '+' : '' }}{{ reportData.comparison?.quantity?.rate }}%
                                 </div>
                             </div>
                         </div>
@@ -173,3 +211,4 @@ onMounted(loadReport);
     border: 1px solid rgba(255, 255, 255, 0.1);
 }
 </style>
+

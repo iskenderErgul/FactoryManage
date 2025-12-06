@@ -2,6 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Common\Helpers\ChartHelper;
+use App\Common\Helpers\DateHelper;
+use App\Common\Traits\HasDateFilters;
+use App\Common\Traits\HasDataFormatting;
+use App\Common\Traits\HasStatistics;
 use App\Domains\Production\Models\Production;
 use App\Domains\Machines\Models\Machine;
 use App\Domains\Users\Models\User;
@@ -11,16 +16,17 @@ use Carbon\Carbon;
 
 class DashboardController extends Controller
 {
+    use HasDateFilters, HasDataFormatting, HasStatistics;
+
     /**
      * Günlük üretim verilerini getir
      */
     public function getDailyProduction(Request $request)
     {
         try {
-            $period = $request->get('period', 'weekly'); // daily, weekly, biweekly, triweekly, monthly
-
-            $startDate = $this->getStartDateByPeriod($period);
-            $endDate = Carbon::now();
+            $dateRange = $this->getDateRangeFromRequest($request);
+            $startDate = $dateRange['start'];
+            $endDate = $dateRange['end'];
 
             // Günlük toplam üretim verileri
             $productions = Production::with(['machine', 'user', 'product'])
@@ -52,28 +58,21 @@ class DashboardController extends Controller
                 });
 
             // Chart data için formatla
-            $chartData = [
-                'labels' => $productions->pluck('production_date')->map(function($date) {
-                    return Carbon::parse($date)->format('d M');
-                })->reverse()->values(),
-                'datasets' => [
-                    [
-                        'label' => 'Günlük Üretim',
-                        'data' => $productions->pluck('total_quantity')->reverse()->values(),
-                        'backgroundColor' => 'rgba(59, 130, 246, 0.8)',
-                        'borderColor' => '#3B82F6',
-                        'borderWidth' => 2,
-                        'borderRadius' => 6,
-                        'borderSkipped' => false
-                    ]
-                ]
-            ];
+            $labels = $productions->pluck('production_date')
+                ->map(fn($date) => DateHelper::formatTurkish($date, 'chart'))
+                ->reverse()
+                ->values()
+                ->toArray();
+            
+            $data = $productions->pluck('total_quantity')->reverse()->values()->toArray();
+            
+            $chartData = $this->formatBarChart($labels, $data, 'Günlük Üretim');
 
             // Table data için formatla
             $tableData = $productions->map(function($production) use ($productDetails) {
                 return [
-                    'production_date' => Carbon::parse($production->production_date)->format('d.m.Y'),
-                    'production_date_raw' => $production->production_date, // Tooltip için ham tarih
+                    'production_date' => DateHelper::formatTurkish($production->production_date, 'short'),
+                    'production_date_raw' => $production->production_date,
                     'total_quantity' => $production->total_quantity,
                     'active_machines' => $production->active_machines,
                     'active_workers' => $production->active_workers,
@@ -84,37 +83,22 @@ class DashboardController extends Controller
             return response()->json([
                 'chartData' => $chartData,
                 'tableData' => $tableData,
-                'period' => $period,
-                'dateRange' => [
-                    'start' => $startDate->format('d.m.Y'),
-                    'end' => $endDate->format('d.m.Y')
-                ]
+                'period' => $request->get('period', 'weekly'),
+                'dateRange' => $this->formatDateRange($startDate, $endDate)
             ]);
         } catch (\Exception $e) {
             return response()->json([
-                'chartData' => [
-                    'labels' => [],
-                    'datasets' => [
-                        [
-                            'label' => 'Günlük Üretim',
-                            'data' => [],
-                            'backgroundColor' => 'rgba(59, 130, 246, 0.8)',
-                            'borderColor' => '#3B82F6',
-                            'borderWidth' => 2,
-                            'borderRadius' => 6,
-                            'borderSkipped' => false
-                        ]
-                    ]
-                ],
+                'chartData' => $this->emptyChart('bar', 'Günlük Üretim'),
                 'tableData' => [],
                 'period' => $request->get('period', 'weekly'),
-                'dateRange' => [
-                    'start' => Carbon::now()->subWeek()->format('d.m.Y'),
-                    'end' => Carbon::now()->format('d.m.Y')
-                ]
+                'dateRange' => $this->formatDateRange(
+                    DateHelper::getStartDateByPeriod('weekly'),
+                    Carbon::now()
+                )
             ], 200);
         }
     }
+
 
     /**
      * Ürün dağılım verilerini getir
@@ -122,10 +106,9 @@ class DashboardController extends Controller
     public function getProductDistribution(Request $request)
     {
         try {
-            $period = $request->get('period', 'monthly');
-
-            $startDate = $this->getStartDateByPeriod($period);
-            $endDate = Carbon::now();
+            $dateRange = $this->getDateRangeFromRequest($request);
+            $startDate = $dateRange['start'];
+            $endDate = $dateRange['end'];
 
             $productDistribution = Production::with('product')
                 ->whereBetween('production_date', [$startDate, $endDate])
@@ -140,45 +123,17 @@ class DashboardController extends Controller
             $totalProduction = $productDistribution->sum('total_produced');
 
             // Chart data için formatla
-            $chartData = [
-                'labels' => $productDistribution->pluck('product.product_name'),
-                'datasets' => [
-                    [
-                        'data' => $productDistribution->pluck('total_produced'),
-                        'backgroundColor' => [
-                            'rgba(59, 130, 246, 0.8)',
-                            'rgba(16, 185, 129, 0.8)',
-                            'rgba(245, 158, 11, 0.8)',
-                            'rgba(139, 92, 246, 0.8)',
-                            'rgba(236, 72, 153, 0.8)',
-                            'rgba(239, 68, 68, 0.8)',
-                            'rgba(34, 197, 94, 0.8)',
-                            'rgba(168, 85, 247, 0.8)',
-                        ],
-                        'borderColor' => [
-                            '#3B82F6',
-                            '#10B981',
-                            '#F59E0B',
-                            '#8B5CF6',
-                            '#EC4899',
-                            '#EF4444',
-                            '#22C55E',
-                            '#A855F7',
-                        ],
-                        'borderWidth' => 2
-                    ]
-                ]
-            ];
+            $labels = $productDistribution->pluck('product.product_name')->toArray();
+            $data = $productDistribution->pluck('total_produced')->toArray();
+            $chartData = $this->formatPieChart($labels, $data);
 
             // Table data için formatla
             $tableData = $productDistribution->map(function($item) use ($totalProduction) {
-                $percentage = $totalProduction > 0 ? round(($item->total_produced / $totalProduction) * 100, 1) : 0;
-
                 return [
                     'product_name' => $item->product->product_name ?? 'Bilinmeyen Ürün',
                     'product_type' => $item->product->product_type ?? 'Belirsiz',
                     'total_produced' => $item->total_produced,
-                    'percentage' => $percentage
+                    'percentage' => $this->calculatePercentage($item->total_produced, $totalProduction, 1)
                 ];
             });
 
@@ -186,39 +141,11 @@ class DashboardController extends Controller
                 'chartData' => $chartData,
                 'tableData' => $tableData,
                 'totalProduction' => $totalProduction,
-                'period' => $period
+                'period' => $request->get('period', 'monthly')
             ]);
         } catch (\Exception $e) {
             return response()->json([
-                'chartData' => [
-                    'labels' => [],
-                    'datasets' => [
-                        [
-                            'data' => [],
-                            'backgroundColor' => [
-                                'rgba(59, 130, 246, 0.8)',
-                                'rgba(16, 185, 129, 0.8)',
-                                'rgba(245, 158, 11, 0.8)',
-                                'rgba(139, 92, 246, 0.8)',
-                                'rgba(236, 72, 153, 0.8)',
-                                'rgba(239, 68, 68, 0.8)',
-                                'rgba(34, 197, 94, 0.8)',
-                                'rgba(168, 85, 247, 0.8)',
-                            ],
-                            'borderColor' => [
-                                '#3B82F6',
-                                '#10B981',
-                                '#F59E0B',
-                                '#8B5CF6',
-                                '#EC4899',
-                                '#EF4444',
-                                '#22C55E',
-                                '#A855F7',
-                            ],
-                            'borderWidth' => 2
-                        ]
-                    ]
-                ],
+                'chartData' => $this->emptyChart('pie'),
                 'tableData' => [],
                 'totalProduction' => 0,
                 'period' => $request->get('period', 'monthly')
@@ -232,17 +159,13 @@ class DashboardController extends Controller
     public function getWorkerProductionMatrix(Request $request)
     {
         try {
-            $period = $request->get('period', 'weekly');
-            $startDate = $this->getStartDateByPeriod($period);
-            $endDate = Carbon::now();
+            $dateRange = $this->getDateRangeFromRequest($request);
+            $startDate = $dateRange['start'];
+            $endDate = $dateRange['end'];
 
             // Tarih aralığındaki tüm tarihleri al
-            $dates = [];
-            $currentDate = $startDate->copy();
-            while ($currentDate->lte($endDate)) {
-                $dates[] = $currentDate->format('Y-m-d');
-                $currentDate->addDay();
-            }
+            $dates = DateHelper::getDatesBetween($startDate, $endDate);
+            $dateStrings = array_map(fn($date) => $date->format('Y-m-d'), $dates);
 
             // Bu tarih aralığında üretim yapan tüm işçileri al
             $workerIds = Production::whereBetween('production_date', [$startDate, $endDate])
@@ -282,11 +205,11 @@ class DashboardController extends Controller
                     'id' => $worker->id,
                     'name' => $worker->name,
                     'productions' => [],
-                    'productDetails' => [], // Ürün detayları için yeni alan
+                    'productDetails' => [],
                     'total' => 0
                 ];
 
-                foreach ($dates as $date) {
+                foreach ($dateStrings as $date) {
                     // Toplam üretim miktarını al
                     $totalProduction = $productionTotals->where('user_id', $worker->id)
                         ->where('production_date', $date)
@@ -324,11 +247,10 @@ class DashboardController extends Controller
 
             // Tarihleri frontend için formatla
             $formattedDates = collect($dates)->map(function($date) {
-                $carbonDate = Carbon::parse($date);
                 return [
-                    'formatted' => $date,
-                    'display' => $carbonDate->format('d.m'),
-                    'full' => $carbonDate->format('d.m.Y'),
+                    'formatted' => $date->format('Y-m-d'),
+                    'display' => DateHelper::formatTurkish($date, 'chart'),
+                    'full' => DateHelper::formatTurkish($date, 'short'),
                 ];
             })->values();
 
@@ -337,11 +259,8 @@ class DashboardController extends Controller
                 'workers' => $matrixData,
                 'dailyTotals' => $dailyTotals,
                 'grandTotal' => $grandTotal,
-                'period' => $period,
-                'dateRange' => [
-                    'start' => $startDate->format('d.m.Y'),
-                    'end' => $endDate->format('d.m.Y')
-                ]
+                'period' => $request->get('period', 'weekly'),
+                'dateRange' => $this->formatDateRange($startDate, $endDate)
             ]);
 
         } catch (\Exception $e) {
@@ -351,10 +270,10 @@ class DashboardController extends Controller
                 'dailyTotals' => [],
                 'grandTotal' => 0,
                 'period' => $request->get('period', 'weekly'),
-                'dateRange' => [
-                    'start' => Carbon::now()->subWeek()->format('d.m.Y'),
-                    'end' => Carbon::now()->format('d.m.Y')
-                ]
+                'dateRange' => $this->formatDateRange(
+                    DateHelper::getStartDateByPeriod('weekly'),
+                    Carbon::now()
+                )
             ], 200);
         }
     }
@@ -478,23 +397,6 @@ class DashboardController extends Controller
     }
 
     /**
-     * Periyoda göre başlangıç tarihi hesapla
-     */
-    private function getStartDateByPeriod($period)
-    {
-        $now = Carbon::now();
-
-        return match($period) {
-            'daily' => $now->copy()->subDay(),
-            'weekly' => $now->copy()->subWeek(),
-            'biweekly' => $now->copy()->subWeeks(2),
-            'triweekly' => $now->copy()->subWeeks(3),
-            'monthly' => $now->copy()->subMonth(),
-            default => $now->copy()->subWeek()
-        };
-    }
-
-    /**
      * Genel dashboard istatistikleri
      */
     public function getDashboardStats()
@@ -525,10 +427,9 @@ class DashboardController extends Controller
     public function getWorkerProduction(Request $request)
     {
         try {
-            $period = $request->get('period', 'weekly');
-
-            $startDate = $this->getStartDateByPeriod($period);
-            $endDate = Carbon::now();
+            $dateRange = $this->getDateRangeFromRequest($request);
+            $startDate = $dateRange['start'];
+            $endDate = $dateRange['end'];
 
             $workerProduction = Production::with(['user', 'product', 'machine'])
                 ->whereBetween('production_date', [$startDate, $endDate])
@@ -548,22 +449,9 @@ class DashboardController extends Controller
             $users = User::whereIn('id', $userIds)->pluck('name', 'id');
 
             // Chart data için formatla
-            $chartData = [
-                'labels' => $workerProduction->map(function($worker) use ($users) {
-                    return $users[$worker->user_id] ?? 'Bilinmeyen İşçi';
-                }),
-                'datasets' => [
-                    [
-                        'label' => 'İşçi Üretimi',
-                        'data' => $workerProduction->pluck('total_produced'),
-                        'backgroundColor' => 'rgba(59, 130, 246, 0.8)',
-                        'borderColor' => '#3B82F6',
-                        'borderWidth' => 2,
-                        'borderRadius' => 6,
-                        'borderSkipped' => false
-                    ]
-                ]
-            ];
+            $labels = $workerProduction->map(fn($worker) => $users[$worker->user_id] ?? 'Bilinmeyen İşçi')->toArray();
+            $data = $workerProduction->pluck('total_produced')->toArray();
+            $chartData = $this->formatBarChart($labels, $data, 'İşçi Üretimi');
 
             // Table data için formatla
             $tableData = $workerProduction->map(function($worker) use ($users) {
@@ -574,41 +462,28 @@ class DashboardController extends Controller
                     'products_worked' => $worker->products_worked,
                     'machines_worked' => $worker->machines_worked,
                     'total_shifts' => $worker->total_shifts,
-                    'avg_per_shift' => $worker->total_shifts > 0 ? round($worker->total_produced / $worker->total_shifts, 1) : 0
+                    'avg_per_shift' => $this->calculateAverage(
+                        array_fill(0, $worker->total_shifts, $worker->total_produced / max($worker->total_shifts, 1)),
+                        1
+                    )
                 ];
             });
 
             return response()->json([
                 'chartData' => $chartData,
                 'tableData' => $tableData,
-                'period' => $period,
-                'dateRange' => [
-                    'start' => $startDate->format('d.m.Y'),
-                    'end' => $endDate->format('d.m.Y')
-                ]
+                'period' => $request->get('period', 'weekly'),
+                'dateRange' => $this->formatDateRange($startDate, $endDate)
             ]);
         } catch (\Exception $e) {
             return response()->json([
-                'chartData' => [
-                    'labels' => [],
-                    'datasets' => [
-                        [
-                            'label' => 'İşçi Üretimi',
-                            'data' => [],
-                            'backgroundColor' => 'rgba(59, 130, 246, 0.8)',
-                            'borderColor' => '#3B82F6',
-                            'borderWidth' => 2,
-                            'borderRadius' => 6,
-                            'borderSkipped' => false
-                        ]
-                    ]
-                ],
+                'chartData' => $this->emptyChart('bar', 'İşçi Üretimi'),
                 'tableData' => [],
                 'period' => $request->get('period', 'weekly'),
-                'dateRange' => [
-                    'start' => Carbon::now()->subWeek()->format('d.m.Y'),
-                    'end' => Carbon::now()->format('d.m.Y')
-                ]
+                'dateRange' => $this->formatDateRange(
+                    DateHelper::getStartDateByPeriod('weekly'),
+                    Carbon::now()
+                )
             ], 200);
         }
     }
@@ -655,22 +530,9 @@ class DashboardController extends Controller
             $users = User::whereIn('id', $userIds)->pluck('name', 'id');
 
             // Chart data formatla
-            $chartData = [
-                'labels' => $workerProduction->map(function($worker) use ($users) {
-                    return $users[$worker->user_id] ?? 'Bilinmeyen İşçi';
-                }),
-                'datasets' => [
-                    [
-                        'label' => 'İşçi Üretimi',
-                        'data' => $workerProduction->pluck('total_produced'),
-                        'backgroundColor' => 'rgba(59, 130, 246, 0.8)',
-                        'borderColor' => '#3B82F6',
-                        'borderWidth' => 2,
-                        'borderRadius' => 6,
-                        'borderSkipped' => false
-                    ]
-                ]
-            ];
+            $labels = $workerProduction->map(fn($worker) => $users[$worker->user_id] ?? 'Bilinmeyen İşçi')->toArray();
+            $data = $workerProduction->pluck('total_produced')->toArray();
+            $chartData = $this->formatBarChart($labels, $data, 'İşçi Üretimi');
 
             // Table data formatla
             $tableData = $workerProduction->map(function($worker) use ($users) {
@@ -690,23 +552,7 @@ class DashboardController extends Controller
                 'tableData' => $tableData
             ]);
         } catch (\Exception $e) {
-            return response()->json([
-                'chartData' => [
-                    'labels' => [],
-                    'datasets' => [
-                        [
-                            'label' => 'İşçi Üretimi',
-                            'data' => [],
-                            'backgroundColor' => 'rgba(59, 130, 246, 0.8)',
-                            'borderColor' => '#3B82F6',
-                            'borderWidth' => 2,
-                            'borderRadius' => 6,
-                            'borderSkipped' => false
-                        ]
-                    ]
-                ],
-                'tableData' => []
-            ], 200);
+            return $this->formatErrorResponse('bar', 'Veri bulunamadı');
         }
     }
 

@@ -68,7 +68,8 @@ const chartOptions = {
 };
 
 const loadReport = async () => {
-    reportData.value = await fetchTrendAnalysisReport(selectedYear.value, selectedMonth.value);
+    const response = await fetchTrendAnalysisReport(selectedYear.value, selectedMonth.value);
+    reportData.value = response.data || response;
 };
 
 onMounted(loadReport);
@@ -105,13 +106,13 @@ onMounted(loadReport);
         <!-- Content -->
         <div v-else-if="reportData?.data" class="report-content">
             <!-- Yearly Growth Cards -->
-            <div class="grid mb-4" v-if="reportData.data.yearly_growth">
+            <div class="grid mb-4" v-if="reportData.yearly_growth">
                 <div class="col-12 md:col-4">
                     <Card class="summary-card">
                         <template #title><div class="text-sm text-gray-300">Bu Yıl Toplam</div></template>
                         <template #content>
                             <div class="text-2xl font-bold text-green-500">
-                                {{ formatNumber(reportData.data.yearly_growth.current_year_total) }}
+                                {{ formatNumber(reportData.yearly_growth.current_year_total) }}
                             </div>
                         </template>
                     </Card>
@@ -121,7 +122,7 @@ onMounted(loadReport);
                         <template #title><div class="text-sm text-gray-300">Geçen Yıl Toplam</div></template>
                         <template #content>
                             <div class="text-2xl font-bold text-gray-300">
-                                {{ formatNumber(reportData.data.yearly_growth.previous_year_total) }}
+                                {{ formatNumber(reportData.yearly_growth.previous_year_total) }}
                             </div>
                         </template>
                     </Card>
@@ -131,8 +132,8 @@ onMounted(loadReport);
                         <template #title><div class="text-sm text-gray-300">Yıllık Büyüme</div></template>
                         <template #content>
                             <div class="text-2xl font-bold" 
-                                 :class="reportData.data.yearly_growth.growth_rate >= 0 ? 'text-green-500' : 'text-red-500'">
-                                {{ reportData.data.yearly_growth.growth_rate >= 0 ? '+' : '' }}{{ reportData.data.yearly_growth.growth_rate }}%
+                                 :class="reportData.yearly_growth.growth_rate >= 0 ? 'text-green-500' : 'text-red-500'">
+                                {{ reportData.yearly_growth.growth_rate >= 0 ? '+' : '' }}{{ reportData.yearly_growth.growth_rate }}%
                             </div>
                         </template>
                     </Card>
@@ -140,14 +141,14 @@ onMounted(loadReport);
             </div>
 
             <!-- Trend Analysis -->
-            <Card class="mb-4" v-if="reportData.data.trend_analysis">
+            <Card class="mb-4" v-if="reportData.trend_analysis">
                 <template #title>📊 Trend Analizi</template>
                 <template #content>
                     <div class="p-4 bg-gray-800 rounded border border-gray-700">
                         <p class="text-lg font-semibold mb-2">
-                            Trend: <span class="text-green-400">{{ reportData.data.trend_analysis.trend }}</span>
+                            Trend: <span class="text-green-400">{{ reportData.trend_analysis.trend }}</span>
                         </p>
-                        <p class="text-gray-300">{{ reportData.data.trend_analysis.analysis }}</p>
+                        <p class="text-gray-300">{{ reportData.trend_analysis.analysis }}</p>
                     </div>
                 </template>
             </Card>
@@ -177,18 +178,18 @@ onMounted(loadReport);
             </div>
 
             <!-- Year Over Year -->
-            <Card v-if="reportData.data.year_over_year">
+            <Card v-if="reportData.year_over_year">
                 <template #title>Geçen Yıl Aynı Ay Karşılaştırması</template>
                 <template #content>
                     <div class="mb-3">
                         <p class="text-gray-300">Fark: 
-                            <span class="font-bold" :class="reportData.data.year_over_year.difference >= 0 ? 'text-green-500' : 'text-red-500'">
-                                {{ formatNumber(reportData.data.year_over_year.difference) }}
+                            <span class="font-bold" :class="reportData.year_over_year.difference >= 0 ? 'text-green-500' : 'text-red-500'">
+                                {{ formatNumber(reportData.year_over_year.difference) }}
                             </span>
                         </p>
                         <p class="text-gray-300">Değişim: 
-                            <span class="font-bold" :class="reportData.data.year_over_year.percentage_change >= 0 ? 'text-green-500' : 'text-red-500'">
-                                {{ reportData.data.year_over_year.percentage_change >= 0 ? '+' : '' }}{{ reportData.data.year_over_year.percentage_change }}%
+                            <span class="font-bold" :class="reportData.year_over_year.percentage_change >= 0 ? 'text-green-500' : 'text-red-500'">
+                                {{ reportData.year_over_year.percentage_change >= 0 ? '+' : '' }}{{ reportData.year_over_year.percentage_change }}%
                             </span>
                         </p>
                     </div>
@@ -206,3 +207,4 @@ onMounted(loadReport);
     border: 1px solid rgba(255, 255, 255, 0.1);
 }
 </style>
+
